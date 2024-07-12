@@ -80,3 +80,4 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets
 *.meta
 *.0.json
+.DS_Store
