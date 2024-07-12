@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &491631922063736609
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5215251404877087023}
+  - component: {fileID: 8739863374466118545}
+  m_Layer: 0
+  m_Name: RoomManagerPrefab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5215251404877087023
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491631922063736609}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 43.063366, y: 9.779612, z: 40.282658}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8739863374466118545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491631922063736609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71d5a126284f7435cbd9100b4e2cfacf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _roomItemPresets:
+  - {fileID: 6916375480379701861, guid: ce7c2d562efc844d1a4621954ee79017, type: 3}
+  - {fileID: 236516817469909084, guid: 11d26f07be67646ccad1828e381d8c38, type: 3}
+  - {fileID: 1004547240516598075, guid: 38792ce3e507f483c9ff79414dcdab6c, type: 3}
+  - {fileID: 7335878602629237504, guid: 7d5e2b4c8a882436da8ad3c2ec7abe56, type: 3}
+  - {fileID: 2186322887633888344, guid: cf3fbc62613f048df85b10f6bf6723e7, type: 3}
+  - {fileID: 7675850476338434135, guid: ba62a9aa75ef14092b0ff1a9e3477cf2, type: 3}
+  - {fileID: 1931171370302917349, guid: 2b952e1bf778b41f484bfe1ec4abac31, type: 3}
+  - {fileID: 2025224353687258066, guid: fc65b388a21374d218f338ad108d0bed, type: 3}
+  _itemLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _gates: []
+  _key: 0
+  _roomType: 1
+  _status: 0
+  WhiteChest: {fileID: 4505513835707202508, guid: 320953f965e404ead86f14d678e1a2f8,
+    type: 3}
+  DungeonChest: {fileID: 4505513835707202508, guid: c07211e8c797d4855bd041057385c0f5,
+    type: 3}

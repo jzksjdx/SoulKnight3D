@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Desert Eagle
+  m_EditorClassIdentifier: 
+  Name: Desert Eagle
+  NameCN: "\u6C99\u6F20\u4E4B\u9E70"
+  Sprite: {fileID: 21300000, guid: 07b267dbcff432c4189209c8d038350b, type: 2}
+  Category: 0
+  Rarity: 0
+  Damage: 4
+  EnergyCost: 1
+  CritChance: 10
+  Inaccuracy: 3
+  Price: 12
+  Cooldown: 0.33

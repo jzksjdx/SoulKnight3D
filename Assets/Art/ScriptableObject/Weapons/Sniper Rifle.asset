@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Sniper Rifle
+  m_EditorClassIdentifier: 
+  Name: Sniper Rifle
+  NameCN: "\u72D9\u51FB\u6B65\u67AA"
+  Sprite: {fileID: 21300000, guid: b179b95410474314e8c05455cc6470c0, type: 2}
+  Category: 1
+  Rarity: 0
+  Damage: 10
+  EnergyCost: 3
+  CritChance: 45
+  Inaccuracy: 0
+  Price: 16
+  Cooldown: 0.833
