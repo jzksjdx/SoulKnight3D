@@ -2,13 +2,14 @@ using UnityEngine;
 using QFramework;
 using System;
 using System.Collections;
-using System.Threading.Tasks;
+using MoreMountains.Feedbacks;
+using Unity.VisualScripting;
 
 namespace SoulKnight3D
 {
 	public partial class Bullet : ViewController
 	{
-		private string _weaponTag;
+        private string _weaponTag;
 		private int _damage;
         private bool _isCritHit = false;
 
@@ -79,7 +80,15 @@ namespace SoulKnight3D
 
         private void DestroyBullet()
         {
+            if (ImpactFeedback)
+            {
+                ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
+                //ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().ParentTransform = GameObjectsManager.Instance.transform;
+                ImpactFeedback.PlayFeedbacks();
+            }
+
             GameObjectsManager.Instance.DespawnBullet(this);
+
         }
 
         public void Reset()

@@ -9,7 +9,6 @@ namespace SoulKnight3D {
         public List<GameObject> Weapons;
         public Transform WeaponPoint;
         public Transform target;
-        public Skill Skill;
         private PlayerStats _playerStats;
         public PlayerAnimation PlayerAnimation;
         public LayerMask AimLayer;
@@ -46,12 +45,6 @@ namespace SoulKnight3D {
                 Interact();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            // for knight only
-
-            Skill.OnKnightSkillActivated.Register((category) =>
-            {
-                PlayerAnimation.SwitchWeaponAnimation(category);
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         // Update is called once per frame
@@ -140,7 +133,6 @@ namespace SoulKnight3D {
                     {
                         _playerStats.Energy.Value -= _currentWeapon.Data.EnergyCost;
                     }).UnRegisterWhenDisabled(_currentWeapon);
-                    Skill.OnSwitchRightHandWeapon(Weapons[_currentWeaponIndex]);
                     OnWeaponSwitched.Trigger(_currentWeapon.Data);
                 }
                 return;
@@ -168,22 +160,8 @@ namespace SoulKnight3D {
 
             _currentWeapon = Weapons[_currentWeaponIndex].GetComponent<Gun>();
 
-            if (Skill.IsUsingSkill)
-            {
-                PlayerAnimation.SwitchWeaponAnimation(WeaponData.WeaponCategory.DoubleGun);
-            }
-            else
-            {
-                PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
-            }
-
 
             AudioKit.PlaySound("fx_switch");
-
-            if (Skill)
-            {
-                Skill.OnSwitchRightHandWeapon(Weapons[_currentWeaponIndex]);
-            }
 
             OnWeaponSwitched.Trigger(_currentWeapon.Data);
         }

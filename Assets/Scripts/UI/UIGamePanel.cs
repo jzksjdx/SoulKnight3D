@@ -34,25 +34,6 @@ namespace SoulKnight3D
                 EnergyText.text = energy + "/" + PlayerController.Instance.PlayerStats.MaxEnergy;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            // Skill button
-            PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.RegisterWithInitValue((amount) =>
-			{
-				SkillImage.fillAmount = amount;
-				if (amount >= 0.999)
-				{
-					SkillImage.color = new Color(74f / 255f, 218f / 255f, 1);
-
-                } else
-				{
-					SkillImage.color = Color.white;
-                }
-			}).UnRegisterWhenGameObjectDestroyed(gameObject);
-
-            SkillButton.onClick.AddListener(() =>
-            {
-                PlayerInputs.Instance.OnSkillPerformed.Trigger();
-            });
-
             // Interact button
             BtnInteract.Hide();
 
