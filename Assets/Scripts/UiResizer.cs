@@ -13,8 +13,10 @@ namespace SoulKnight3D
 
         private void Start()
         {
-            _screenWidth = Screen.width;
-            _screenHeight = Screen.height;
+            //_screenWidth = Screen.width;
+            //_screenHeight = Screen.height;
+             _screenWidth = 1920;
+            _screenHeight = 1080;
             UIKit.Root.SetResolution(_screenWidth, _screenHeight, 1);
 
             // apply safe area
@@ -23,10 +25,10 @@ namespace SoulKnight3D
 
         private void Update()
         {
-            if (Screen.width == _screenWidth && Screen.height == _screenHeight) { return; }
-            _screenWidth = Screen.width;
-            _screenHeight = Screen.height;
-            UIKit.Root.SetResolution(_screenWidth, _screenHeight, 1);
+            //if (Screen.width == _screenWidth && Screen.height == _screenHeight) { return; }
+            //_screenWidth = Screen.width;
+            //_screenHeight = Screen.height;
+            //UIKit.Root.SetResolution(_screenWidth, _screenHeight, 1);
         }
     }
 

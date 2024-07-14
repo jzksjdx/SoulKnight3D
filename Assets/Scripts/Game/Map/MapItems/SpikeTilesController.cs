@@ -75,7 +75,7 @@ namespace SoulKnight3D
             if (targets.Contains(target)) { return; }
             targets.Add(target);
             target.ApplyDamage(damage);
-            GameController.Instance.SpawnDamageText(damage, target.transform.position + new Vector3(0, 0.5f, 0));
+            //GameController.Instance.SpawnDamageText(damage, target.transform.position + new Vector3(0, 0.5f, 0));
             ActionKit.Delay(0.4f, () =>
             {
                 targets.Remove(target);

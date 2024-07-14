@@ -76,8 +76,6 @@ namespace SoulKnight3D
                 Jump();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            AudioKit.PlaySound("fx_show_up");
-
             this.GetSystem<ControlSystem>().ToggleCursor(false);
         }
 

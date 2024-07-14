@@ -40,21 +40,21 @@ namespace SoulKnight3D
             AudioKit.PlayMusic("bgm_1Low");
         }
 
-        public void SpawnDamageText(int value, Vector3 position)
-        {
-            FloatingTextPos.position = position;
-            MMF_FloatingText floatingText = DamageNumber?.GetFeedbackOfType<MMF_FloatingText>();
-            floatingText.Value = value.ToString();
-            DamageNumber?.PlayFeedbacks();
-        }
+        //public void SpawnDamageText(int value, Vector3 position)
+        //{
+        //    FloatingTextPos.position = position;
+        //    MMF_FloatingText floatingText = DamageNumber?.GetFeedbackOfType<MMF_FloatingText>();
+        //    floatingText.Value = value.ToString();
+        //    DamageNumber?.PlayFeedbacks();
+        //}
 
-        public void SpawnCritText(int value, Vector3 position)
-        {
-            FloatingTextPos.position = position;
-            MMF_FloatingText floatingText = CritNumber?.GetFeedbackOfType<MMF_FloatingText>();
-            floatingText.Value = value.ToString();
-            CritNumber?.PlayFeedbacks();
-            CritText?.PlayFeedbacks();
-        }
+        //public void SpawnCritText(int value, Vector3 position)
+        //{
+        //    FloatingTextPos.position = position;
+        //    MMF_FloatingText floatingText = CritNumber?.GetFeedbackOfType<MMF_FloatingText>();
+        //    floatingText.Value = value.ToString();
+        //    CritNumber?.PlayFeedbacks();
+        //    CritText?.PlayFeedbacks();
+        //}
     }
 }

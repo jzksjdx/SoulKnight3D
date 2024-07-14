@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fb4eeab411ae47bca43abf505875088, type: 3}
+  m_Name: Level1-1
+  m_EditorClassIdentifier: 
+  ZombieWaves:
+  - ZombieGroups:
+    - ZombiePrefab: {fileID: 8500170153172678778, guid: 129734b0017024ea789ee46caf397ab4,
+        type: 3}
+      Count: 1
+      Cooldown: 4
+    duration: 10
+    isHugeWave: 0
+  - ZombieGroups:
+    - ZombiePrefab: {fileID: 8500170153172678778, guid: 129734b0017024ea789ee46caf397ab4,
+        type: 3}
+      Count: 1
+      Cooldown: 2.5
+    duration: 10
+    isHugeWave: 1
+  - ZombieGroups:
+    - ZombiePrefab: {fileID: 8500170153172678778, guid: 129734b0017024ea789ee46caf397ab4,
+        type: 3}
+      Count: 2
+      Cooldown: 3
+    duration: 10
+    isHugeWave: 1

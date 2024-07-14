@@ -33,6 +33,8 @@ namespace SoulKnight3D
 			{
 				if (other.tag == "Bullet") { return; }
 
+                bool enemyHasHitFeedback = false;
+
                 if (other.TryGetComponent(out TargetableObject targetableObject))
                 {
                     if (other.tag == _weaponTag) { return; }
@@ -42,15 +44,36 @@ namespace SoulKnight3D
                     if (_weaponTag == "Player" && other.tag == "Enemy")
                     {
                         // player attaking other objects
-                        if (_isCritHit)
+                        //if (_isCritHit)
+                        //{
+                        //    GameController.Instance.SpawnCritText(_damage, transform.position);
+                        //    AudioKit.PlaySound("fx_hit");
+                        //} else
+                        //{
+                        //    GameController.Instance.SpawnDamageText(_damage, transform.position);
+                        //}
+
+                        if (other.TryGetComponent(out Zombie zombie))
                         {
-                            GameController.Instance.SpawnCritText(_damage, transform.position);
-                            AudioKit.PlaySound("fx_hit");
-                        } else
-                        {
-                            GameController.Instance.SpawnDamageText(_damage, transform.position);
+                            enemyHasHitFeedback = true;
+                            zombie.Effects.PlayHitSound();
                         }
                     }
+                }
+
+                if (ImpactFeedback)
+                {
+                    MMF_MMSoundManagerSound soundFeedback = ImpactFeedback.GetFeedbackOfType<MMF_MMSoundManagerSound>();
+                    if (enemyHasHitFeedback)
+                    { // impact audio already played, disable default audio
+                        soundFeedback.Active = false;
+                    } else
+                    {
+                        soundFeedback.Active = true;
+                    }
+                    ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
+                    //ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().ParentTransform = GameObjectsManager.Instance.transform;
+                    ImpactFeedback.PlayFeedbacks();
                 }
                 DestroyBullet();
                 //Destroy(gameObject);
@@ -80,13 +103,7 @@ namespace SoulKnight3D
 
         private void DestroyBullet()
         {
-            if (ImpactFeedback)
-            {
-                ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
-                //ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().ParentTransform = GameObjectsManager.Instance.transform;
-                ImpactFeedback.PlayFeedbacks();
-            }
-
+            
             GameObjectsManager.Instance.DespawnBullet(this);
 
         }

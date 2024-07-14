@@ -1414,7 +1414,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -172, y: 147}
+  m_AnchoredPosition: {x: -172, y: 200}
   m_SizeDelta: {x: 220, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8477834904868468600
@@ -1552,7 +1552,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -389, y: 147}
+  m_AnchoredPosition: {x: -389, y: 200}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7596957204556346358
@@ -1787,8 +1787,6 @@ MonoBehaviour:
   ArmorText: {fileID: 558260661977957464}
   EnergyBar: {fileID: 2547206737502004069}
   EnergyText: {fileID: 5134073898566084273}
-  SkillButton: {fileID: 0}
-  SkillImage: {fileID: 0}
   BtnWeapon: {fileID: 4382858234100434626}
   WeaponSprite: {fileID: 4935582856025595928}
   EnergyCostText: {fileID: 1438631380287468828}
@@ -2401,7 +2399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &373542629241360595
 RectTransform:
   m_ObjectHideFlags: 0
