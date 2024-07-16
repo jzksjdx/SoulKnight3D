@@ -22,4 +22,4 @@ MonoBehaviour:
   CritChance: 0
   Inaccuracy: 5
   Price: 4
-  Cooldown: 0.4
+  Cooldown: 0.6

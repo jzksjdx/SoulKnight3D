@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2021f24565ad4cf4b5e9935179a474f0, type: 3}
+  m_Name: ExampleItemDatabase
+  m_EditorClassIdentifier: 
+  Namespace: QFramework.Example
+  CodeGenPath: Assets/QFramework/ItemKit/Examples/0.InventoryExample/Items.cs
+  AttributesDefine:
+  - Name: "\u662F\u6B66\u5668"
+    Type: 0
+  Items:
+  - {fileID: 4728595413489480828}
+  - {fileID: 4522555978169948036}
+  - {fileID: 8569025756977458223}
+  - {fileID: 6833798862668575009}
+--- !u!114 &4522555978169948036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1863326e7c803f24d812e18af81c1110, type: 3}
+  m_Name: item_greensword
+  m_EditorClassIdentifier: 
+  Name: "\u7EFF\u5251"
+  Description: "\u8FD9\u662F\u4E00\u628A\u7EFF\u8272\u7684\u5251"
+  Key: item_greensword
+  Icon: {fileID: 8296213929934205469, guid: 7957487023e378a4a9001eb622be2e1a, type: 3}
+  Stackable: 0
+  HasMaxStackableCount: 0
+  MaxStackableCount: 0
+  Attributes:
+  - Name: "\u662F\u6B66\u5668"
+    Type: 0
+    Value: True
+--- !u!114 &4728595413489480828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1863326e7c803f24d812e18af81c1110, type: 3}
+  m_Name: item_iron
+  m_EditorClassIdentifier: 
+  Name: "\u94C1\u5757"
+  Description: "\u8FD9\u662F\u4E00\u4E2A\u94C1\u5757"
+  Key: item_iron
+  Icon: {fileID: -6503034749178081580, guid: 7957487023e378a4a9001eb622be2e1a, type: 3}
+  Stackable: 1
+  HasMaxStackableCount: 1
+  MaxStackableCount: 10
+  Attributes:
+  - Name: "\u662F\u6B66\u5668"
+    Type: 0
+    Value: False
+--- !u!114 &6833798862668575009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1863326e7c803f24d812e18af81c1110, type: 3}
+  m_Name: item_wood
+  m_EditorClassIdentifier: 
+  Name: "\u6728\u5934"
+  Description: "\u8FD9\u662F\u4E00\u4E2A\u6728\u5934"
+  Key: item_wood
+  Icon: {fileID: 2765949574463535841, guid: 7957487023e378a4a9001eb622be2e1a, type: 3}
+  Stackable: 1
+  HasMaxStackableCount: 0
+  MaxStackableCount: 0
+  Attributes:
+  - Name: "\u662F\u6B66\u5668"
+    Type: 0
+    Value: False
+--- !u!114 &8569025756977458223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1863326e7c803f24d812e18af81c1110, type: 3}
+  m_Name: item_paper
+  m_EditorClassIdentifier: 
+  Name: "\u7EB8\u5F20"
+  Description: "\u8FD9\u662F\u4E00\u5F20\u7EB8"
+  Key: item_paper
+  Icon: {fileID: -2989111840540134464, guid: 7957487023e378a4a9001eb622be2e1a, type: 3}
+  Stackable: 1
+  HasMaxStackableCount: 0
+  MaxStackableCount: 0
+  Attributes:
+  - Name: "\u662F\u6B66\u5668"
+    Type: 0
+    Value: False
