@@ -12,6 +12,7 @@ namespace SoulKnight3D
 	public partial class UIInventoryPanel : UIPanel
 	{
         public List<UISlot> HotbarSlots;
+        public List<UISlot> BackpackSlots;
 
         protected override void OnInit(IUIData uiData = null)
         {
@@ -21,13 +22,16 @@ namespace SoulKnight3D
 
         private void Start()
         {
+            InitHotbarSlots();
+            InitBackpackSlots();
+
             ItemKit.AddItemConfig(ItemManager.Instance.Items[0]);
 
             ItemKit.Slots[0].Item = ItemManager.Instance.Items[0];
             ItemKit.Slots[0].Count = 1;
 
             //UISlot.Hide();
-            InitHotbarSlots();
+            
 
             BtnAddItem1.onClick.AddListener(() =>
             {
@@ -50,8 +54,17 @@ namespace SoulKnight3D
         {
             for(int i = 0; i < HotbarSlots.Count; i ++)
             {
-                HotbarSlots[i].InitWithData(ItemKit.Slots[i]);
                 ItemKit.Slots.Add(new Slot(null, 0));
+                HotbarSlots[i].InitWithData(ItemKit.Slots[i]);
+            }
+        }
+
+        public void InitBackpackSlots()
+        {
+            for (int i = 0; i < BackpackSlots.Count; i++)
+            {
+                ItemKit.BackpackSlots.Add(new Slot(null, 0));
+                BackpackSlots[i].InitWithData(ItemKit.BackpackSlots[i]);
             }
         }
 

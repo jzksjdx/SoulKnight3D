@@ -15,6 +15,8 @@ namespace SoulKnight3D
             ItemByKey.Add(itemConfig.GetKey, itemConfig);
         }
 
+        public static List<Slot> BackpackSlots = new List<Slot>();
+
         public static List<Slot> Slots = new List<Slot>();
 
         public static Dictionary<string, IItem> ItemByKey = new Dictionary<string, IItem>(){
