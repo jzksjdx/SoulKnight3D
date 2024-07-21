@@ -41,25 +41,6 @@ namespace SoulKnight3D
 
 				OnJoystickAtkPerformed.Trigger(isPressed);
             }).UnRegisterWhenGameObjectDestroyed(this);
-
-            PlayerController.Instance.PlayerAttack.OnInteractiveItemChanged.Register((interactiveItem) =>
-            {
-                
-                if (interactiveItem)
-                {
-					_joystickAtkAnimator.SetBool(_animIdInteract, true);
-					_canInteract = true;
-                    //BtnInteract.Show();
-                }
-                else
-                {
-                    _joystickAtkAnimator.SetBool(_animIdInteract, false);
-                    _canInteract = false;
-                    //BtnInteract.Hide();
-                }
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
-
-
         }
 		
 		protected override void OnOpen(IUIData uiData = null)

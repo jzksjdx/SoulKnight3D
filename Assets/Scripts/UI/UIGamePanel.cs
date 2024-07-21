@@ -34,26 +34,6 @@ namespace SoulKnight3D
                 EnergyText.text = energy + "/" + PlayerController.Instance.PlayerStats.MaxEnergy;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            // Interact button
-            BtnInteract.Hide();
-
-            PlayerController.Instance.PlayerAttack.OnInteractiveItemChanged.Register((interactiveItem) =>
-            {
-                if(this.GetSystem<ControlSystem>().IsMobile) { return; }
-                if (interactiveItem)
-                {
-                    BtnInteract.Show();
-                } else
-                {
-                    BtnInteract.Hide();
-                }
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
-
-            BtnInteract.onClick.AddListener(() =>
-            {
-                PlayerController.Instance.PlayerAttack.Interact();
-            });
-
             // Pause Panel
 
             PausePanel.Hide();
@@ -66,6 +46,7 @@ namespace SoulKnight3D
 			PlayerInputs.Instance.OnPausePerformed.Register(() =>
 			{
                 if (gameObject.activeSelf == false) { return; }
+                if (UIKit.GetPanel<UIInventoryPanel>().StoragePanel.gameObject.activeSelf) { return; }
 				if (Time.timeScale == 1)
 				{
                     ShowPausePanel();
@@ -75,24 +56,11 @@ namespace SoulKnight3D
                 }
 			});
 
-            // Button Weapon
-            BtnWeapon.onClick.AddListener(() =>
-            {
-                if (Time.timeScale == 0) { return; }
-                PlayerInputs.Instance.OnSwitchPerformed.Trigger();
-            });
-
-            PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData) =>
-            {
-                Debug.Log("UIGamePanelData: " + weaponData.name);
-                WeaponSprite.sprite = weaponData.Sprite;
-                EnergyCostText.text = weaponData.EnergyCost.ToString();
-            }).UnRegisterWhenGameObjectDestroyed(this);
         }
 
 		private void ShowPausePanel()
 		{
-            AudioKit.PlaySound("fx_btn");
+            AudioKit.PlaySound("pause");
             this.GetSystem<ControlSystem>().ToggleCursor(true);
             Time.timeScale = 0;
             PausePanel.Show();
@@ -100,7 +68,7 @@ namespace SoulKnight3D
 
         private void HidePausePanel()
         {
-            AudioKit.PlaySound("fx_btn");
+            AudioKit.PlaySound("buttonclick");
             this.GetSystem<ControlSystem>().ToggleCursor(false);
             Time.timeScale = 1;
             PausePanel.Hide();
@@ -112,10 +80,7 @@ namespace SoulKnight3D
 		
 		protected override void OnShow()
 		{
-            if (PlayerController.Instance.PlayerAttack.Weapons.Count == 1)
-            {
-                PlayerController.Instance.PlayerAttack.SwitchWeapon();
-            }
+
 		}
 		
 		protected override void OnHide()

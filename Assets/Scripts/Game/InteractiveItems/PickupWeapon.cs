@@ -15,7 +15,7 @@ namespace SoulKnight3D
 
             GameObject newWeapon = Instantiate(WeaponPrefab, playerAtk.WeaponPoint.position, Quaternion.identity, playerAtk.WeaponPoint);
             newWeapon.transform.rotation = new Quaternion(0, 0, 0, 0);
-            playerAtk.TakeNewWeapon(newWeapon);
+            //playerAtk.TakeNewWeapon(newWeapon);
             Destroy(gameObject);
         }
 

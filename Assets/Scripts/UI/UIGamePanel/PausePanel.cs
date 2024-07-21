@@ -28,16 +28,31 @@ namespace SoulKnight3D
                 HidePausePanel();
             });
 
-            BtnSettings.onClick.AddListener(() =>
+            BtnRestart.onClick.AddListener(() =>
             {
-                AudioKit.PlaySound("fx_btn");
-                UIKit.OpenPanel<UISettingsPanel>();
+                AudioKit.PlaySound("buttonclick");
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            });
+
+            AudioSystem audioSystem = this.GetSystem<AudioSystem>();
+
+            SliderMusic.value = audioSystem.MusicVolume.Value;
+            SliderSound.value = audioSystem.SoundVolume.Value;
+
+            SliderMusic.onValueChanged.AddListener((value) =>
+            {
+                audioSystem.ChangeMusicVolume(value);
+            });
+
+            SliderSound.onValueChanged.AddListener((value) =>
+            {
+                audioSystem.ChangeSoundVolume(value);
             });
         }
 
         private void HidePausePanel()
         {
-            AudioKit.PlaySound("fx_btn");
+            AudioKit.PlaySound("buttonclick");
             this.GetSystem<ControlSystem>().ToggleCursor(false);
             Time.timeScale = 1;
             Hide();

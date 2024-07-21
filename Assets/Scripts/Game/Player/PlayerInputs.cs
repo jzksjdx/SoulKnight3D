@@ -16,6 +16,7 @@ namespace SoulKnight3D
         public EasyEvent OnSwitchPerformed = new EasyEvent();
         public EasyEvent OnInteractPerformed = new EasyEvent();
         public EasyEvent OnPausePerformed = new EasyEvent();
+        public EasyEvent<int> OnNumberKeyPerformed = new EasyEvent<int>();
 
         private bool _isMobile = false;
 
@@ -31,6 +32,10 @@ namespace SoulKnight3D
             inputActions.Player.Switch.performed += Switch_performed;
             inputActions.Player.Interact.performed += Interact_performed;
             inputActions.Player.Pause.performed += Pause_performed;
+
+            inputActions.Player.KeyOne.performed += KeyOne_performed;
+            inputActions.Player.KeyTwo.performed += KeyTwo_performed;
+            inputActions.Player.KeyThree.performed += KeyThree_performed;
 
             Instance = this;
         }
@@ -108,6 +113,21 @@ namespace SoulKnight3D
         private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
             OnInteractPerformed.Trigger();
+        }
+
+        private void KeyOne_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            OnNumberKeyPerformed.Trigger(1);
+        }
+
+        private void KeyTwo_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            OnNumberKeyPerformed.Trigger(2);
+        }
+
+        private void KeyThree_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            OnNumberKeyPerformed.Trigger(3);
         }
 
         public Vector2 GetMovementVectorNormalized()

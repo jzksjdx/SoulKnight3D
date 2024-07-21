@@ -7,7 +7,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-    public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public Image Icon;
         public Text Count;
@@ -29,7 +29,7 @@ namespace SoulKnight3D
             return this;
         }
 
-        public void UpdateView()
+        public virtual void UpdateView()
         {
             if (Data.Count == 0 || Data.Item == null)
             {
@@ -50,10 +50,10 @@ namespace SoulKnight3D
         void SyncItemToMousePos()
         {
             var mousePos = Input.mousePosition;
-            var controller = FindAnyObjectByType<UIInventoryPanel>();
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(controller.transform as RectTransform, mousePos, null, out var localPos))
+            //var controller = FindAnyObjectByType<UIInventoryPanel>();
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform, mousePos, null, out var localPos))
             {
-                Icon.LocalPosition2D(localPos);
+                Icon.LocalPosition2D(localPos); 
             }
         }
 
@@ -61,9 +61,11 @@ namespace SoulKnight3D
         {
             if (mDragging || Data.Count == 0) return;
             mDragging = true;
+            AudioKit.PlaySound("seedlift");
 
-            var controller = FindAnyObjectByType<UIInventoryPanel>();
-            Icon.Parent(controller);
+            var canvas = Icon.gameObject.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 1000;
             SyncItemToMousePos();
         }
 
@@ -75,22 +77,21 @@ namespace SoulKnight3D
             }
         }
 
-        public void OnEndDrag(PointerEventData eventData)
+        public virtual void OnEndDrag(PointerEventData eventData)
         {
            if (mDragging)
             {
-                Icon.Parent(transform);
+                mDragging = false;
+                var canvas = Icon.GetComponent<Canvas>();
+                canvas.DestroySelf();
                 Icon.LocalPositionIdentity();
-                // 检测鼠标是否在任意一个UISlot
-                var uiSlots = transform.parent.GetComponentsInChildren<UISlot>();
-                bool throwItem = true;
-                foreach (var uiSlot in uiSlots)
+
+                if (ItemKit.CurrentSlotPointerOn)
                 {
+                    var uiSlot = ItemKit.CurrentSlotPointerOn;
                     var rectTransform = uiSlot.transform as RectTransform;
                     if (RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition))
                     {
-                        throwItem = false;
-                         
                         if (Data.Count > 0)
                         {
                             // 物品交换
@@ -99,7 +100,6 @@ namespace SoulKnight3D
 
                             uiSlot.Data.Item = Data.Item;
                             uiSlot.Data.Count = Data.Count;
-                            
 
                             Data.Item = cachedItem;
                             Data.Count = cachedCount;
@@ -107,16 +107,28 @@ namespace SoulKnight3D
                             uiSlot.Data.Changed.Trigger();
                             Data.Changed.Trigger();
                         }
-                        break;
                     }
                 }
-
-                if (throwItem)
+                else
                 {
+                    AudioKit.PlaySound("swing");
                     Data.Item = null;
                     Data.Count = 0;
                     Data.Changed.Trigger();
                 }
+            }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            ItemKit.CurrentSlotPointerOn = this;
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (ItemKit.CurrentSlotPointerOn == this)
+            {
+                ItemKit.CurrentSlotPointerOn = null; 
             }
         }
     }

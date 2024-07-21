@@ -54,12 +54,13 @@ namespace SoulKnight3D
             {
                 UIKit.OpenPanel<UIMobileControlPanel>();
             }
-            UIKit.OpenPanel<UIGamePanel>();
-
-            PlayerController.Instance.PlayerAttack.SwitchWeapon();
-            AudioKit.PlayMusic("bgm_loon");
 
             UIKit.OpenPanel<UIPvzGamePanel>();
+            UIKit.OpenPanel<UIInventoryPanel>();
+            UIKit.OpenPanel<UIGamePanel>();
+
+            PlayerController.Instance.PlayerAttack.InitPlayerAttackWithUnequipedPlant();
+            AudioKit.PlayMusic("bgm_loon");
 
             for (int i = 0; i < ZombieWavesSO.ZombieWaves.Count - 1; i ++) // ignore final wave duration
             {

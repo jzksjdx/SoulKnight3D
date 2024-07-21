@@ -3,147 +3,124 @@ using UnityEngine.UI;
 using QFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SoulKnight3D
 {
 	public class UIInventoryPanelData : UIPanelData
 	{
 	}
-	public partial class UIInventoryPanel : UIPanel
-	{
+	public partial class UIInventoryPanel : UIPanel, IController
+    {
         public List<UISlot> HotbarSlots;
         public List<UISlot> BackpackSlots;
+        public List<UISlot> CraftingSlots;
+        public UISlot CraftResultSlot;
+
+        public static EasyEvent<bool> OnToggleInventory = new EasyEvent<bool>();
 
         protected override void OnInit(IUIData uiData = null)
         {
             mData = uiData as UIInventoryPanelData ?? new UIInventoryPanelData();
             // please add init code here
+
+            StoragePanel.Hide();
+
+            InitHotbarSlots();
+            InitBackpackSlots();
+            InitCraftingSlots();
+
+            PlayerInputs.Instance.OnInteractPerformed.Register(() =>
+            {
+                if (StoragePanel.gameObject.activeSelf)
+                {
+                    CloseBackpack();
+                } else
+                {
+                    OpenBackpack();
+                }
+            }).UnRegisterWhenGameObjectDestroyed(this);
+
+            PlayerInputs.Instance.OnPausePerformed.Register(() =>
+            {
+               if (StoragePanel.gameObject.activeSelf)
+               {
+                    CloseBackpack();
+               }
+            });
+        }
+
+        private void OpenBackpack() 
+        {
+            PlayRandomSound();
+            this.GetSystem<ControlSystem>().ToggleCursor(true);
+            StoragePanel.Show();
+            OnToggleInventory.Trigger(true);
+        }
+
+        private void CloseBackpack()
+        {
+            PlayRandomSound();
+            this.GetSystem<ControlSystem>().ToggleCursor(false);
+            StoragePanel.Hide();
+            OnToggleInventory.Trigger(false);
+        }
+
+        private void PlayRandomSound()
+        {
+            List<string> soundNames = new List<string>() { "tap", "tap2" };
+            AudioKit.PlaySound(soundNames[Random.Range(0, soundNames.Count)]);
         }
 
         private void Start()
         {
-            InitHotbarSlots();
-            InitBackpackSlots();
 
-            ItemKit.AddItemConfig(ItemManager.Instance.Items[0]);
+            //BtnAddItem1.onClick.AddListener(() =>
+            //{
+            //    if (!ItemKit.AddItem(ItemManager.Instance.Items[0].GetKey))
+            //    {
+            //        Debug.Log("背包已满");
+            //    }
+            //});
 
-            ItemKit.Slots[0].Item = ItemManager.Instance.Items[0];
-            ItemKit.Slots[0].Count = 1;
-
-            //UISlot.Hide();
-            
-
-            BtnAddItem1.onClick.AddListener(() =>
-            {
-                if (!ItemKit.AddItem(ItemManager.Instance.Items[0].GetKey))
-                {
-                    Debug.Log("背包已满");
-                }
-            });
-
-            BtnSubitem1.onClick.AddListener(() =>
-            {
-                if (!ItemKit.SubItem(ItemManager.Instance.Items[0].GetKey))
-                {
-                    Debug.Log("数量不足");
-                }
-            });
+            //BtnSubitem1.onClick.AddListener(() =>
+            //{
+            //    if (!ItemKit.SubItem(ItemManager.Instance.Items[0].GetKey))
+            //    {
+            //        Debug.Log("数量不足");
+            //    }
+            //});
         }
 
         public void InitHotbarSlots()
         {
-            for(int i = 0; i < HotbarSlots.Count; i ++)
+            ItemKit.CreateSlotGroup("Hotbar").CreateSlotsByCount(HotbarSlots.Count);
+            for (int i = 0; i < HotbarSlots.Count; i++)
             {
-                ItemKit.Slots.Add(new Slot(null, 0));
-                HotbarSlots[i].InitWithData(ItemKit.Slots[i]);
+                HotbarSlots[i].InitWithData(ItemKit.GetSlotGroupByKey("Hotbar").Slots[i]);
             }
         }
 
         public void InitBackpackSlots()
         {
+            ItemKit.CreateSlotGroup("Backpack").CreateSlotsByCount(BackpackSlots.Count);
             for (int i = 0; i < BackpackSlots.Count; i++)
             {
-                ItemKit.BackpackSlots.Add(new Slot(null, 0));
-                BackpackSlots[i].InitWithData(ItemKit.BackpackSlots[i]);
+                BackpackSlots[i].InitWithData(ItemKit.GetSlotGroupByKey("Backpack").Slots[i]);
             }
         }
 
-        //     private void OnGUI()
-        //     {
-        //IMGUIHelper.SetDesignResolution(640, 360);
+        public void InitCraftingSlots()
+        {
+            ItemKit.CreateSlotGroup("Crafting").CreateSlotsByCount(CraftingSlots.Count);
+            for (int i = 0; i < CraftingSlots.Count; i++)
+            {
+                CraftingSlots[i].InitWithData(ItemKit.GetSlotGroupByKey("Crafting").Slots[i]);
+            }
 
-        //foreach (var slot in ItemKit.Slots)
-        //{
-        //             GUILayout.BeginHorizontal("box");
-        //	if (slot.Count == 0)
-        //	{
-        //		GUILayout.Label("格子: 空");
-        //	} else
-        //	{
-        //                 GUILayout.Label($"格子: {slot.Item.Name} x {slot.Count}");
-        //             }
-
-        //             GUILayout.EndHorizontal();
-        //         }
-
-        //         GUILayout.BeginHorizontal();
-        //         GUILayout.Label("物品1");
-        //         if (GUILayout.Button("+"))
-        //         {
-        //             if (!ItemKit.AddItem("item_1"))
-        //             {
-        //                 Debug.Log("物品栏已满");
-        //             }
-        //         }
-        //         if (GUILayout.Button("-")) { ItemKit.SubItem("item_1"); }
-        //         GUILayout.EndHorizontal();
-
-        //         GUILayout.BeginHorizontal();
-        //         GUILayout.Label("物品2");
-        //         if (GUILayout.Button("+")) {
-        //             if (!ItemKit.AddItem("item_2"))
-        //             {
-        //                 Debug.Log("物品栏已满");
-        //             }
-        //         }
-        //         if (GUILayout.Button("-")) { ItemKit.SubItem("item_2"); }
-        //         GUILayout.EndHorizontal();
-
-        //         GUILayout.BeginHorizontal();
-        //         GUILayout.Label("物品3");
-        //         if (GUILayout.Button("+")) {
-        //             if (!ItemKit.AddItem("item_3"))
-        //             {
-        //                 Debug.Log("物品栏已满");
-        //             }
-        //         }
-        //         if (GUILayout.Button("-")) { ItemKit.SubItem("item_3"); }
-        //         GUILayout.EndHorizontal();
-
-        //         GUILayout.BeginHorizontal();
-        //         GUILayout.Label("物品4");
-        //         if (GUILayout.Button("+")) {
-        //             if (!ItemKit.AddItem("item_4"))
-        //             {
-        //                 Debug.Log("物品栏已满");
-        //             }
-        //         }
-        //         if (GUILayout.Button("-")) { ItemKit.SubItem("item_4"); }
-        //         GUILayout.EndHorizontal();
-
-        //         GUILayout.BeginHorizontal();
-        //         GUILayout.Label("物品5");
-        //         if (GUILayout.Button("+")) {
-        //             if (!ItemKit.AddItem("item_5"))
-        //             {
-        //                 Debug.Log("物品栏已满");
-        //             }
-        //         }
-        //         if (GUILayout.Button("-")) { ItemKit.SubItem("item_5"); }
-        //         GUILayout.EndHorizontal();
-        //     }
-
-
+            ItemKit.CreateSlotGroup("CraftResult").CreateSlotsByCount(1);
+            CraftResultSlot.InitWithData(ItemKit.GetSlotGroupByKey("CraftResult").Slots[0]);
+        }
 
         protected override void OnOpen(IUIData uiData = null)
 		{
@@ -160,5 +137,10 @@ namespace SoulKnight3D
 		protected override void OnClose()
 		{
 		}
-	}
+
+        public IArchitecture GetArchitecture()
+        {
+            return Global.Interface;
+        }
+    }
 }

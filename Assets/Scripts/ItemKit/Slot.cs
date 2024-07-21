@@ -7,11 +7,11 @@ namespace SoulKnight3D
 {
     public class Slot
     {
-        public IItem Item;
+        public ItemPlant Item;
         public int Count;
         public EasyEvent Changed = new EasyEvent();
 
-        public Slot(IItem item, int count)
+        public Slot(ItemPlant item, int count)
         {
             Item = item;
             Count = count;

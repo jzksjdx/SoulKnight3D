@@ -41,6 +41,7 @@ namespace SoulKnight3D
         public float BottomClamp = -30.0f;
 
         private PlayerStats _playerStats;
+        private bool _isUsingInventory = false;
 
         // cinemachine
         private float lookSensitivity = 5f;
@@ -74,6 +75,11 @@ namespace SoulKnight3D
             PlayerInputs.Instance.OnJumpPerformed.Register(() =>
             {
                 Jump();
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            UIInventoryPanel.OnToggleInventory.Register((isUsingInventory) =>
+            {
+                _isUsingInventory = isUsingInventory;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             this.GetSystem<ControlSystem>().ToggleCursor(false);
@@ -121,6 +127,7 @@ namespace SoulKnight3D
 
         private void CameraRotation()
         {
+            if (_isUsingInventory) { return; }
             Vector2 lookVector = PlayerInputs.Instance.GetLookVector();
             _cinemachineTargetPitch += lookVector.y * lookSensitivity;
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);

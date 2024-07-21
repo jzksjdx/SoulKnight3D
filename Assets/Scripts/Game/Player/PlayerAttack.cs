@@ -13,17 +13,13 @@ namespace SoulKnight3D {
         public PlayerAnimation PlayerAnimation;
         public LayerMask AimLayer;
 
-        private int _currentWeaponIndex = 0;
+        public int CurrentWeaponIndex = 0;
         private Gun _currentWeapon;
 
         private bool _isAttacking = false;
+        private bool _isUsingInventory = false;
 
-        private float _interactDistance = 2f;
-        private InteractiveItem _interactiveItem;
-
-
-        public EasyEvent<InteractiveItem> OnInteractiveItemChanged = new EasyEvent<InteractiveItem>();
-        public EasyEvent<WeaponData> OnWeaponSwitched = new EasyEvent<WeaponData>();
+        public EasyEvent<int> OnWeaponSwitched = new EasyEvent<int>();
 
         void Start()
         {
@@ -37,14 +33,28 @@ namespace SoulKnight3D {
 
             PlayerInputs.Instance.OnSwitchPerformed.Register(() =>
             {
-                SwitchWeapon();
+
+                if (CurrentWeaponIndex + 1 == Weapons.Count)
+                {
+                    CurrentWeaponIndex = 0;
+                }
+                else
+                {
+                    CurrentWeaponIndex++;
+                }
+                SwitchWeapon(CurrentWeaponIndex);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            PlayerInputs.Instance.OnInteractPerformed.Register(() =>
+            PlayerInputs.Instance.OnNumberKeyPerformed.Register((number) =>
             {
-                Interact();
+                if (number - 1 == CurrentWeaponIndex) { return; }
+                SwitchWeapon(number - 1);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
+            UIInventoryPanel.OnToggleInventory.Register((isUsingInventory) =>
+            {
+                _isUsingInventory = isUsingInventory;
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         // Update is called once per frame
@@ -64,108 +74,71 @@ namespace SoulKnight3D {
             {
                 target.position = raycastHit.point;
             }
-
-            // raycast for interaction
-            if (Physics.Raycast(ray, out RaycastHit interactableHit, _interactDistance))
-            {
-                if (interactableHit.transform.TryGetComponent(out InteractiveItem interactiveItem))
-                {
-                    if (interactiveItem != _interactiveItem)
-                    {
-                        _interactiveItem = interactiveItem;
-                        interactiveItem.Label.gameObject.Show();
-                        OnInteractiveItemChanged.Trigger(interactiveItem);
-                    }
-                }
-                else
-                {
-                    if (_interactiveItem != null)
-                    {
-                        _interactiveItem.Label.gameObject.Hide();
-                        _interactiveItem = null;
-                        OnInteractiveItemChanged.Trigger(null);
-                    }
-                }
-            }
-            else
-            {
-                if (_interactiveItem != null)
-                {
-                    _interactiveItem.Label.gameObject.Hide();
-                    _interactiveItem = null;
-                    OnInteractiveItemChanged.Trigger(null);
-                }
-            }
         }
 
         private void Attack()
         {
             if (_currentWeapon == null) { return; }
+            if (_isUsingInventory) { return; }
             if (_currentWeapon.Data.EnergyCost > _playerStats.Energy.Value) { return; }
             _currentWeapon.Attack();
         }
 
-        public void Interact()
+        public void InitPlayerAttackWithUnequipedPlant()
         {
-            if (_interactiveItem == null) { return; }
-            _interactiveItem.Interact();
-
-            OnInteractiveItemChanged.Trigger(null);
+            ItemPlant plant = WeaponPoint.GetComponentInChildren<ItemPlant>();
+            plant.AddToInventory();
         }
 
-        public void TakeNewWeapon(GameObject newWeapon)
+        public void SwitchWeapon(int weaponIndex, bool playSound = false)
         {
-            Weapons.Add(newWeapon);
-            SwitchWeapon();
-        }
-
-        public void SwitchWeapon()
-        {
-            // handle one weapon
-            if (Weapons.Count == 1)
+            if (Weapons[CurrentWeaponIndex])
             {
-                // handle no weapon / game start
-                if (_currentWeapon == null)
+                if (Weapons[CurrentWeaponIndex] == _currentWeapon)
                 {
-                    _currentWeapon = Weapons[0].GetComponent<Gun>();
-                    PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
-                    _currentWeapon.OnWeaponFired.Register(() =>
-                    {
-                        _playerStats.Energy.Value -= _currentWeapon.Data.EnergyCost;
-                    }).UnRegisterWhenDisabled(_currentWeapon);
-                    OnWeaponSwitched.Trigger(_currentWeapon.Data);
+                    return;
                 }
-                return;
+            }
+            Debug.Log("SwitchWeapon: " + weaponIndex);
+            if (playSound)
+            {
+                AudioKit.PlaySound("seedlift");
+            }
+            if (Weapons[CurrentWeaponIndex])
+            {
+                Weapons[CurrentWeaponIndex].Hide();
+            }
+            CurrentWeaponIndex = weaponIndex;
+            if (Weapons[CurrentWeaponIndex])
+            {
+                Weapons[CurrentWeaponIndex].Show();
             }
 
-            // handle more than one weapon
-            Weapons[_currentWeaponIndex].Hide();
-
-            if (_currentWeaponIndex + 1 == Weapons.Count)
+            if (Weapons[CurrentWeaponIndex])
             {
-                _currentWeaponIndex = 0;
+                Weapon mWeapon = Weapons[CurrentWeaponIndex].GetComponent<Weapon>();
+                if (mWeapon)
+                {
+                    mWeapon.OnWeaponFired.Register(() =>
+                    {
+                        _playerStats.Energy.Value -= mWeapon.Data.EnergyCost;
+                    }).UnRegisterWhenDisabled(mWeapon);
+
+                    _currentWeapon = Weapons[CurrentWeaponIndex].GetComponent<Gun>();
+
+                    PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
+                }
+            }else
+            {
+                _currentWeapon = null;
             }
-            else
-            {
-                _currentWeaponIndex++;
-
-            }
-            Weapons[_currentWeaponIndex].Show();
-
-            Weapon mWeapon = Weapons[_currentWeaponIndex].GetComponent<Weapon>();
-            mWeapon.OnWeaponFired.Register(() =>
-            {
-                _playerStats.Energy.Value -= mWeapon.Data.EnergyCost;
-            }).UnRegisterWhenDisabled(mWeapon);
-
-            _currentWeapon = Weapons[_currentWeaponIndex].GetComponent<Gun>();
-
-
-            AudioKit.PlaySound("fx_switch");
-
-            OnWeaponSwitched.Trigger(_currentWeapon.Data);
+            OnWeaponSwitched.Trigger(CurrentWeaponIndex);
         }
 
+        public Weapon GetCurrentWeapon()
+        {
+            return _currentWeapon;
+        }
     }
 }
 

@@ -66,9 +66,8 @@ namespace SoulKnight3D
 		private IEnumerator HugeWaveTip() // wait for 3 seconds for zombie spawn
 		{
 			TipHugeWave.Show();
-            yield return new WaitForSeconds(0.6f);
 			AudioKit.PlaySound("hugewave");
-            yield return new WaitForSeconds(2.4f);
+            yield return new WaitForSeconds(3f);
             TipHugeWave.Hide();
             AudioKit.PlaySound("siren");
         }
@@ -77,9 +76,8 @@ namespace SoulKnight3D
 		{
 			yield return StartCoroutine(HugeWaveTip());
 			TipFinalWave.Show();
-            yield return new WaitForSeconds(0.6f);
             AudioKit.PlaySound("finalwave");
-            yield return new WaitForSeconds(1.4f);
+            yield return new WaitForSeconds(2f);
             TipFinalWave.Hide();
         }
 

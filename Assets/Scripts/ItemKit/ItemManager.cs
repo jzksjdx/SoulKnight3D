@@ -15,7 +15,7 @@ namespace SoulKnight3D
 
         private void Awake()
         {
-            Items.Add(ItemGameObjects[0].GetComponent<ItemPlant>());
+            //Items.Add(ItemGameObjects[0].GetComponent<ItemPlant>());
         }
 
 

@@ -36,7 +36,7 @@ namespace SoulKnight3D
             }
             UIKit.OpenPanel<UIGamePanel>();
 
-            PlayerController.Instance.PlayerAttack.SwitchWeapon();
+            PlayerController.Instance.PlayerAttack.SwitchWeapon(PlayerController.Instance.PlayerAttack.CurrentWeaponIndex);
             AudioKit.PlayMusic("bgm_1Low");
         }
 

@@ -100,6 +100,33 @@ namespace SoulKnight3D
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""KeyOne"",
+                    ""type"": ""Button"",
+                    ""id"": ""4363f5b5-41a5-4877-9395-ecb75c904d18"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""KeyTwo"",
+                    ""type"": ""Button"",
+                    ""id"": ""07f835b6-b2ec-4c4b-89c2-0f11d3baced1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""KeyThree"",
+                    ""type"": ""Button"",
+                    ""id"": ""a5c9a67a-1ad5-43d2-878d-fceec3e0787f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -245,6 +272,39 @@ namespace SoulKnight3D
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa7a96fd-29a5-4ef6-937c-a13da36e262e"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""KeyOne"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dc4d6576-703e-49ad-bffd-c4acdd772aa8"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""KeyTwo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d72ed400-672e-4880-b98b-4ce63b3f717d"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""KeyThree"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -261,6 +321,9 @@ namespace SoulKnight3D
             m_Player_Switch = m_Player.FindAction("Switch", throwIfNotFound: true);
             m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
             m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
+            m_Player_KeyOne = m_Player.FindAction("KeyOne", throwIfNotFound: true);
+            m_Player_KeyTwo = m_Player.FindAction("KeyTwo", throwIfNotFound: true);
+            m_Player_KeyThree = m_Player.FindAction("KeyThree", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -330,6 +393,9 @@ namespace SoulKnight3D
         private readonly InputAction m_Player_Switch;
         private readonly InputAction m_Player_Interact;
         private readonly InputAction m_Player_Pause;
+        private readonly InputAction m_Player_KeyOne;
+        private readonly InputAction m_Player_KeyTwo;
+        private readonly InputAction m_Player_KeyThree;
         public struct PlayerActions
         {
             private @InputActions m_Wrapper;
@@ -342,6 +408,9 @@ namespace SoulKnight3D
             public InputAction @Switch => m_Wrapper.m_Player_Switch;
             public InputAction @Interact => m_Wrapper.m_Player_Interact;
             public InputAction @Pause => m_Wrapper.m_Player_Pause;
+            public InputAction @KeyOne => m_Wrapper.m_Player_KeyOne;
+            public InputAction @KeyTwo => m_Wrapper.m_Player_KeyTwo;
+            public InputAction @KeyThree => m_Wrapper.m_Player_KeyThree;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -375,6 +444,15 @@ namespace SoulKnight3D
                 @Pause.started += instance.OnPause;
                 @Pause.performed += instance.OnPause;
                 @Pause.canceled += instance.OnPause;
+                @KeyOne.started += instance.OnKeyOne;
+                @KeyOne.performed += instance.OnKeyOne;
+                @KeyOne.canceled += instance.OnKeyOne;
+                @KeyTwo.started += instance.OnKeyTwo;
+                @KeyTwo.performed += instance.OnKeyTwo;
+                @KeyTwo.canceled += instance.OnKeyTwo;
+                @KeyThree.started += instance.OnKeyThree;
+                @KeyThree.performed += instance.OnKeyThree;
+                @KeyThree.canceled += instance.OnKeyThree;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -403,6 +481,15 @@ namespace SoulKnight3D
                 @Pause.started -= instance.OnPause;
                 @Pause.performed -= instance.OnPause;
                 @Pause.canceled -= instance.OnPause;
+                @KeyOne.started -= instance.OnKeyOne;
+                @KeyOne.performed -= instance.OnKeyOne;
+                @KeyOne.canceled -= instance.OnKeyOne;
+                @KeyTwo.started -= instance.OnKeyTwo;
+                @KeyTwo.performed -= instance.OnKeyTwo;
+                @KeyTwo.canceled -= instance.OnKeyTwo;
+                @KeyThree.started -= instance.OnKeyThree;
+                @KeyThree.performed -= instance.OnKeyThree;
+                @KeyThree.canceled -= instance.OnKeyThree;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -430,6 +517,9 @@ namespace SoulKnight3D
             void OnSwitch(InputAction.CallbackContext context);
             void OnInteract(InputAction.CallbackContext context);
             void OnPause(InputAction.CallbackContext context);
+            void OnKeyOne(InputAction.CallbackContext context);
+            void OnKeyTwo(InputAction.CallbackContext context);
+            void OnKeyThree(InputAction.CallbackContext context);
         }
     }
 }

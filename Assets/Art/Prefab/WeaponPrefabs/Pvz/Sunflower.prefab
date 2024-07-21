@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4747911943351174701}
   - component: {fileID: 3182727270601116620}
   m_Layer: 3
-  m_Name: Peashooter
+  m_Name: Sunflower
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   m_Children:
   - {fileID: 3012229913411895298}
   - {fileID: 6940711691508399834}
-  - {fileID: 7535248667798194049}
+  - {fileID: 1020187858095943118}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3182727270601116620
@@ -292,7 +292,7 @@ MonoBehaviour:
         RemapRangeFalloff: {x: 0, y: 1}
         Owner: {fileID: 1305253900433612875}
         DebugActive: 0
-        AnimateRotationTarget: {fileID: 7535248667798194049}
+        AnimateRotationTarget: {fileID: 0}
         Mode: 1
         RotationSpace: 1
         AnimateRotationDuration: 0.2
@@ -635,8 +635,8 @@ MonoBehaviour:
         PoolSize: 10
         UseLegacyEventsMode: 0
         StopSoundOnFeedbackStop: 1
-        MinVolume: 0.4
-        MaxVolume: 0.4
+        MinVolume: 0.5
+        MaxVolume: 0.5
         MinPitch: 0.95
         MaxPitch: 1.05
         SfxAudioMixerGroup: {fileID: 0}
@@ -804,7 +804,7 @@ MonoBehaviour:
   CustomComponentName: ShootFeedback
   CustomComment: 
   mComponentName: MoreMountains.Feedbacks.MMF_Player
---- !u!1001 &8005198640658620522
+--- !u!1001 &694352651865082405
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -812,69 +812,69 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4747911943351174701}
     m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.0585
+      value: 0.0488
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0377
+      value: 0.0268
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0009
+      value: 0.0031
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7478224
+      value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.015921535
+      value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.66344947
+      value: -0.5
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.01851704
+      value: -0.5
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -177.227
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 96.852
+      value: -90
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -180.377
+      value: -90
       objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+    - target: {fileID: 919132149155446097, guid: 90e88fcf67c7f49fca205de67bd25629,
         type: 3}
       propertyPath: m_Name
-      value: Peashooter
+      value: Sunflower
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 229fb0844511d44c9b7d64f9a98b2a23, type: 3}
---- !u!4 &7535248667798194049 stripped
+  m_SourcePrefab: {fileID: 100100000, guid: 90e88fcf67c7f49fca205de67bd25629, type: 3}
+--- !u!4 &1020187858095943118 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 229fb0844511d44c9b7d64f9a98b2a23,
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 90e88fcf67c7f49fca205de67bd25629,
     type: 3}
-  m_PrefabInstance: {fileID: 8005198640658620522}
+  m_PrefabInstance: {fileID: 694352651865082405}
   m_PrefabAsset: {fileID: 0}
