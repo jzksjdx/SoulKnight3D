@@ -62,8 +62,8 @@ namespace SoulKnight3D
             BoneMesh.Hide();
             BrokenArm.Hide();
             Head.Hide();
-            BrokenArm.transform.position = _brokenArmPosition;
-            Head.transform.position = _HeadPosition;
+            BrokenArm.transform.localPosition = _brokenArmPosition;
+            Head.transform.localPosition = _HeadPosition;
             LeftForeArmTransform.localScale = Vector3.one;
             LeftArmTransform.localScale = Vector3.one;
             HeadTransform.localScale = Vector3.one;
@@ -127,6 +127,10 @@ namespace SoulKnight3D
 
         public void PlayGroanSound()
         {
+            if (_sound == null)
+            {
+                _sound = SoundFeedbacks.GetFeedbackOfType<MMF_MMSoundManagerSound>();
+            }
             _sound.RandomSfx = GroanSounds;
             SoundFeedbacks?.PlayFeedbacks();
         }

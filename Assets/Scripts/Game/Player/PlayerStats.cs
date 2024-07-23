@@ -87,7 +87,7 @@ namespace SoulKnight3D
                 Armor.Value = 0;
                 Health.Value -= armorDamage;
             }
-            AudioKit.PlaySound("fx_hit_p1");
+            AudioKit.PlaySound("DaveHurt" + Random.Range(1,3).ToString());
 
             _armorRecTimeoutDelta = _armorRecTimeout;
             _armorRecCdDelta = _armorRecCd;

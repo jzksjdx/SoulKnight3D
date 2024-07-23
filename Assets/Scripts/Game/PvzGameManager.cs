@@ -11,10 +11,21 @@ namespace SoulKnight3D
 
         public static PvzGameManager Instance;
 
+        public Transform LeftWall;
+        public Transform RightWall;
+        public Transform FrontWall;
+        public Transform BackWall;
+
         public ZombieWavesSO ZombieWavesSO;
+
         private int currentWaveIndex = 0;
         private float _levelDuration = 0f;
         private float _currentDuration = 0f;
+
+        private float _leftBound;
+        private float _rightBound;
+        private float _frontBound;
+        private float _backBound;
 
         // timeout
         private float _progressTimeoutDelta = 0f;
@@ -55,6 +66,11 @@ namespace SoulKnight3D
                 UIKit.OpenPanel<UIMobileControlPanel>();
             }
 
+            _leftBound = LeftWall.position.x + 0.5f;
+            _rightBound = RightWall.position.x - 0.5f;
+            _frontBound = FrontWall.position.z - 0.5f;
+            _backBound = BackWall.position.z + 0.5f;
+
             UIKit.OpenPanel<UIPvzGamePanel>();
             UIKit.OpenPanel<UIInventoryPanel>();
             UIKit.OpenPanel<UIGamePanel>();
@@ -68,6 +84,7 @@ namespace SoulKnight3D
             }
             OnNewLevelStart.Trigger(ZombieWavesSO);
             StartCoroutine(RunWaves());
+            StartCoroutine(SpawnSunlight());
         }
 
         private void Update()
@@ -130,7 +147,7 @@ namespace SoulKnight3D
         {
             for (int i = 0; i < group.Count; i++)
             {
-                Instantiate(group.ZombiePrefab, GetRandomSpawnPosition(), Quaternion.identity);
+                GameObjectsManager.Instance.SpawnZombie(group.ZombiePrefab).Position(GetRandomSpawnPosition()).Show();
                 yield return new WaitForSeconds(group.Cooldown / group.Count);
             }
         }
@@ -138,7 +155,18 @@ namespace SoulKnight3D
         private Vector3 GetRandomSpawnPosition()
         {
             // Implement your logic to get a random spawn position
-            return new Vector3(Random.Range(42, 46), 0.3f, Random.Range(42, 46));
+            Vector3 randPos = new Vector3(Random.Range(_leftBound, _rightBound), 0.3f, Random.Range(_backBound, _frontBound));
+            return randPos;
+        }
+
+        private IEnumerator SpawnSunlight()
+        {
+            while(gameObject)
+            {
+                yield return new WaitForSeconds(10f);
+                Vector3 randPos = new Vector3(Random.Range(_leftBound, _rightBound), 5f, Random.Range(_backBound, _frontBound));
+                GameObjectsManager.Instance.SpawnSun(randPos);
+            }
         }
 
         public IArchitecture GetArchitecture()

@@ -14,7 +14,7 @@ namespace SoulKnight3D
 
         public Slot Data { get; set; }
 
-        private bool mDragging = false;
+        protected bool mDragging = false;
 
         public UISlot InitWithData(Slot data)
         {
@@ -89,6 +89,7 @@ namespace SoulKnight3D
                 if (ItemKit.CurrentSlotPointerOn)
                 {
                     var uiSlot = ItemKit.CurrentSlotPointerOn;
+                    if (uiSlot == this) { return; }
                     var rectTransform = uiSlot.transform as RectTransform;
                     if (RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition))
                     {
@@ -111,6 +112,7 @@ namespace SoulKnight3D
                 }
                 else
                 {
+                    Data.Item.ThrowFromInventory();
                     AudioKit.PlaySound("swing");
                     Data.Item = null;
                     Data.Count = 0;

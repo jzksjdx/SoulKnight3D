@@ -12,7 +12,7 @@ namespace SoulKnight3D
 
             for (int i = 0; i <= 3; i++)
             {
-                GameObject newOrb = GameObjectsManager.Instance.SpawnEnergyOrb(transform.position);
+                GameObject newOrb = GameObjectsManager.Instance.SpawnSun(transform.position);
                 Rigidbody rb = newOrb.GetComponent<Rigidbody>();
                 float randomScale = 0.3f;
                 Vector3 randomDirection = Vector3.up + new Vector3(Random.Range(-randomScale, randomScale), 0f, Random.Range(-randomScale, randomScale));

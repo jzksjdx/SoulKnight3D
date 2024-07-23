@@ -14,7 +14,7 @@ namespace SoulKnight3D {
         public LayerMask AimLayer;
 
         public int CurrentWeaponIndex = 0;
-        private Gun _currentWeapon;
+        private Weapon _currentWeapon;
 
         private bool _isAttacking = false;
         private bool _isUsingInventory = false;
@@ -98,8 +98,7 @@ namespace SoulKnight3D {
                 {
                     return;
                 }
-            }
-            Debug.Log("SwitchWeapon: " + weaponIndex);
+            } 
             if (playSound)
             {
                 AudioKit.PlaySound("seedlift");
@@ -124,7 +123,7 @@ namespace SoulKnight3D {
                         _playerStats.Energy.Value -= mWeapon.Data.EnergyCost;
                     }).UnRegisterWhenDisabled(mWeapon);
 
-                    _currentWeapon = Weapons[CurrentWeaponIndex].GetComponent<Gun>();
+                    _currentWeapon = Weapons[CurrentWeaponIndex].GetComponent<Weapon>();
 
                     PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
                 }

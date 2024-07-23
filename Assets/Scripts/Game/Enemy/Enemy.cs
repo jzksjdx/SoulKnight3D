@@ -142,7 +142,7 @@ namespace SoulKnight3D
                 // spawn energy orb
                 if (0.2f >= Random.Range(0f, 1f))
                 {
-                    GameObject newOrb = GameObjectsManager.Instance.SpawnEnergyOrb(transform.position);
+                    GameObject newOrb = GameObjectsManager.Instance.SpawnSun(transform.position);
                     Rigidbody rb = newOrb.GetComponent<Rigidbody>();
                     float randomScale = 0.5f;
                     Vector3 randomDirection = new Vector3(Random.Range(-randomScale, randomScale), 0.5f, Random.Range(-randomScale, randomScale));

@@ -16,9 +16,12 @@ namespace SoulKnight3D
 
         public enum StorageState
         {
-            Dropped, Hotbar, Backpack
+            Dropped, Hotbar, Backpack, Crafting, Recipe
         }
         public StorageState State = StorageState.Dropped;
+
+        // for crafting
+        public List<IngredientRequirement> RequiredIngredients;
 
         private Collider _pickUpCollider;
         private Collider _modelCollider;
@@ -26,6 +29,8 @@ namespace SoulKnight3D
         private bool _isPickingUp = false;
         private Rigidbody _rigidbody;
         private WeaponData _weaponData;
+
+        private bool _hasStarted = false;
 
         // time out
         private float _pickUpDelayTimeout = 1f;
@@ -49,20 +54,26 @@ namespace SoulKnight3D
 
         private void Start()
         {
+            StartItemPlant();
+        }
+
+        private void StartItemPlant()
+        {
+            if (_hasStarted) { return; }
+            _hasStarted = true;
             _player = PlayerController.Instance;
             _pickUpCollider = GetComponent<SphereCollider>();
             _modelCollider = GetComponentInChildren<BoxCollider>();
             _rigidbody = GetComponent<Rigidbody>();
             _pickUpDelayTimeoutDelta = _pickUpDelayTimeout;
 
+
+            _pickUpCollider.enabled = false;
             _pickUpCollider.OnTriggerEnterEvent((other) =>
             {
                 if (other.gameObject.tag == "Player")
                 {
-                    // pickup weapon
                     AddToInventory();
-                    //AudioKit.PlaySound("fx_energy");
-                    //Destroy(gameObject);
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
@@ -76,6 +87,10 @@ namespace SoulKnight3D
             if (_pickUpDelayTimeoutDelta >= 0f)
             {
                 _pickUpDelayTimeoutDelta -= Time.deltaTime;
+                if (_pickUpDelayTimeoutDelta <= 0f)
+                {
+                    _pickUpCollider.enabled = true;
+                }
                 return;
             }
             if (_player == null)
@@ -99,6 +114,7 @@ namespace SoulKnight3D
 
         public void AddToInventory()
         {
+            _isPickingUp = false;
             PickUpItem();
 
             ItemKit.AddItemConfig(this);
@@ -112,7 +128,7 @@ namespace SoulKnight3D
             if (slot == null) // not enough slot in hotbar
             {
                 State = StorageState.Backpack;
-                MoveToBackpack();
+                MoveToItemManager();
                 slot = ItemKit.GetSlotGroupByKey("Backpack").FindEmptySlot();
             }
             if (slot == null) // no space in hotbar or backpack
@@ -128,6 +144,7 @@ namespace SoulKnight3D
 
         public void PickUpItem()
         {
+            StartItemPlant();
             _modelCollider.gameObject.Hide();
             _pickUpCollider.enabled = false;
             _rigidbody.isKinematic = true;
@@ -136,11 +153,19 @@ namespace SoulKnight3D
 
         public void ThrowFromInventory()
         {
+            _pickUpCollider.enabled = false;
+            _isPickingUp = false;
+            _pickUpDelayTimeoutDelta = _pickUpDelayTimeout;
             State = StorageState.Dropped;
             _modelCollider.gameObject.Show();
-            _pickUpCollider.enabled = true;
             _rigidbody.isKinematic = false;
+
+            transform.SetParent(null);
+            transform.position = _player.PlayerAttack.WeaponPoint.position;
+            transform.rotation = Quaternion.Euler(Vector3.zero); 
             WeaponModel.gameObject.Show();
+            Weapon.gameObject.Hide();
+            _rigidbody.AddForce(_player.PlayerAttack.WeaponPoint.up * 5, ForceMode.Impulse);
         }
 
         public void MoveToHotbar()
@@ -150,7 +175,7 @@ namespace SoulKnight3D
             transform.localRotation = Quaternion.Euler(Vector3.zero);
         }
 
-        public void MoveToBackpack()
+        public void MoveToItemManager()
         {
             transform.SetParent(ItemManager.Instance.transform);
             transform.localPosition = Vector3.zero;
@@ -160,6 +185,29 @@ namespace SoulKnight3D
                 _player.PlayerAttack.Weapons[index] = null;
             }
             // TODO: handle when current weapon is this
+        }
+
+        public Rigidbody GetRigidbody()
+        {
+            if (_rigidbody)
+            {
+                return _rigidbody;
+            } else
+            {
+                _rigidbody = GetComponent<Rigidbody>();
+                return _rigidbody;
+            }
+        }
+
+        public List<IngredientRequirement> GetIngredientRequirements()
+        {
+            if (RequiredIngredients.Count == 0)
+            {
+                return new List<IngredientRequirement> { new IngredientRequirement(Weapon.GetComponent<Weapon>().Data, 1) };
+            } else
+            {
+                return RequiredIngredients;
+            }
         }
 
         // IItem interface

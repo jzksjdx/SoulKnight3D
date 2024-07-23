@@ -19,6 +19,8 @@ namespace SoulKnight3D
 
         public ZombieEffects Effects;
 
+        public GameObject PrefabRef { get; private set; }
+
         public EasyEvent OnDeath = new EasyEvent();
 
         public enum EnemyState
@@ -45,8 +47,7 @@ namespace SoulKnight3D
             _animIdMove = Animator.StringToHash("Move");
             _animIdAttack = Animator.StringToHash("Attack");
             _animIdDie = Animator.StringToHash("Die");
-            SelfAnimator.SetTrigger(_animIdMove);
-
+            //SelfAnimator.SetTrigger(_animIdMove);
             // set time out delta
         }
 
@@ -118,7 +119,12 @@ namespace SoulKnight3D
                 SelfRigidbody.isKinematic = true;
                 OnDeath.Trigger();
 
-                Destroy(gameObject, 3);
+                GameObjectsManager.Instance.DrawDropPlant(transform.position + Vector3.up * 0.5f);
+                ActionKit.Delay(3f, () =>
+                {
+                    GameObjectsManager.Instance.DespawnZombie(this);
+                }).Start(this);
+                //Destroy(gameObject, 3);
             }
         }
 
@@ -130,6 +136,20 @@ namespace SoulKnight3D
             {
                 PlayerController.Instance.PlayerStats.ApplyDamage(Attack);
             }
+        }
+
+        public void Reset()
+        {
+            Health.Value = MaxHealth;
+            SelfAnimator.SetTrigger(_animIdMove);
+            Effects.ResetEffects();
+            SelfCollider.enabled = true;
+            SelfRigidbody.isKinematic = false;
+        }
+
+        public void SetPrefabRef(GameObject prefabRef)
+        {
+            PrefabRef = prefabRef;
         }
     }
 

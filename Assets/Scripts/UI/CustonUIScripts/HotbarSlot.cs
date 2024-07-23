@@ -39,7 +39,11 @@ namespace SoulKnight3D
                 playerAttack.Weapons[HotbarNumber - 1] = null;
             }
 
-            playerAttack.SwitchWeapon(HotbarNumber - 1);
+            if (playerAttack.CurrentWeaponIndex == HotbarNumber - 1)
+            {
+                playerAttack.SwitchWeapon(HotbarNumber - 1);
+            }
+            
 
             // Handle Manual drag to hotbar
             if (Data.Item == null) { return; }

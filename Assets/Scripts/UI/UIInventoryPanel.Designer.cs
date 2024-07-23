@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:8b6fc6cf-b6c5-4849-9793-c04eb05816ff
+	// Generate Id:4fb53134-3c98-45f9-8ef3-5e81e24267f1
 	public partial class UIInventoryPanel
 	{
 		public const string Name = "UIInventoryPanel";
@@ -22,6 +22,8 @@ namespace SoulKnight3D
 		/// </summary>
 		[SerializeField]
 		public UnityEngine.RectTransform StoragePanel;
+		[SerializeField]
+		public CraftingSystem CraftingSystem;
 		
 		private UIInventoryPanelData mPrivateData = null;
 		
@@ -31,6 +33,7 @@ namespace SoulKnight3D
 			BtnAddItem1 = null;
 			BtnSubitem1 = null;
 			StoragePanel = null;
+			CraftingSystem = null;
 			
 			mData = null;
 		}

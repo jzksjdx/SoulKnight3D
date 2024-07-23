@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2240552160859024054}
   - component: {fileID: 4612740639860918699}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66,7 +66,7 @@ GameObject:
   - component: {fileID: 6186962101516280322}
   - component: {fileID: 8668127377685321754}
   - component: {fileID: 3770749747227964533}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: EnergyOrb
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,8 +14,6 @@ namespace SoulKnight3D
     {
         public List<UISlot> HotbarSlots;
         public List<UISlot> BackpackSlots;
-        public List<UISlot> CraftingSlots;
-        public UISlot CraftResultSlot;
 
         public static EasyEvent<bool> OnToggleInventory = new EasyEvent<bool>();
 
@@ -28,7 +26,6 @@ namespace SoulKnight3D
 
             InitHotbarSlots();
             InitBackpackSlots();
-            InitCraftingSlots();
 
             PlayerInputs.Instance.OnInteractPerformed.Register(() =>
             {
@@ -108,18 +105,6 @@ namespace SoulKnight3D
             {
                 BackpackSlots[i].InitWithData(ItemKit.GetSlotGroupByKey("Backpack").Slots[i]);
             }
-        }
-
-        public void InitCraftingSlots()
-        {
-            ItemKit.CreateSlotGroup("Crafting").CreateSlotsByCount(CraftingSlots.Count);
-            for (int i = 0; i < CraftingSlots.Count; i++)
-            {
-                CraftingSlots[i].InitWithData(ItemKit.GetSlotGroupByKey("Crafting").Slots[i]);
-            }
-
-            ItemKit.CreateSlotGroup("CraftResult").CreateSlotsByCount(1);
-            CraftResultSlot.InitWithData(ItemKit.GetSlotGroupByKey("CraftResult").Slots[0]);
         }
 
         protected override void OnOpen(IUIData uiData = null)

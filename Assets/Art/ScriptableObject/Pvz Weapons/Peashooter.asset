@@ -18,7 +18,7 @@ MonoBehaviour:
   Category: 0
   Rarity: 0
   Damage: 3
-  EnergyCost: 0
+  EnergyCost: 1
   CritChance: 0
   Inaccuracy: 5
   Price: 4

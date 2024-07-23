@@ -65,7 +65,7 @@ GameObject:
   - component: {fileID: 4413670196669018964}
   - component: {fileID: 4358499557488691874}
   - component: {fileID: 3845668867535026683}
-  m_Layer: 2
+  m_Layer: 6
   m_Name: Pickup Peashooter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,6 +107,7 @@ MonoBehaviour:
   PickUpDistance: 2
   Speed: 1.5
   State: 0
+  RequiredIngredients: []
 --- !u!54 &4358499557488691874
 Rigidbody:
   m_ObjectHideFlags: 0

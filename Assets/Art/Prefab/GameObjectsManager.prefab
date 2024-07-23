@@ -44,5 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b374d8c17fa44ed395cb6eeb17d0bcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnergyOrbPrefab: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
+  SunPrefab: {fileID: 4531412225396487519, guid: 847d0ceeef8aa4eccb89107da00dbac8,
     type: 3}
+  DropPlants:
+  - {fileID: 4195584256734572376, guid: 327abc21ea0a04a7cb8b473f3dcd503e, type: 3}
+  - {fileID: 4195584256734572376, guid: c0b335d1749d347f58e91d0792b2bc4e, type: 3}
+  DropChance: 0.05

@@ -26,7 +26,7 @@ namespace SoulKnight3D
                 if (DropRate >= dropChance)
                 {
                     // drop energy
-                    GameObjectsManager.Instance.SpawnEnergyOrb(transform.position + new Vector3(0, 0.275f, 0));
+                    GameObjectsManager.Instance.SpawnSun(transform.position + new Vector3(0, 0.275f, 0));
                 }
                 BreakFeedbacks?.PlayFeedbacks();
             }

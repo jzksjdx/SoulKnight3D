@@ -2441,7 +2441,7 @@ GameObject:
   - component: {fileID: 7200409748102261847}
   - component: {fileID: 8679422746988958925}
   - component: {fileID: 8853790772755422915}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Zombie
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -2595,7 +2595,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.14
+  m_Radius: 0.15
   m_Height: 0.6623983
   m_Direction: 1
   m_Center: {x: 0, y: 0.33119914, z: 0.11999999}

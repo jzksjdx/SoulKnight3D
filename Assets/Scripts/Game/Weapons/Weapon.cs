@@ -21,6 +21,8 @@ namespace SoulKnight3D
             }
         }
 
+        public virtual void Attack() { }
+
         protected bool GetIsCritHit()
         {
             return Data.CritChance > Random.Range(0, 100);

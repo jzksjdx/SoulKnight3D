@@ -18,7 +18,7 @@ namespace SoulKnight3D
             {
                 Data.Item.State = ItemPlant.StorageState.Backpack;
                 Data.Item.PickUpItem();
-                Data.Item.MoveToBackpack();
+                Data.Item.MoveToItemManager();
             }
         }
 

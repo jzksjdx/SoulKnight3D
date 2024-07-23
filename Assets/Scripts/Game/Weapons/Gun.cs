@@ -20,7 +20,7 @@ namespace SoulKnight3D
 			base.Update();
         }
 
-        public virtual void Attack()
+        public override void Attack()
 		{
 			if (_cooldownTimeout > 0f) { return; }
 			Bullet newBullet = SpawnBulletFromPool(shootPoint.position);

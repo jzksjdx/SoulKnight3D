@@ -20,6 +20,9 @@ namespace SoulKnight3D
         private float _pickUpDelayTimeout = 1f;
         private float _pickUpDelayTimeoutDelta;
 
+        private float _disappearTimeout = 20f;
+        private float _disappearTimeoutDelta = 20f;
+
         void Start()
         {
             _player = PlayerController.Instance;
@@ -41,8 +44,8 @@ namespace SoulKnight3D
                         stats.Energy.Value += Amount;
                     }
                     
-                    AudioKit.PlaySound("fx_energy");
-                    GameObjectsManager.Instance.DespawnEnergyOrb(gameObject);
+                    AudioKit.PlaySound("points");
+                    GameObjectsManager.Instance.DespawnSun(gameObject);
                     //Destroy(gameObject);
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -50,9 +53,15 @@ namespace SoulKnight3D
 
         void Update()
         {
+            HandleSelfDespawn();
+
             if (_pickUpDelayTimeoutDelta >= 0f)
             {
                 _pickUpDelayTimeoutDelta -= Time.deltaTime;
+                if (_pickUpDelayTimeoutDelta <= 0f)
+                {
+                    _pickUpCollider.enabled = true;
+                }
                 return;
             }
             if (_player == null)
@@ -75,10 +84,25 @@ namespace SoulKnight3D
             _rigidbody.velocity = direction.normalized * Speed;
         }
 
+        private void HandleSelfDespawn()
+        {
+            if (_disappearTimeoutDelta > 0f)
+            {
+                _disappearTimeoutDelta -= Time.deltaTime;
+                if (_disappearTimeoutDelta <= 0f)
+                {
+                    GameObjectsManager.Instance.DespawnSun(gameObject);
+                }
+            }
+           
+        }
+
         public void Reset()
         {
             _isPickingUp = false;
             _pickUpDelayTimeoutDelta = _pickUpDelayTimeout;
+            _pickUpCollider.enabled = false;
+            _disappearTimeoutDelta = _disappearTimeout;
             this.Hide();
         }
     }
