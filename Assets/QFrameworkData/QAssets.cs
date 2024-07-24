@@ -42,18 +42,47 @@ namespace QAssetBundle
         public const string FX_TRANSFORM = "fx_transform";
         public const string HUMAN1_HURT2 = "human1 hurt2";
         public const string HUMAN2_HURT2 = "human2 hurt2";
-        public const string BGM_1LOW = "bgm_1Low";
-        public const string BGM_ROOM = "bgm_room";
+        public const string BGM_FASTER = "bgm_Faster";
+        public const string BGM_GRASSWALK = "bgm_Grasswalk";
+        public const string BGM_LOON = "bgm_loon";
+        public const string BGM_WINMUSIC = "bgm_winmusic";
+        public const string BUTTONCLICK = "buttonclick";
+        public const string DAVEHURT1 = "DaveHurt1";
+        public const string DAVEHURT2 = "DaveHurt2";
+        public const string FINALWAVE = "finalwave";
+        public const string HUGEWAVE = "hugewave";
+        public const string PAUSE = "pause";
+        public const string PLANT = "plant";
+        public const string PLANT2 = "plant2";
+        public const string POINTS = "points";
+        public const string PRIZE = "prize";
+        public const string PRODUCESUN = "ProduceSun";
+        public const string READYSETPLANT = "readysetplant";
+        public const string SEEDLIFT = "seedlift";
+        public const string SIREN = "siren";
+        public const string SWING = "swing";
+        public const string TAP = "tap";
+        public const string TAP2 = "tap2";
     }
     public class Uigamepanel_prefab
     {
         public const string BundleName = "uigamepanel_prefab";
         public const string UIGAMEPANEL = "UIGamePanel";
     }
+    public class Uiinventorypanel_prefab
+    {
+        public const string BundleName = "uiinventorypanel_prefab";
+        public const string UIINVENTORYPANEL = "UIInventoryPanel";
+    }
     public class Uimobilecontrolpanel_prefab
     {
         public const string BundleName = "uimobilecontrolpanel_prefab";
         public const string UIMOBILECONTROLPANEL = "UIMobileControlPanel";
+    }
+    public class Uipvzgamepanel_prefab
+    {
+        public const string BundleName = "uipvzgamepanel_prefab";
+        public const string UIPVZGAMEPANEL = "UIPvzGamePanel";
     }
     public class Uisettingspanel_prefab
     {
@@ -64,5 +93,10 @@ namespace QAssetBundle
     {
         public const string BundleName = "uistartmenupanel_prefab";
         public const string UISTARTMENUPANEL = "UIStartMenuPanel";
+    }
+    public class Uitempstartpanel_prefab
+    {
+        public const string BundleName = "uitempstartpanel_prefab";
+        public const string UITEMPSTARTPANEL = "UITempStartPanel";
     }
 }

@@ -107,7 +107,11 @@ MonoBehaviour:
   PickUpDistance: 2
   Speed: 1.5
   State: 0
-  RequiredIngredients: []
+  RequiredIngredients:
+  - Ingredient: {fileID: 11400000, guid: ca3d0fb4eab0b41c0a77a12af8842dac, type: 2}
+    Quantity: 1
+  - Ingredient: {fileID: 11400000, guid: 45b496e83b75c481aa414e89307d9eff, type: 2}
+    Quantity: 1
 --- !u!54 &4358499557488691874
 Rigidbody:
   m_ObjectHideFlags: 0

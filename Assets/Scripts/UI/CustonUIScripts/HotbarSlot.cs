@@ -6,9 +6,11 @@ using UnityEngine.EventSystems;
 
 namespace SoulKnight3D
 {
-    public class HotbarSlot : UISlot
+    public class HotbarSlot : UISlot, IPointerClickHandler, IController
     {
         public int HotbarNumber;
+
+        private bool _isMobile = false;
 
         private void Start()
         {
@@ -23,6 +25,8 @@ namespace SoulKnight3D
                     transform.localScale = Vector3.one;
                 }
             }).UnRegisterWhenGameObjectDestroyed(this);
+
+            _isMobile = this.GetSystem<ControlSystem>().IsMobile;
         }
 
         public override void UpdateView()
@@ -53,6 +57,19 @@ namespace SoulKnight3D
                 Data.Item.State = ItemPlant.StorageState.Hotbar;
                 Data.Item.MoveToHotbar();
             }
+        }
+
+
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (!_isMobile) { return; }
+            PlayerInputs.Instance.OnNumberKeyPerformed.Trigger(HotbarNumber);
+        }
+
+        public IArchitecture GetArchitecture()
+        {
+            return Global.Interface;
         }
     }
 

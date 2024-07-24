@@ -32,6 +32,11 @@ namespace SoulKnight3D
         }
         public static Dictionary<string, ItemPlant> ItemByKey = new Dictionary<string, ItemPlant>();
 
+        public static void Clear()
+        {
+            mSlotGroupByKey = new Dictionary<string, SlotGroup>();
+        }
+
     }
 
 }

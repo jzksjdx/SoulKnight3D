@@ -18,19 +18,19 @@ MonoBehaviour:
         type: 3}
       Count: 1
       Cooldown: 4
-    duration: 10
+    duration: 20
     isHugeWave: 0
   - ZombieGroups:
     - ZombiePrefab: {fileID: 8500170153172678778, guid: 129734b0017024ea789ee46caf397ab4,
         type: 3}
       Count: 1
       Cooldown: 2.5
-    duration: 10
+    duration: 20
     isHugeWave: 1
   - ZombieGroups:
     - ZombiePrefab: {fileID: 8500170153172678778, guid: 129734b0017024ea789ee46caf397ab4,
         type: 3}
       Count: 2
       Cooldown: 3
-    duration: 10
+    duration: 20
     isHugeWave: 1

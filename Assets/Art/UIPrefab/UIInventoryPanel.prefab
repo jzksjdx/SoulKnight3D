@@ -659,6 +659,7 @@ GameObject:
   - component: {fileID: 7931675780445876919}
   - component: {fileID: 7062302037565337182}
   - component: {fileID: 7798694985037913855}
+  - component: {fileID: 8871629323800273098}
   m_Layer: 0
   m_Name: BtnOpenInventory
   m_TagString: Untagged
@@ -770,6 +771,22 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8871629323800273098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778781347441755898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d51f3a7c41ab0346b49ae50d456bece, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MarkType: 0
+  CustomComponentName: BtnOpenInventory
+  CustomComment: 
+  mComponentName: UnityEngine.UI.Button
 --- !u!1 &1052565420993500546
 GameObject:
   m_ObjectHideFlags: 0
@@ -823,6 +840,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Recipes:
   - {fileID: 11400000, guid: b3d8e9413f5a542159c2743dfd391b01, type: 2}
+  - {fileID: 11400000, guid: 2c96f1f3e1bb54114bf0acaeaa8e8906, type: 2}
   CraftingSlots:
   - {fileID: 6351352971042180427}
   - {fileID: 1318800323305172060}
@@ -4889,6 +4907,7 @@ MonoBehaviour:
   - {fileID: 5194356764911193069}
   - {fileID: 4767418768089435876}
   UIHotbarRoot: {fileID: 6935837557747484239}
+  BtnOpenInventory: {fileID: 7798694985037913855}
   BtnAddItem1: {fileID: 1661161144767750200}
   BtnSubitem1: {fileID: 4161876433498506198}
   StoragePanel: {fileID: 8672367583646348631}

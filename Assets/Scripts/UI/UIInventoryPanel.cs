@@ -45,6 +45,18 @@ namespace SoulKnight3D
                     CloseBackpack();
                }
             });
+
+            BtnOpenInventory.onClick.AddListener(() =>
+            {
+                if (StoragePanel.gameObject.activeSelf)
+                {
+                    CloseBackpack();
+                }
+                else
+                {
+                    OpenBackpack();
+                }
+            });
         }
 
         private void OpenBackpack() 

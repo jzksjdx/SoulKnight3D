@@ -18,9 +18,9 @@ namespace SoulKnight3D
             BtnHome.onClick.AddListener(() =>
             {
                 Time.timeScale = 1;
+                UIKit.CloseAllPanel();
                 SceneManager.LoadScene(0);
-                UIKit.ClosePanel<UIGamePanel>();
-                UIKit.ClosePanel<UIMobileControlPanel>();
+                ItemKit.Clear();
             });
 
             BtnResume.onClick.AddListener(() =>
@@ -31,6 +31,9 @@ namespace SoulKnight3D
             BtnRestart.onClick.AddListener(() =>
             {
                 AudioKit.PlaySound("buttonclick");
+                Time.timeScale = 1;
+                UIKit.CloseAllPanel();
+                ItemKit.Clear();
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             });
 

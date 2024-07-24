@@ -7,7 +7,8 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-    public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+    public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler,
+        IPointerExitHandler
     {
         public Image Icon;
         public Text Count;

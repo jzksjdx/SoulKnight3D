@@ -5,13 +5,15 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:4fb53134-3c98-45f9-8ef3-5e81e24267f1
+	// Generate Id:e573dac3-5a16-4592-a10c-db90001cfbff
 	public partial class UIInventoryPanel
 	{
 		public const string Name = "UIInventoryPanel";
 		
 		[SerializeField]
 		public UnityEngine.RectTransform UIHotbarRoot;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnOpenInventory;
 		[SerializeField]
 		public UnityEngine.UI.Button BtnAddItem1;
 		[SerializeField]
@@ -30,6 +32,7 @@ namespace SoulKnight3D
 		protected override void ClearUIComponents()
 		{
 			UIHotbarRoot = null;
+			BtnOpenInventory = null;
 			BtnAddItem1 = null;
 			BtnSubitem1 = null;
 			StoragePanel = null;

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4747911943351174701}
   - component: {fileID: 3182727270601116620}
+  - component: {fileID: 3892528258922910769}
   m_Layer: 3
   m_Name: SunPeashooter
   m_TagString: Player
@@ -60,6 +61,19 @@ MonoBehaviour:
   bulletPrefab: {fileID: 3274414806100878763, guid: eb8d10b2f69844228afd3c1829f93ef7,
     type: 3}
   ShootFeedback: {fileID: 1305253900433612875}
+--- !u!114 &3892528258922910769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437197427452384212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a97b43b0cc327496385ff7025573ad16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SunSpawnChance: 0.2
 --- !u!1 &5042126933167311480
 GameObject:
   m_ObjectHideFlags: 0
@@ -862,6 +876,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0.219
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 2109e8a730afc40fb962356533066e2a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7490c1246aed3404e889ab44b200b554, type: 2}
     - target: {fileID: 919132149155446097, guid: 2109e8a730afc40fb962356533066e2a,
         type: 3}
       propertyPath: m_Name
