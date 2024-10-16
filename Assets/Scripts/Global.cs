@@ -20,6 +20,7 @@ namespace SoulKnight3D
             RegisterSystem(new SaveSystem());
             RegisterSystem(new AudioSystem());
             RegisterSystem(new ControlSystem());
+            RegisterSystem(new LanguageSystem());
         }
     }
 

@@ -19,10 +19,13 @@ namespace SoulKnight3D
             Destroy(gameObject);
         }
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             WeaponData weaponData = WeaponPrefab.GetComponent<Weapon>().Data;
-            Label.SetLabelText(weaponData.NameCN, weaponData.Rarity);
+
+            string WeaponLabelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese ? weaponData.NameCN : weaponData.Name;
+            Label.SetLabelText(WeaponLabelText, weaponData.Rarity);
         }
 
         private void Update()

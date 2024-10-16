@@ -43,19 +43,23 @@ namespace SoulKnight3D
         private PlayerStats _playerStats;
 
         // cinemachine
-        private float lookSensitivity = 5f;
+        private float _lookSensitivity = 1f;
+        private float _lookSensitivityFactor = 5f;
         private float _cinemachineTargetPitch;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
-        private float _jumpTimeout = 0.30f;
+        private float _jumpTimeout = 0.3f;
         private float _fallTimeoutDelta;
-        private float _fallTimeout = 0.15f;
+        private float _fallTimeout = 0.2f;
 
+        // system references
+        ControlSystem _controlSystem;
 
         private void Awake()
         {
             Instance = this;
+            _controlSystem = this.GetSystem<ControlSystem>();
         }
 
         private void OnDestroy()
@@ -74,6 +78,11 @@ namespace SoulKnight3D
             PlayerInputs.Instance.OnJumpPerformed.Register(() =>
             {
                 Jump();
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            _controlSystem.Sensitivity.RegisterWithInitValue((value) =>
+            {
+                _lookSensitivity = 0.1f + value * 0.9f;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             AudioKit.PlaySound("fx_show_up");
@@ -117,20 +126,22 @@ namespace SoulKnight3D
             if (_jumpTimeoutDelta > 0 || !Grounded) { return; }
 
             SelfRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
-            PlayerAnimation.SetAnimatorJump(true);
+            PlayerAnimation.SetAnimatorJump();
             _jumpTimeoutDelta = _jumpTimeout;
+            Grounded = false;
+            PlayerAnimation.SetAnimatorGrounded(Grounded);
         }
 
         private void CameraRotation()
         {
             Vector2 lookVector = PlayerInputs.Instance.GetLookVector();
-            _cinemachineTargetPitch += lookVector.y * lookSensitivity;
+            _cinemachineTargetPitch += lookVector.y * _lookSensitivityFactor * _lookSensitivity;
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             CameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, CameraTarget.transform.rotation.eulerAngles.y, 0f);
             //CameraTarget.transform.Rotate(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
             //transform.Rotate(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
-            SelfRigidbody.AddTorque(new Vector3(0f, lookVector.x * lookSensitivity * LookRotationTorque, 0f));
+            SelfRigidbody.AddTorque(new Vector3(0f, lookVector.x * _lookSensitivityFactor * _lookSensitivity * LookRotationTorque, 0f));
 
             //SelfRigidbody.AddTorque(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
             //transform.Rotate(new Vector3(0f, 20 * Time.deltaTime, 0f));
@@ -145,17 +156,21 @@ namespace SoulKnight3D
                 _jumpTimeoutDelta -= Time.deltaTime;
                 return;
             }
+            if (Mathf.Abs(SelfRigidbody.velocity.y) > 0.1f )
+            {
+                return;
+            }
 
             // set sphere position, with offset
             Vector3 checkPosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
             Ray groundedCheckRay = new Ray(checkPosition, Vector3.down);
-            Grounded = Physics.Raycast(groundedCheckRay, 0.5f, GroundLayers);
+            Grounded = Physics.Raycast(groundedCheckRay, 0.2f, GroundLayers);
             PlayerAnimation.SetAnimatorGrounded(Grounded);
 
             if (Grounded)
             {
-                PlayerAnimation.SetAnimatorJump(false);
+                //PlayerAnimation.SetAnimatorJump(false);
                 PlayerAnimation.SetAnimatorFreeFall(false);
             } else
             {

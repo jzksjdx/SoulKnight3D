@@ -9,13 +9,17 @@ namespace SoulKnight3D
 	public class UIStartMenuPanelData : UIPanelData
 	{
 	}
-	public partial class UIStartMenuPanel : UIPanel
+	public partial class UIStartMenuPanel : UIPanel, IController
 	{
-		protected override void OnInit(IUIData uiData = null)
+		private LanguageSystem _languageSystem;
+
+        protected override void OnInit(IUIData uiData = null)
 		{
 			mData = uiData as UIStartMenuPanelData ?? new UIStartMenuPanelData();
 			// please add init code here
-			StartButton.onClick.AddListener(() =>
+			_languageSystem = this.GetSystem<LanguageSystem>();
+
+            StartButton.onClick.AddListener(() =>
 			{
 				AudioKit.PlaySound("fx_btn_start");
 
@@ -50,9 +54,36 @@ namespace SoulKnight3D
                 AudioKit.PlaySound("fx_btn");
 				Application.Quit();
             });
+
+			BtnSettings.onClick.AddListener(() =>
+			{
+                AudioKit.PlaySound("fx_btn");
+                UIKit.OpenPanel<UISettingsPanel>();
+            });
+
+            UpdateMenuImage();
+			_languageSystem.OnLanguageChanged.Register((currentLanguage) =>
+			{
+				//Debug.Log("Language changed");
+                UpdateMenuImage();
+            }).UnRegisterWhenGameObjectDestroyed(this);
+
 		}
 
-		private IEnumerator DelayedStartGame()
+		private void UpdateMenuImage()
+		{
+			if (MenuImage == null) { return; }
+			if (_languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese)
+			{
+				Debug.Log("Changed to chinese");
+                MenuImage.rotation = Quaternion.Euler(0, 0, 0);
+            } else
+			{
+                MenuImage.rotation = Quaternion.Euler(0, 0, 9);
+            }
+        }
+
+        private IEnumerator DelayedStartGame()
 		{
 			yield return new WaitForSeconds(0.5f);
             CloseSelf();
@@ -75,5 +106,10 @@ namespace SoulKnight3D
 		protected override void OnClose()
 		{
 		}
-	}
+
+        public IArchitecture GetArchitecture()
+        {
+            return Global.Interface;
+        }
+    }
 }

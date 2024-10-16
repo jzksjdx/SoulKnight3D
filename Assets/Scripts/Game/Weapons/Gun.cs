@@ -54,13 +54,14 @@ namespace SoulKnight3D
 		{
 			Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
             newBullet.SelfRigidbody.velocity = direction * BulletSpeed;
+			newBullet.transform.rotation = Quaternion.LookRotation(direction);
 
             ShootFeedback?.PlayFeedbacks();
         }
 
 		public Bullet SpawnBulletFromPool(Vector3 position)
 		{
-			GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)
+            GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)
 				.Position(position);
 			Bullet newBullet = newBulletObj.GetComponent<Bullet>();
             newBullet.InitializeBullet(tag, Data.Damage, GetIsCritHit(), bulletPrefab);

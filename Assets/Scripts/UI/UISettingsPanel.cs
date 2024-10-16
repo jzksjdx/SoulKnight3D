@@ -21,8 +21,10 @@ namespace SoulKnight3D
 			});
 
 			AudioSystem audioSystem = this.GetSystem<AudioSystem>();
+			LanguageSystem languageSystem = this.GetSystem<LanguageSystem>();
+			ControlSystem controlSystem = this.GetSystem<ControlSystem>();
 
-			SliderMusic.value = audioSystem.MusicVolume.Value;
+            SliderMusic.value = audioSystem.MusicVolume.Value;
 			SliderSound.value = audioSystem.SoundVolume.Value;
 
             SliderMusic.onValueChanged.AddListener((value) =>
@@ -33,6 +35,25 @@ namespace SoulKnight3D
             SliderSound.onValueChanged.AddListener((value) =>
             {
                 audioSystem.ChangeSoundVolume(value);
+            });
+
+			SliderSensitivity.value = controlSystem.Sensitivity.Value;
+
+            SliderSensitivity.onValueChanged.AddListener((value) =>
+			{
+				controlSystem.ChangeSensitivity(value);
+            });
+
+			BtnChinese.onClick.AddListener(() =>
+			{
+                AudioKit.PlaySound("fx_btn");
+				languageSystem.SetLanguage(LanguageSystem.Languages.Chinese);
+            });
+
+			BtnEnglish.onClick.AddListener(() =>
+            {
+                AudioKit.PlaySound("fx_btn");
+                languageSystem.SetLanguage(LanguageSystem.Languages.English);
             });
         }
 		

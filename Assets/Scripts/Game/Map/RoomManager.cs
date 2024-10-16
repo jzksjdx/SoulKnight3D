@@ -123,7 +123,8 @@ namespace SoulKnight3D
 
         private IEnumerator WaveWorkFlow()
         {
-            foreach(EnemyWaveGroup waveGroup in _enemyWaves.EnemyWaveGroups)
+            float reducedRadius = _radius * 0.9f;
+            foreach (EnemyWaveGroup waveGroup in _enemyWaves.EnemyWaveGroups)
             {
                 foreach(EnemyWave enemyWave in waveGroup.Waves)
                 {
@@ -134,7 +135,7 @@ namespace SoulKnight3D
                         bool isValidPosition;
                         do
                         {
-                            Vector3 randomOffset = new Vector3(Random.Range(-_radius, _radius), 0.05f, Random.Range(-_radius, _radius));
+                            Vector3 randomOffset = new Vector3(Random.Range(-reducedRadius, reducedRadius), 0.05f, Random.Range(-reducedRadius, reducedRadius));
                             spawnPosition = transform.position + randomOffset;
                             isValidPosition = !Physics.CheckSphere(spawnPosition, 0.5f, _itemLayerMask);
                         }

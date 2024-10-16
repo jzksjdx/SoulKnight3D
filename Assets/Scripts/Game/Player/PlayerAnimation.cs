@@ -44,9 +44,9 @@ namespace SoulKnight3D
            
         }
 
-        public void SetAnimatorJump(bool isJumping)
+        public void SetAnimatorJump()
         {
-            SelfAnimator.SetBool(_animIDJump, isJumping);
+            SelfAnimator.SetTrigger(_animIDJump);
         }
 
         public void SetAnimatorGrounded(bool isGrounded)

@@ -11,12 +11,16 @@ namespace SoulKnight3D
 
         private int _animIdOpen;
 
-        protected virtual void Start()
+        
+
+        protected override void Start()
         {
+            base.Start();
             _animator = GetComponent<Animator>();
             _animIdOpen = Animator.StringToHash("Open");
 
-            Label.SetLabelText("宝箱", WeaponData.WeaponRarity.White);
+            string chestLabelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese ? "宝箱" : "Chest";
+            Label.SetLabelText(chestLabelText, WeaponData.WeaponRarity.White);
         }
 
         public override void Interact()
@@ -25,5 +29,7 @@ namespace SoulKnight3D
             AudioKit.PlaySound("fx_chest_open");
             _animator.SetTrigger(_animIdOpen);
         }
+
+       
     }
 }

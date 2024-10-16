@@ -88,5 +88,5 @@ namespace SoulKnight3D
             _isCritHit = false;
             gameObject.Hide();
         }
-	}
+    }
 }

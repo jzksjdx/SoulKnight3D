@@ -5,17 +5,21 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:fa6d199a-ffdc-48f4-bc5a-18a03bdcd8f3
+	// Generate Id:07a4cbf0-289a-4c1e-9a45-b61575f7c37f
 	public partial class UIStartMenuPanel
 	{
 		public const string Name = "UIStartMenuPanel";
 		
+		[SerializeField]
+		public UnityEngine.RectTransform MenuImage;
 		[SerializeField]
 		public UnityEngine.UI.Button StartButton;
 		[SerializeField]
 		public UnityEngine.UI.Button BtnInstruction;
 		[SerializeField]
 		public UnityEngine.UI.Button BtnQuit;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnSettings;
 		[SerializeField]
 		public UnityEngine.UI.Button CreditButton;
 		[SerializeField]
@@ -27,9 +31,11 @@ namespace SoulKnight3D
 		
 		protected override void ClearUIComponents()
 		{
+			MenuImage = null;
 			StartButton = null;
 			BtnInstruction = null;
 			BtnQuit = null;
+			BtnSettings = null;
 			CreditButton = null;
 			HelpPanel = null;
 			BtnCloseHelp = null;

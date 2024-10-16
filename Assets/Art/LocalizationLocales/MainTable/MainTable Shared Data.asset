@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: MainTable Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: MainTable
+  m_TableCollectionNameGuidString: 17739ebe8814c4f609ed2d6efb6510ad
+  m_Entries:
+  - m_Id: 1091394592768
+    m_Key: ' Start Game'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 65193311723520
+    m_Key: Instructions
+    m_Metadata:
+      m_Items: []
+  - m_Id: 65261825679360
+    m_Key: Quit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 65384106418176
+    m_Key: Test Version
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66840830140416
+    m_Key: Claim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72785408811008
+    m_Key: UIStartMenuPanel/Canvas (Environment)/UIStartMenuPanel/MenuImage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84276581228544
+    m_Key: Move/Jump
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84402527789056
+    m_Key: Aim/Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84620321218560
+    m_Key: Skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84653334585344
+    m_Key: Switch Weapon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84887150256128
+    m_Key: Interact
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84996369932288
+    m_Key: Paue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 85223776706560
+    m_Key: Control Panel Controls
+    m_Metadata:
+      m_Items: []
+  - m_Id: 85425455620096
+    m_Key: Space
+    m_Metadata:
+      m_Items: []
+  - m_Id: 85425631780864
+    m_Key: Control Panel Close
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 7432400960503676952
+  references:
+    version: 2
+    RefIds:
+    - rid: 7432400960503676952
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables,
+        asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1726300414589

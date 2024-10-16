@@ -120,6 +120,14 @@ namespace SoulKnight3D
         private void HidePausePanel()
         {
             AudioKit.PlaySound("fx_btn");
+
+            // close settings panel if opened
+            if (UIKit.GetPanel<UISettingsPanel>())
+            {
+                UIKit.ClosePanel<UISettingsPanel>();
+                return;
+            }
+
             this.GetSystem<ControlSystem>().ToggleCursor(false);
             Time.timeScale = 1;
             PausePanel.Hide();

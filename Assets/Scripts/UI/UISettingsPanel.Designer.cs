@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:2921af6b-c756-440c-9747-bd91a64c4405
+	// Generate Id:5cd0d597-a774-4d05-baef-77786a7da59f
 	public partial class UISettingsPanel
 	{
 		public const string Name = "UISettingsPanel";
@@ -16,6 +16,14 @@ namespace SoulKnight3D
 		public UnityEngine.UI.Slider SliderMusic;
 		[SerializeField]
 		public UnityEngine.UI.Slider SliderSound;
+		[SerializeField]
+		public UnityEngine.UI.Slider SliderSensitivity;
+		[SerializeField]
+		public UnityEngine.UI.Slider Btns;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnChinese;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnEnglish;
 		
 		private UISettingsPanelData mPrivateData = null;
 		
@@ -24,6 +32,10 @@ namespace SoulKnight3D
 			BtnClose = null;
 			SliderMusic = null;
 			SliderSound = null;
+			SliderSensitivity = null;
+			Btns = null;
+			BtnChinese = null;
+			BtnEnglish = null;
 			
 			mData = null;
 		}
