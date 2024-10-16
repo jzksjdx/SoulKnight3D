@@ -36,6 +36,7 @@ namespace SoulKnight3D
                         _cachedItem[craftingSlot.Index] = craftingSlot.Data.Item;
                         if (newItem != null)
                         { // add new one _availableIngredients
+                            Debug.Log("Add new item ingredient");
                             AddToDictionary(newItem.GetIngredientRequirements());
                         }
 
@@ -137,12 +138,33 @@ namespace SoulKnight3D
         {
             foreach (var requirement in recipe.RequiredIngredients)
             {
-                if (!_availableIngredients.ContainsKey(requirement.Ingredient) ||
-                    _availableIngredients[requirement.Ingredient] < requirement.Quantity)
+                bool containsKey = false;
+                WeaponData matchKey = null;
+                foreach(var availableIngredient in _availableIngredients)
+                {
+                    if (availableIngredient.Key.Name == requirement.Ingredient.name)
+                    {
+                        containsKey = true;
+                        matchKey = availableIngredient.Key;
+                        break;
+                    }
+                }
+                if (!containsKey)
                 {
                     return false;
                 }
+                if (_availableIngredients[matchKey] < requirement.Quantity)
+                {
+                    return false;
+                }
+                //if (!_availableIngredients.ContainsKey(requirement.Ingredient) ||
+                //    _availableIngredients[requirement.Ingredient] < requirement.Quantity)
+                //{
+                //    return false;
+                //}
             }
+            
+            Debug.Log("Can craft!");
             return true;
         }
 

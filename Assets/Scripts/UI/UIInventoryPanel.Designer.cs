@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:e573dac3-5a16-4592-a10c-db90001cfbff
+	// Generate Id:c1006b4a-ecd6-4466-ae17-87cd876cf5bd
 	public partial class UIInventoryPanel
 	{
 		public const string Name = "UIInventoryPanel";
