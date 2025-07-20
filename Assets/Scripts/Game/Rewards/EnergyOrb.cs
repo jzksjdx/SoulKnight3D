@@ -32,15 +32,7 @@ namespace SoulKnight3D
             {
                 if (other.gameObject.tag == "Player")
                 {
-                    var stats = PlayerController.Instance.PlayerStats;
-                    if (stats.Energy.Value + Amount >= stats.MaxEnergy)
-                    {
-                        stats.Energy.Value = stats.MaxEnergy;
-                    } else
-                    {
-                        stats.Energy.Value += Amount;
-                    }
-                    
+                    PlayerController.Instance.PlayerStats.RecoverEnergy(Amount);
                     AudioKit.PlaySound("fx_energy");
                     GameObjectsManager.Instance.DespawnEnergyOrb(gameObject);
                     //Destroy(gameObject);

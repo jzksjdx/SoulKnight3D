@@ -93,7 +93,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7392739462163377670}
-  - component: {fileID: 4647136408237748420}
+  - component: {fileID: 2983045913219848456}
   - component: {fileID: 1709326660904849564}
   - component: {fileID: 6095219560726355617}
   m_Layer: 8
@@ -121,7 +121,7 @@ Transform:
   - {fileID: 8001235514648144878}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4647136408237748420
+--- !u!114 &2983045913219848456
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,11 +130,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4505513835707202508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 021b36bfd97844eeb89404adf8b3564e, type: 3}
+  m_Script: {fileID: 11500000, guid: 45799bad7d93e49f09222ab14de068c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   InteractCollider: {fileID: 6095219560726355617}
   Label: {fileID: 1507682831692059557}
+  ChestReward: {fileID: 11400000, guid: 7132b5c60dcc84bcba86f874600ca215, type: 2}
 --- !u!95 &1709326660904849564
 Animator:
   serializedVersion: 5

@@ -24,7 +24,6 @@ namespace SoulKnight3D
             _critChanceCache = startWeapon.InGameData.CritChance;
             startWeapon.OnWeaponFired.Register(() =>
             {
-                Debug.Log("Reset crit " + _critChanceCache);
                 _weaponCache.InGameData.CritChance = _critChanceCache;
             }).AddToUnregisterList(this);
 

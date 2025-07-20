@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ChestRewards:
   - Type: 0
-    Rate: 2
+    Rate: 1
     Items:
     - Item: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
         type: 3}
@@ -22,9 +22,9 @@ MonoBehaviour:
   - Type: 2
     Rate: 1
     Items:
-    - Item: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
+    - Item: {fileID: 1116304796272423276, guid: 282363899df60435abf1d757bdc7d245,
         type: 3}
       Rate: 1
-    - Item: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
+    - Item: {fileID: 2566297622277629398, guid: c321da98143bb45dca9f09f08257bb50,
         type: 3}
       Rate: 1

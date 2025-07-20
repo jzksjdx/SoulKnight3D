@@ -93,7 +93,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7392739462163377670}
-  - component: {fileID: 9222237396370317505}
+  - component: {fileID: 1867173866763578277}
   - component: {fileID: 1709326660904849564}
   - component: {fileID: 6095219560726355617}
   m_Layer: 8
@@ -120,7 +120,7 @@ Transform:
   - {fileID: 8001235514648144878}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9222237396370317505
+--- !u!114 &1867173866763578277
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,34 +129,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4505513835707202508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2dda5299054e4bf09e01679162e68bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 45799bad7d93e49f09222ab14de068c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   InteractCollider: {fileID: 6095219560726355617}
   Label: {fileID: 4300893822555121968}
-  WeaponPool:
-  - {fileID: 4195584256734572376, guid: ff4e1313fd690434f913889dc3a93bc2, type: 3}
-  - {fileID: 5351574803012271382, guid: 5d1c2cb3ad3724f6496a3691417f1ddd, type: 3}
-  - {fileID: 3052236251711250402, guid: 313fc9e17352b48269c6717371567d2e, type: 3}
-  - {fileID: 3052236251711250402, guid: 4d79abed899f34e19bbaebc9c92ac422, type: 3}
-  - {fileID: 4113761817267273222, guid: 7bcbbfe2b82a6487aa4554fae61245a9, type: 3}
-  - {fileID: 7803077075272029618, guid: be5c2a70f0dfd40e2904bfe564f70f84, type: 3}
-  - {fileID: 4259353473263515671, guid: 55c631b8eff0d436b9490852250ce262, type: 3}
-  - {fileID: 9007230301464915775, guid: c30a12d3eb0bf4566b82baf382a562d0, type: 3}
-  - {fileID: 5351574803012271382, guid: 7bf102468ff774adeb91c3a0438ef017, type: 3}
-  - {fileID: 5534597393651219342, guid: 4f491f3fc253c4f80b0a6de8b6205d49, type: 3}
-  - {fileID: 4337086551097017867, guid: 9e15fec5c828e4b5788d44833d3e3db6, type: 3}
-  - {fileID: 4337086551097017867, guid: f3b605527713b48fdbbb718f4d6eacb9, type: 3}
-  - {fileID: 3052236251711250402, guid: 26dc0a9da1b164b969c408d8fa55c250, type: 3}
-  - {fileID: 3438112547324174431, guid: 8ed57e168ba2e4384a876faf65c12182, type: 3}
-  - {fileID: 5198467878857497343, guid: 51ea18e00cd5c436891c48e837969633, type: 3}
-  - {fileID: 4337086551097017867, guid: 08d180d3e4d074ec78cd08669673a069, type: 3}
-  - {fileID: 6493924236389136335, guid: 15d07ea3d7e674cb49522515548d435d, type: 3}
-  - {fileID: 142270184362528395, guid: c22e7b61b7ad34857a33d99f1fcc5f64, type: 3}
-  - {fileID: 3904313527459923930, guid: af76c9c1cf5824ff68158c534c1387f2, type: 3}
-  - {fileID: 8109429839822162422, guid: 5bcdd1b694ff84b03bb7abb7060cf10a, type: 3}
-  - {fileID: 2012942507554850447, guid: 8348b4d34c3e4418eaa912a181894ee4, type: 3}
-  - {fileID: 4233588143159461782, guid: f41a07aa22493467aaee25212d741fac, type: 3}
+  ChestReward: {fileID: 11400000, guid: b017ea30beef94303a85454893722d6a, type: 2}
 --- !u!95 &1709326660904849564
 Animator:
   serializedVersion: 5

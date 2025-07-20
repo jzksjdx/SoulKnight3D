@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using QFramework;
 using SoulKnight3D;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -103,6 +104,29 @@ namespace SoulKnight3D
                     endPanel.UpdateEndTitle(false);
                 }).Start(this);
                 
+            }
+        }
+
+        public void RecoverHealth(int amount)
+        {
+            if (Health.Value + amount >= MaxHealth)
+            {
+                Health.Value = MaxHealth;
+            } else
+            {
+                Health.Value += amount;
+            }
+        }
+
+        public void RecoverEnergy(int amount)
+        {
+            if (Energy.Value + amount >= MaxEnergy)
+            {
+                Energy.Value = MaxEnergy;
+            }
+            else
+            {
+                Energy.Value += amount;
             }
         }
     }
