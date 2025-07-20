@@ -75,6 +75,22 @@ MonoBehaviour:
     m_Key: Control Panel Close
     m_Metadata:
       m_Items: []
+  - m_Id: 111755332512899072
+    m_Key: Choose Character
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761415579099136
+    m_Key: CharacterNameDisplay
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761474941083648
+    m_Key: CharacterName.Knight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761560504885248
+    m_Key: CharacterName.Rouge
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

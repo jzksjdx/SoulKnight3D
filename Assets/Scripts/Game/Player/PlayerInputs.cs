@@ -38,13 +38,6 @@ namespace SoulKnight3D
         private void Start()
         {
             _isMobile = this.GetSystem<ControlSystem>().IsMobile;
-            if (_isMobile)
-            {
-                UIMobileControlPanel.OnJoystickAtkPerformed.Register((isAttacking) =>
-                {
-                    OnAttackPerformed.Trigger(isAttacking);
-                }).UnRegisterWhenGameObjectDestroyed(this);
-            }
         }
 
         private void OnDestroy()

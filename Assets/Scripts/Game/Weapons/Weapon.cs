@@ -8,10 +8,20 @@ namespace SoulKnight3D
     public class Weapon : ViewController 
     {
         public EasyEvent OnWeaponFired = new EasyEvent();
-        public WeaponData Data;
+        [SerializeField] private WeaponData Data;  // game asset
+        [HideInInspector] public WeaponData InGameData;
 
         protected float _cooldownTimeout = 0f;
 
+        private void Awake()
+        {
+            InGameData = Instantiate(Data);
+        }
+
+        protected virtual void Start()
+        {
+
+        }
 
         protected virtual void Update()
         {
@@ -21,9 +31,11 @@ namespace SoulKnight3D
             }
         }
 
-        protected bool GetIsCritHit()
+        public virtual void Attack() { }
+
+        protected virtual bool GetIsCritHit()
         {
-            return Data.CritChance > Random.Range(0, 100);
+            return InGameData.CritChance > Random.Range(0, 100);
         }
     }
 

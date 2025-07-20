@@ -6,13 +6,7 @@ namespace SoulKnight3D
 	public partial class MapGenerator
 	{
 
-		public UnityEngine.GameObject roomGenPrefab;
-
-		public UnityEngine.GameObject roomGatePrefab;
-
-		public UnityEngine.GameObject hallwayGenPrefab;
-
-		public UnityEngine.GameObject roomLightPrefab;
+        
 
 	}
 }

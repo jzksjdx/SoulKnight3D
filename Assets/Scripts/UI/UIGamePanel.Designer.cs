@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:aac3e3e3-1a10-4a30-a223-55f70d8d678e
+	// Generate Id:131083b7-d7a3-4851-a4e2-f561cb8c6889
 	public partial class UIGamePanel
 	{
 		public const string Name = "UIGamePanel";
@@ -38,6 +38,12 @@ namespace SoulKnight3D
 		public UnityEngine.UI.Button PauseButton;
 		[SerializeField]
 		public PausePanel PausePanel;
+		[SerializeField]
+		public UnityEngine.UI.RawImage MinimapRawImage;
+		[SerializeField]
+		public UnityEngine.UI.Text MinimapLevelText;
+		[SerializeField]
+		public UnityEngine.UI.Text LevelFlagText;
 		
 		private UIGamePanelData mPrivateData = null;
 		
@@ -57,6 +63,9 @@ namespace SoulKnight3D
 			BtnInteract = null;
 			PauseButton = null;
 			PausePanel = null;
+			MinimapRawImage = null;
+			MinimapLevelText = null;
+			LevelFlagText = null;
 			
 			mData = null;
 		}

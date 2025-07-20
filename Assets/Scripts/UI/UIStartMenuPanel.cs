@@ -3,6 +3,10 @@ using UnityEngine.UI;
 using QFramework;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Localization.Components;
 
 namespace SoulKnight3D
 {
@@ -13,6 +17,13 @@ namespace SoulKnight3D
 	{
 		private LanguageSystem _languageSystem;
 
+		private int _selectedCharacterIndex = 0;
+		private List<string> _characterNames = new List<string>
+        {
+            "Knight", "Rouge"
+		};
+        [SerializeField] private LocalizeStringEvent _localizedStringEvent;
+
         protected override void OnInit(IUIData uiData = null)
 		{
 			mData = uiData as UIStartMenuPanelData ?? new UIStartMenuPanelData();
@@ -22,8 +33,7 @@ namespace SoulKnight3D
             StartButton.onClick.AddListener(() =>
 			{
 				AudioKit.PlaySound("fx_btn_start");
-
-				StartCoroutine(DelayedStartGame());
+                StartCoroutine(DelayedStartGame());
 			});
 
 			CreditButton.onClick.AddListener(() =>
@@ -68,7 +78,34 @@ namespace SoulKnight3D
                 UpdateMenuImage();
             }).UnRegisterWhenGameObjectDestroyed(this);
 
-		}
+			_selectedCharacterIndex = this.GetSystem<SaveSystem>().LoadInt("Character");
+            SetCharacterName(_characterNames[_selectedCharacterIndex]);
+            BtnSelectCharacterRight.onClick.AddListener(() =>
+			{
+				_selectedCharacterIndex++;
+				if (_selectedCharacterIndex >= _characterNames.Count)
+				{
+					_selectedCharacterIndex = 0;
+                }
+				SetCharacterName(_characterNames[_selectedCharacterIndex]);
+				StartMenuManager.Instance.UpdateSelectedCharacter(_selectedCharacterIndex);
+                this.GetSystem<SaveSystem>().SaveInt("Character", _selectedCharacterIndex);
+                AudioKit.PlaySound("fx_btn");
+            });
+
+            BtnSelectCharacterLeft.onClick.AddListener(() =>
+            {
+                _selectedCharacterIndex--;
+                if (_selectedCharacterIndex < 0)
+                {
+                    _selectedCharacterIndex = _characterNames.Count - 1;
+                }
+                SetCharacterName(_characterNames[_selectedCharacterIndex]);
+                StartMenuManager.Instance.UpdateSelectedCharacter(_selectedCharacterIndex);
+                this.GetSystem<SaveSystem>().SaveInt("Character", _selectedCharacterIndex);
+                AudioKit.PlaySound("fx_btn");
+            });
+        }
 
 		private void UpdateMenuImage()
 		{
@@ -85,13 +122,25 @@ namespace SoulKnight3D
 
         private IEnumerator DelayedStartGame()
 		{
-			yield return new WaitForSeconds(0.5f);
+			UIKit.OpenPanel<UILoadingPanel>();
+            yield return new WaitForSeconds(0.5f);
             CloseSelf();
+			this.GetSystem<SaveSystem>().SaveInt("Level", 1);
             SceneManager.LoadScene(1);
 			yield return null;
         }
-		
-		protected override void OnOpen(IUIData uiData = null)
+
+        public void SetCharacterName(string characterKey)
+        {
+            // Get the localized character name
+            string localizedCharacterName = LocalizationSettings.StringDatabase.GetLocalizedString("MainTable", "CharacterName." + characterKey);
+
+            // Set the argument for the {0} placeholder
+            _localizedStringEvent.StringReference.Arguments = new object[] { localizedCharacterName };
+            _localizedStringEvent.RefreshString();
+        }
+
+        protected override void OnOpen(IUIData uiData = null)
 		{
 		}
 		

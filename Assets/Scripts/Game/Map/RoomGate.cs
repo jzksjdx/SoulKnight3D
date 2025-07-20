@@ -36,6 +36,13 @@ namespace SoulKnight3D
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
+            SelfBoxCollider.OnTriggerEnterEvent((other) =>
+            {
+                if (other.TryGetComponent(out Bullet bullet))
+                {
+                    bullet.DestroyBullet();
+                }
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         private void Update()
@@ -51,7 +58,6 @@ namespace SoulKnight3D
                 {
                     _isClosed = !_isClosed;
                     _isMoving = false;
-                    Debug.Log("IS closed: " + _isClosed);
                 }
             }
         }

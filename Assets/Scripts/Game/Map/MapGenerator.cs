@@ -11,7 +11,17 @@ namespace SoulKnight3D
 	{
         public List<EnemyWaveSO> EnemyWaveSOs = new List<EnemyWaveSO>();
         [SerializeField] private RoomManager RoomManagerPrefab;
+        [SerializeField] private bool _shouldGenerateMap = true;
+
+        [Header("Room Objects")]
         [SerializeField] private GameObject PortalPrefab;
+        [SerializeField] private GameObject roomGenPrefab;
+        [SerializeField] private GameObject roomGatePrefab;
+        [SerializeField] private GameObject hallwayGenPrefab;
+        [SerializeField] private GameObject roomLightPrefab;
+
+        [Header("Minimap")]
+        [SerializeField] private GameObject MinimapTile;
 
         private int[,] map;
         private int gridWidth = 5;
@@ -21,8 +31,9 @@ namespace SoulKnight3D
         // room length * 2
         private float mapScale = 22;
 
-        private Dictionary<int, RoomData> generatedRooms = new Dictionary<int, RoomData>();
-        private List<GameObject> generatedHallways = new List<GameObject>();
+        private Dictionary<int, RoomData> _roomDataDict = new Dictionary<int, RoomData>();
+        private Dictionary<int, RoomManager> _generatedRooms = new Dictionary<int, RoomManager>(); // saves room managers
+        private List<GameObject> _generatedHallways = new List<GameObject>();
 
         private struct RoomData
         {
@@ -44,25 +55,13 @@ namespace SoulKnight3D
         private void Start()
         {
             map = new int[gridHeight, gridWidth];
-            InitializeMap();
-            AddRoom();
-            //PrintMap();
-
-            // TODO: Generate Room Script
-            //Debug.Log(generatedRooms.Count);
-            foreach(var room in generatedRooms)
+            if (_shouldGenerateMap)
             {
-                //Debug.Log("Room #" + room.Key + " has " + room.Value.gates.Count + " gates");
-                var newRoom = Instantiate(RoomManagerPrefab, transform);
-                newRoom
-                    .SetDimension(room.Value.position, mapScale / 4)
-                    .SetGates(room.Value.gates)
-                    .SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)])
-                    .SetKey(room.Key)
-                    .SetRoomType(room.Value.type)
-                    .SetRoomStatus(room.Value.status)
-                    .CompleteSetup();
+                InitializeMap();
+                AddRoom();
+                //PrintMap();
             }
+            UIKit.ClosePanel<UILoadingPanel>();
         }
 
         void InitializeMap()
@@ -78,10 +77,14 @@ namespace SoulKnight3D
             // Start from the middle of the grid
             int startRoom = gridWidth / 2 + gridHeight / 2 * gridWidth;
             map[startRoom / gridWidth, startRoom % gridWidth] = 1; // 1 indicates occupied
-            //Instantiate(roomPrefab, new Vector3(2 * mapScale, 0, 2 * mapScale), roomPrefab.transform.rotation);
+
+            // generate home room
             Vector3 initialRoomPos = new Vector3(2 * mapScale, 0, 2 * mapScale);
-            GenerateRoom(initialRoomPos);
-            generatedRooms.Add(startRoom, new RoomData(initialRoomPos, new List<RoomGate>(), RoomManager.RoomType.Home, RoomManager.RoomStatus.Explored));
+            _roomDataDict.Add(startRoom, new RoomData(initialRoomPos, new List<RoomGate>(), RoomManager.RoomType.Home, RoomManager.RoomStatus.Explored));
+            SetupRoomManager(startRoom);
+            GameObject homeRoom = GenerateRoom(startRoom, initialRoomPos);
+            homeRoom.transform.SetParent(_generatedRooms[startRoom].transform);
+            _generatedRooms[startRoom].InitializeForMinimap();
         }
 
         private void AddRoom()
@@ -90,6 +93,9 @@ namespace SoulKnight3D
             int nextRoomNumber1 = AddRange(nextRoomNumber, 2);
             int nextRoomNumber2 = AddRange(nextRoomNumber1, 2, isReward: true);
             int nextRoomNumber3 = AddRange(nextRoomNumber2, 1, isFinal: true);
+            //int nextRoomNumber3 = AddRange(nextRoomNumber, 1, isFinal: true);
+
+            _generatedRooms[12].PlayerEntersRoom();
         }
 
         public int AddRange(int oldRoomKey, int newRoomCount = 1, bool isReward = false , bool isFinal = false)
@@ -128,6 +134,7 @@ namespace SoulKnight3D
             for (int k = 0; k < range.Count; k++)
             {
                 int newRoomKey = range[k];
+                
                 if (newRoomKey != nextRoomKey)
                 {
                     deadEndKey = newRoomKey;
@@ -137,12 +144,7 @@ namespace SoulKnight3D
 
                 var newRoomWorldPosition = new Vector3(newRoomKey / gridWidth * mapScale, 0, newRoomKey % gridWidth * mapScale);
                 // generate room
-
-                //Instantiate(roomPrefab, roomWorldPosition, roomPrefab.transform.rotation);
                 //Debug.Log("Generated room at: (" + pos / gridWidth + ", " + pos % gridWidth + ")");
-                GenerateRoom(newRoomWorldPosition);
-
-                
                 var hallWayPosition = new Vector3((float)(newRoomKey / gridWidth + oldRoomKey / gridWidth) / 2 * mapScale, 0, (float)(newRoomKey % gridWidth + oldRoomKey % gridWidth) / 2 * mapScale);
                 // generate gate
                 Vector3 oldRoomGatePos;
@@ -181,61 +183,105 @@ namespace SoulKnight3D
                 GameObject oldRoomGate = Instantiate(roomGatePrefab, oldRoomGatePos, rotation1);
                 GameObject newRoomGate = Instantiate(roomGatePrefab, newRoomGatePos, rotation2);
 
-                // generate hall way
-                var hallwayGenObj = Instantiate(hallwayGenPrefab, hallWayPosition, Quaternion.identity);
-                var hallwayGen = hallwayGenObj.GetComponent<RoomGenerator>();
-                hallwayGen.id = 1000 + generatedHallways.Count;
-                EventSystem.instance.SetGridSize(1000 + generatedHallways.Count,
-                    newRoomKey / gridWidth == oldRoomKey / gridWidth ? 3 : 11,
-                    newRoomKey / gridWidth == oldRoomKey / gridWidth ? 11 : 3);
-                EventSystem.instance.SetRoomSeed(1000 + generatedHallways.Count, 0, Random.Range(0, 100000));
+                // asign generated rooms
+                _roomDataDict[oldRoomKey].gates.Add(oldRoomGate.GetComponent<RoomGate>());
+                _roomDataDict.Add(newRoomKey, new RoomData(newRoomWorldPosition, new List<RoomGate>()));
+                _roomDataDict[newRoomKey].gates.Add(newRoomGate.GetComponent<RoomGate>());
+
+                // generate portal or boss
+                if (isFinal)
+                {
+                    var finalRoom = _roomDataDict[newRoomKey];
+                    //finalRoom.status = RoomManager.RoomStatus.Explored;
+                    finalRoom.type = RoomManager.RoomType.Portal;
+                    _roomDataDict[newRoomKey] = finalRoom;
+                    Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
+                }
+                // reward
+                if (isReward && deadEndKey != -99)
+                {
+                    var rewardRoom = _roomDataDict[deadEndKey];
+                    //rewardRoom.status = RoomManager.RoomStatus.Explored;
+                    rewardRoom.type = RoomManager.RoomType.Reward;
+                    _roomDataDict[deadEndKey] = rewardRoom;
+                }
+
+                // setup room manager
+                SetupRoomManager(newRoomKey);
+                GameObject newRoom = GenerateRoom(newRoomKey, newRoomWorldPosition);
+
+                // generate hallway
+                GameObject hallwayGenObj = Instantiate(hallwayGenPrefab, hallWayPosition, Quaternion.identity);
+                RoomGenerator hallwayGen = hallwayGenObj.GetComponent<RoomGenerator>();
+                hallwayGen.id = 1000 + _generatedHallways.Count;
+                bool isHorizontal = newRoomKey / gridWidth == oldRoomKey / gridWidth;
+                EventSystem.instance.SetGridSize(1000 + _generatedHallways.Count,
+                    isHorizontal ? 3 : 11,
+                    isHorizontal ? 11 : 3);
+                EventSystem.instance.SetRoomSeed(1000 + _generatedHallways.Count, 0, Random.Range(0, 100000));
                 hallwayGen.GenerateRoom(hallwayGen.id);
-                generatedHallways.Add(hallwayGenObj);
+                hallwayGen.parent.transform.SetParent(hallwayGenObj.transform);
+                _generatedHallways.Add(hallwayGenObj);
                 hallwayGen.roomCollider.transform.localScale = new Vector3(1, 0.1f, 1);
                 hallwayGen.roomCollider.transform.Translate(Vector3.down * 0.28f);
 
-                // asign generated rooms
-                generatedRooms[oldRoomKey].gates.Add(oldRoomGate.GetComponent<RoomGate>());
+                // generate minimap for hallway
+                GameObject minimapTile = Instantiate(MinimapTile, hallwayGenObj.transform);
+                minimapTile.transform.localScale = isHorizontal ? new Vector3(3, 11, 0) : new Vector3(11, 3, 0);
+                _generatedRooms[newRoomKey].AddHallwayMinimapTile(minimapTile.GetComponent<SpriteRenderer>());
+                _generatedRooms[oldRoomKey].AddHallwayMinimapTile(minimapTile.GetComponent<SpriteRenderer>());
+                _generatedRooms[newRoomKey].InitializeForMinimap();
+                // add connected rooms
+                _generatedRooms[newRoomKey].AddConnectedRoom(_generatedRooms[oldRoomKey]);
+                _generatedRooms[oldRoomKey].AddConnectedRoom(_generatedRooms[newRoomKey]);
+                // set parent for room gates
+                newRoom.transform.SetParent(_generatedRooms[newRoomKey].transform);
+                oldRoomGate.transform.SetParent(_generatedRooms[oldRoomKey].transform);
+                newRoomGate.transform.SetParent(_generatedRooms[newRoomKey].transform);
 
-                generatedRooms.Add(newRoomKey, new RoomData(newRoomWorldPosition, new List<RoomGate>()));
-                generatedRooms[newRoomKey].gates.Add(newRoomGate.GetComponent<RoomGate>());
-
-                if (isFinal)
-                {
-                    // generate portal or boss
-                    var finalRoom = generatedRooms[newRoomKey];
-                    finalRoom.status = RoomManager.RoomStatus.Explored;
-                    finalRoom.type = RoomManager.RoomType.Portal;
-                    generatedRooms[newRoomKey] = finalRoom;
-                    Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
-                }
-            }
-
-            if (isReward && deadEndKey != -99)
-            {
-                var rewardRoom = generatedRooms[deadEndKey];
-                rewardRoom.status = RoomManager.RoomStatus.Explored;
-                rewardRoom.type = RoomManager.RoomType.Reward;
-                generatedRooms[deadEndKey] = rewardRoom;
+                
             }
 
             return nextRoomKey;
         }
 
-        private void GenerateRoom(Vector3 roomWorldPosition)
+        private GameObject GenerateRoom(int roomKey, Vector3 roomWorldPosition)
         {
-            var roomGenObj = Instantiate(roomGenPrefab, roomWorldPosition, Quaternion.identity);
-            var roomGen = roomGenObj.GetComponent<RoomGenerator>();
-            roomGen.id = generatedRooms.Count;
-            EventSystem.instance.SetRoomSeed(generatedRooms.Count, 0, Random.Range(0, 100000));
+            GameObject roomGenObj = Instantiate(roomGenPrefab, roomWorldPosition, Quaternion.identity);
+            RoomGenerator roomGen = roomGenObj.GetComponent<RoomGenerator>();
+            roomGen.id = _roomDataDict.Count;
+            EventSystem.instance.SetRoomSeed(_roomDataDict.Count, 0, Random.Range(0, 100000));
             roomGen.GenerateRoom(roomGen.id);
+            roomGen.parent.transform.SetParent(roomGenObj.transform);
             // adjust room collider
             roomGen.roomCollider.transform.localScale = new Vector3(1, 0.1f, 1);
             roomGen.roomCollider.transform.Translate(Vector3.down * 0.28f);
 
             // generate light
             Vector3 lightPos = new Vector3(roomWorldPosition.x, roomWorldPosition.y + 2.2f, roomWorldPosition.z);
-            Instantiate(roomLightPrefab, lightPos, Quaternion.identity);
+            GameObject light = Instantiate(roomLightPrefab, lightPos, Quaternion.identity);
+            light.transform.SetParent(roomGenObj.transform);
+
+            // generate minimap
+            GameObject minimapTile = Instantiate(MinimapTile, roomGenObj.transform);
+            minimapTile.transform.localScale *= 11;
+            _generatedRooms[roomKey].MinimapTile = minimapTile.GetComponent<SpriteRenderer>();
+
+            return roomGenObj;
+        }
+
+        private void SetupRoomManager(int roomKey)
+        {
+            RoomManager newRoom = Instantiate(RoomManagerPrefab, transform);
+            newRoom
+                .SetDimension(_roomDataDict[roomKey].position, mapScale / 4)
+                .SetGates(_roomDataDict[roomKey].gates)
+                .SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)])
+                .SetKey(roomKey)
+                .SetRoomType(_roomDataDict[roomKey].type)
+                .SetRoomStatus(_roomDataDict[roomKey].status)
+                .CompleteSetup();
+            _generatedRooms.Add(roomKey, newRoom);
         }
 
         private void PrintMap()

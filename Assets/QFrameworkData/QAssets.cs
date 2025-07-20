@@ -14,6 +14,10 @@ namespace QAssetBundle
     public class Audio
     {
         public const string BundleName = "audio";
+        public const string FX_BLOWPIPE = "fx_blowpipe";
+        public const string FX_BOSS1_ATK3 = "fx_boss1_atk3";
+        public const string FX_BOW_DRAW = "fx_bow_draw";
+        public const string FX_BOW_SHOOT = "fx_bow_shoot";
         public const string FX_BOX_HIT = "fx_box_hit";
         public const string FX_BTN = "fx_btn";
         public const string FX_BTN_LEVELUP = "fx_btn_levelup";
@@ -23,6 +27,8 @@ namespace QAssetBundle
         public const string FX_COIN = "fx_coin";
         public const string FX_DOOR = "fx_door";
         public const string FX_ENERGY = "fx_energy";
+        public const string FX_EXPLODE_BIG = "fx_explode_big";
+        public const string FX_EXPLODE_SMALL = "fx_explode_small";
         public const string FX_GUN_1 = "fx_gun_1";
         public const string FX_GUN_2 = "fx_gun_2";
         public const string FX_GUN_3 = "fx_gun_3";
@@ -31,6 +37,7 @@ namespace QAssetBundle
         public const string FX_GUN_6 = "fx_gun_6";
         public const string FX_GUN_7 = "fx_gun_7";
         public const string FX_GUN_8 = "fx_gun_8";
+        public const string FX_GUN_ROCKET = "fx_gun_rocket";
         public const string FX_HIT = "fx_hit";
         public const string FX_HIT_P1 = "fx_hit_p1";
         public const string FX_SHOOT_E1 = "fx_shoot_e1";
@@ -45,10 +52,25 @@ namespace QAssetBundle
         public const string BGM_1LOW = "bgm_1Low";
         public const string BGM_ROOM = "bgm_room";
     }
+    public class Common
+    {
+        public const string BundleName = "common";
+        public const string LIGHT = "light";
+    }
+    public class Uiendpanel_prefab
+    {
+        public const string BundleName = "uiendpanel_prefab";
+        public const string UIENDPANEL = "UIEndPanel";
+    }
     public class Uigamepanel_prefab
     {
         public const string BundleName = "uigamepanel_prefab";
         public const string UIGAMEPANEL = "UIGamePanel";
+    }
+    public class Uiloadingpanel_prefab
+    {
+        public const string BundleName = "uiloadingpanel_prefab";
+        public const string UILOADINGPANEL = "UILoadingPanel";
     }
     public class Uimobilecontrolpanel_prefab
     {

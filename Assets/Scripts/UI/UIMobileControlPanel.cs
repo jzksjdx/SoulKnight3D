@@ -12,7 +12,7 @@ namespace SoulKnight3D
 		private Animator _joystickAtkAnimator;
 		private int _animIdInteract;
 		private bool _canInteract = false;
-		public static EasyEvent<bool> OnJoystickAtkPerformed = new EasyEvent<bool>();
+		private bool _isJoystickRightPressed = false;
 
 		protected override void OnInit(IUIData uiData = null)
 		{
@@ -29,6 +29,8 @@ namespace SoulKnight3D
 
             JoystickRight.OnJoystickRightPressed.Register((isPressed) =>
             {
+				if (isPressed == _isJoystickRightPressed) { return; }
+				_isJoystickRightPressed = isPressed;
                 if (Time.timeScale == 0) { return; }
 				if (_canInteract)
 				{
@@ -39,27 +41,10 @@ namespace SoulKnight3D
 					return;
 				}
 
-				OnJoystickAtkPerformed.Trigger(isPressed);
+                PlayerInputs.Instance.OnAttackPerformed.Trigger(isPressed);
             }).UnRegisterWhenGameObjectDestroyed(this);
 
-            PlayerController.Instance.PlayerAttack.OnInteractiveItemChanged.Register((interactiveItem) =>
-            {
-                
-                if (interactiveItem)
-                {
-					_joystickAtkAnimator.SetBool(_animIdInteract, true);
-					_canInteract = true;
-                    //BtnInteract.Show();
-                }
-                else
-                {
-                    _joystickAtkAnimator.SetBool(_animIdInteract, false);
-                    _canInteract = false;
-                    //BtnInteract.Hide();
-                }
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
-
-
+			
         }
 		
 		protected override void OnOpen(IUIData uiData = null)
@@ -68,7 +53,23 @@ namespace SoulKnight3D
 		
 		protected override void OnShow()
 		{
-		}
+            PlayerController.Instance.PlayerAttack.OnInteractiveItemChanged.Register((interactiveItem) =>
+            {
+
+                if (interactiveItem)
+                {
+                    _joystickAtkAnimator.SetBool(_animIdInteract, true);
+                    _canInteract = true;
+                    //BtnInteract.Show();
+                }
+                else
+                {
+                    _joystickAtkAnimator.SetBool(_animIdInteract, false);
+                    _canInteract = false;
+                    //BtnInteract.Hide();
+                }
+            }).UnRegisterWhenCurrentSceneUnloaded();
+        }
 		
 		protected override void OnHide()
 		{

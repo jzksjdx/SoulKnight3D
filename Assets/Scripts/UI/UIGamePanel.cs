@@ -10,6 +10,7 @@ namespace SoulKnight3D
 	}
 	public partial class UIGamePanel : UIPanel, IController
 	{
+        
 		protected override void OnInit(IUIData uiData = null)
 		{
 			mData = uiData as UIGamePanelData ?? new UIGamePanelData();
@@ -92,7 +93,7 @@ namespace SoulKnight3D
 				{
                     HidePausePanel();
                 }
-			});
+			}).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             // Button Weapon
             BtnWeapon.onClick.AddListener(() =>
@@ -101,26 +102,24 @@ namespace SoulKnight3D
                 PlayerInputs.Instance.OnSwitchPerformed.Trigger();
             });
 
-            PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData) =>
+            PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData, _) =>
             {
-                Debug.Log("UIGamePanelData: " + weaponData.name);
                 WeaponSprite.sprite = weaponData.Sprite;
                 EnergyCostText.text = weaponData.EnergyCost.ToString();
             }).UnRegisterWhenGameObjectDestroyed(this);
+            
         }
 
 		private void ShowPausePanel()
 		{
             AudioKit.PlaySound("fx_btn");
-            this.GetSystem<ControlSystem>().ToggleCursor(true);
-            Time.timeScale = 0;
+            GameController.Instance.ToggleGameFreeze(true);
             PausePanel.Show();
         }
 
         private void HidePausePanel()
         {
             AudioKit.PlaySound("fx_btn");
-
             // close settings panel if opened
             if (UIKit.GetPanel<UISettingsPanel>())
             {
@@ -128,9 +127,14 @@ namespace SoulKnight3D
                 return;
             }
 
-            this.GetSystem<ControlSystem>().ToggleCursor(false);
-            Time.timeScale = 1;
+            GameController.Instance.ToggleGameFreeze(false);
             PausePanel.Hide();
+        }
+
+        public void UpdateUiLevelTexts(int level)
+        {
+            LevelFlagText.text = "1-" + level.ToString();
+            MinimapLevelText.text = "1-" + level.ToString();
         }
 
         protected override void OnOpen(IUIData uiData = null)

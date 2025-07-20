@@ -7,24 +7,26 @@ namespace SoulKnight3D {
     public class PlayerAttack : MonoBehaviour
     {
         public List<GameObject> Weapons;
-        public Transform WeaponPoint;
+        public Transform WeaponPoint, LeftWeaponPoint;
         public Transform target;
         public Skill Skill;
         private PlayerStats _playerStats;
         public PlayerAnimation PlayerAnimation;
         public LayerMask AimLayer;
+        public PlayerChargeBar ChargeBar;
 
         private int _currentWeaponIndex = 0;
-        private Gun _currentWeapon;
+        private Weapon _currentWeapon;
 
         private bool _isAttacking = false;
 
         private float _interactDistance = 2f;
         private InteractiveItem _interactiveItem;
 
+        public bool DisableAttack = false;
 
         public EasyEvent<InteractiveItem> OnInteractiveItemChanged = new EasyEvent<InteractiveItem>();
-        public EasyEvent<WeaponData> OnWeaponSwitched = new EasyEvent<WeaponData>();
+        public EasyEvent<WeaponData, GameObject> OnWeaponSwitched = new EasyEvent<WeaponData, GameObject>();
 
         void Start()
         {
@@ -46,12 +48,7 @@ namespace SoulKnight3D {
                 Interact();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-            // for knight only
-
-            Skill.OnKnightSkillActivated.Register((category) =>
-            {
-                PlayerAnimation.SwitchWeaponAnimation(category);
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+           
         }
 
         // Update is called once per frame
@@ -73,7 +70,7 @@ namespace SoulKnight3D {
             }
 
             // raycast for interaction
-            if (Physics.Raycast(ray, out RaycastHit interactableHit, _interactDistance))
+            if (Physics.Raycast(ray, out RaycastHit interactableHit, _interactDistance, AimLayer))
             {
                 if (interactableHit.transform.TryGetComponent(out InteractiveItem interactiveItem))
                 {
@@ -107,8 +104,9 @@ namespace SoulKnight3D {
 
         private void Attack()
         {
+            if (DisableAttack) { return; }
             if (_currentWeapon == null) { return; }
-            if (_currentWeapon.Data.EnergyCost > _playerStats.Energy.Value) { return; }
+            if (_currentWeapon.InGameData.EnergyCost > _playerStats.Energy.Value) { return; }
             _currentWeapon.Attack();
         }
 
@@ -122,8 +120,22 @@ namespace SoulKnight3D {
 
         public void TakeNewWeapon(GameObject newWeapon)
         {
+            if (Weapons.Count >= 2)
+            {
+                DropCurrentWeapon();
+            }
             Weapons.Add(newWeapon);
             SwitchWeapon();
+        }
+
+        public void DropCurrentWeapon()
+        {
+            GameObject oldWeapon = Weapons[_currentWeaponIndex];
+            Weapons.Remove(Weapons[_currentWeaponIndex]);
+            GameObject droppedWeapon = Instantiate(_currentWeapon.InGameData.PickUpPrefab, WeaponPoint.position, Quaternion.identity);
+            droppedWeapon.GetComponent<PickupWeapon>().SelfRigidBody.AddForce(transform.forward * 3f, ForceMode.Impulse);
+            _currentWeapon = null;
+            Destroy(oldWeapon);
         }
 
         public void SwitchWeapon()
@@ -134,14 +146,19 @@ namespace SoulKnight3D {
                 // handle no weapon / game start
                 if (_currentWeapon == null)
                 {
-                    _currentWeapon = Weapons[0].GetComponent<Gun>();
-                    PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
+                    _currentWeapon = Weapons[0].GetComponent<Weapon>();
+                    PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
                     _currentWeapon.OnWeaponFired.Register(() =>
                     {
-                        _playerStats.Energy.Value -= _currentWeapon.Data.EnergyCost;
+                        _playerStats.Energy.Value -= _currentWeapon.InGameData.EnergyCost;
                     }).UnRegisterWhenDisabled(_currentWeapon);
-                    Skill.OnSwitchRightHandWeapon(Weapons[_currentWeaponIndex]);
-                    OnWeaponSwitched.Trigger(_currentWeapon.Data);
+                    OnWeaponSwitched.Trigger(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
+
+                    if (Skill.TryGetComponent(out DualWield skill))
+                    {
+                        skill.HandleRightHandWeaponChange(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
+                    }
+                    
                 }
                 return;
             }
@@ -163,31 +180,71 @@ namespace SoulKnight3D {
             Weapon mWeapon = Weapons[_currentWeaponIndex].GetComponent<Weapon>();
             mWeapon.OnWeaponFired.Register(() =>
             {
-                _playerStats.Energy.Value -= mWeapon.Data.EnergyCost;
+                _playerStats.Energy.Value -= mWeapon.InGameData.EnergyCost;
             }).UnRegisterWhenDisabled(mWeapon);
 
-            _currentWeapon = Weapons[_currentWeaponIndex].GetComponent<Gun>();
+            _currentWeapon = Weapons[_currentWeaponIndex].GetComponent<Weapon>();
 
-            if (Skill.IsUsingSkill)
+            if (Skill.IsUsingSkill == false)
             {
-                PlayerAnimation.SwitchWeaponAnimation(WeaponData.WeaponCategory.DoubleGun);
+                PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
             }
-            else
-            {
-                PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.Data.Category);
-            }
-
 
             AudioKit.PlaySound("fx_switch");
 
-            if (Skill)
-            {
-                Skill.OnSwitchRightHandWeapon(Weapons[_currentWeaponIndex]);
-            }
-
-            OnWeaponSwitched.Trigger(_currentWeapon.Data);
+            OnWeaponSwitched.Trigger(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
         }
 
+        public Weapon GetCurrentWeapon()
+        {
+            return _currentWeapon;
+        }
+
+        public void AllowChargeWeaponToShoot()
+        {
+            if (_currentWeapon.TryGetComponent(out ChargeWeapon chargeWeapon))
+            {
+                chargeWeapon.AllowShoot();
+            }
+        }
+
+        public void SetChargeBarProgress(float progress)
+        {
+            if (progress == 0f)
+            {
+                ChargeBar.ResetChargeBar();
+                return;
+            }
+            ChargeBar.UpdateChargeBar(progress);
+        }
+
+        public void ToggleChargeBar(bool isShown)
+        {
+            ChargeBar.gameObject.SetActive(isShown);
+        }
+
+        public void HandleMeleeWeaponAttack()
+        {
+            if (_currentWeapon.TryGetComponent(out Sword sword))
+            {
+                sword.AttackFromAniamtion();
+            }
+        }
+
+        public void ToggleBareHandAttack(bool isBareHand)
+        {
+            if (isBareHand)
+            {
+                Weapons[_currentWeaponIndex].Hide();
+            } else
+            {
+                Weapons[_currentWeaponIndex].Show();
+                _currentWeapon.OnWeaponFired.Register(() =>
+                {
+                    _playerStats.Energy.Value -= _currentWeapon.InGameData.EnergyCost;
+                }).UnRegisterWhenDisabled(_currentWeapon);
+            }
+        }
     }
 }
 

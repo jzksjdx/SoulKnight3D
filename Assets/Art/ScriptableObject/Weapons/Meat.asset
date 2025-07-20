@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Meat
+  m_EditorClassIdentifier: 
+  Name: Meat
+  NameCN: "\u8089"
+  Sprite: {fileID: 21300000, guid: 331d25b769160514bbe4582a6cae4c77, type: 2}
+  Category: 8
+  Rarity: 1
+  Animation: 3
+  Damage: 5
+  EnergyCost: 0
+  CritChance: -20
+  Inaccuracy: 0
+  Price: 20
+  Cooldown: 0.25
+  WeaponPrefab: {fileID: 2367835771377574563, guid: 798ef99013d404598b858e20e16fd58a,
+    type: 3}
+  PickUpPrefab: {fileID: 4337086551097017867, guid: f3b605527713b48fdbbb718f4d6eacb9,
+    type: 3}

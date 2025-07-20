@@ -15,7 +15,7 @@ namespace SoulKnight3D
         public BindableProperty<int> Armor = new BindableProperty<int>(5);
         public BindableProperty<int> Energy = new BindableProperty<int>(200);
 
-        public bool _isInvincible = false;
+        public bool IsInvincible = false;
 
         private PlayerAnimation _playerAnimation;
         // timeout deltatime
@@ -61,13 +61,13 @@ namespace SoulKnight3D
             }
 
             // invinciblility cooldown
-            if (_isInvincible)
+            if (IsInvincible)
             {
                 _invincibleTimeoutDelta -= Time.deltaTime;
                 if (_invincibleTimeoutDelta <= 0f)
                 {
                     _invincibleTimeoutDelta = _invincibleTimeout;
-                    _isInvincible = false;
+                    IsInvincible = false;
                 }
             }
         }
@@ -75,8 +75,8 @@ namespace SoulKnight3D
         public override void ApplyDamage(int damage)
         {
             if (IsDead) { return; }
-            if (_isInvincible) { return; }
-            _isInvincible = true;
+            if (IsInvincible) { return; }
+            IsInvincible = true;
             if (Armor.Value >= damage)
             {
                 Armor.Value -= damage;
@@ -96,11 +96,11 @@ namespace SoulKnight3D
             {
                 _playerAnimation.SetAnimationDie();
 
-                ActionKit.Delay(1f, () =>
+                ActionKit.Delay(3f, () =>
                 {
-                    SceneManager.LoadScene(0);
-                    UIKit.ClosePanel<UIGamePanel>();
-                    UIKit.ClosePanel<UIMobileControlPanel>();
+                    GameController.Instance.ToggleGameFreeze(true);
+                    UIEndPanel endPanel = UIKit.OpenPanel<UIEndPanel>();
+                    endPanel.UpdateEndTitle(false);
                 }).Start(this);
                 
             }

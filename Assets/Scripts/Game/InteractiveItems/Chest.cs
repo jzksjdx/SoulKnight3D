@@ -11,8 +11,6 @@ namespace SoulKnight3D
 
         private int _animIdOpen;
 
-        
-
         protected override void Start()
         {
             base.Start();

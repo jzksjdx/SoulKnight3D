@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47b95ac5f44fc45688943b46a6e66f1a, type: 3}
+  m_Name: Bow
+  m_EditorClassIdentifier: 
+  Name: Bow
+  NameCN: "\u5F13"
+  Sprite: {fileID: 21300000, guid: 4da5a1bb0b5c8ec4498deab03c013fed, type: 2}
+  Category: 6
+  Rarity: 0
+  Animation: 4
+  Damage: 4
+  EnergyCost: 2
+  CritChance: 0
+  Inaccuracy: 0
+  Price: 10
+  Cooldown: 0
+  WeaponPrefab: {fileID: 437197427452384212, guid: 15f490822d5814abfae117b863661e69,
+    type: 3}
+  PickUpPrefab: {fileID: 7803077075272029618, guid: be5c2a70f0dfd40e2904bfe564f70f84,
+    type: 3}
+  MaxDamage: 8
+  MaxCritChance: 50
+  ChargeTime: 0.6

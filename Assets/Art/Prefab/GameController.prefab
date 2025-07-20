@@ -1,5 +1,96 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &198439125550521558
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3144556989304253482}
+  - component: {fileID: 6218586280659333557}
+  - component: {fileID: 7055973249074018466}
+  m_Layer: 0
+  m_Name: MapGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3144556989304253482
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198439125550521558}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3.370345, y: -2.263177, z: -8.985767}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1528247580141134349}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6218586280659333557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198439125550521558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7783aca1d4c814f3d80d5e1b493e969a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Namespace: SoulKnight3D
+  ScriptName: MapGenerator
+  ScriptsFolder: Assets/Scripts/Game/Map
+  GeneratePrefab: 0
+  PrefabFolder: Assets/Art/Prefab
+  ArchitectureFullTypeName: 
+  ViewControllerFullTypeName: 
+  EnemyWaveSOs: []
+  RoomManagerPrefab: {fileID: 8739863374466118545, guid: 109cf7629f80f4367b30bd57db2fed9c,
+    type: 3}
+  _shouldGenerateMap: 1
+  PortalPrefab: {fileID: 2694056907898403194, guid: a900f0f4337974a0794f66c6511d1997,
+    type: 3}
+  roomGenPrefab: {fileID: 557731140853129520, guid: 8cbdca1fca12a4f1ca628a0db28caed9,
+    type: 3}
+  roomGatePrefab: {fileID: 1066074783329785337, guid: bac39933270b348ed8a912299e4b1dbe,
+    type: 3}
+  hallwayGenPrefab: {fileID: 838859062099886301, guid: 89efc96e7ef3a4a5a97583e64c4a3466,
+    type: 3}
+  roomLightPrefab: {fileID: 2632798700195175932, guid: 867f00b1dcdf5490bb550517b0233f90,
+    type: 3}
+  MinimapTile: {fileID: 8525094105139994070, guid: 1d6829a2d22f6487f93cfaf6650db9f7,
+    type: 3}
+--- !u!114 &7055973249074018466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198439125550521558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411e729afed24c62a04e2b99d9122e78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Binds:
+  - MemberName: roomGenPrefab
+    Object: {fileID: 557731140853129520, guid: 8cbdca1fca12a4f1ca628a0db28caed9, type: 3}
+  - MemberName: roomGatePrefab
+    Object: {fileID: 1066074783329785337, guid: bac39933270b348ed8a912299e4b1dbe,
+      type: 3}
+  - MemberName: hallwayGenPrefab
+    Object: {fileID: 838859062099886301, guid: 89efc96e7ef3a4a5a97583e64c4a3466, type: 3}
+  - MemberName: roomLightPrefab
+    Object: {fileID: 2632798700195175932, guid: 867f00b1dcdf5490bb550517b0233f90,
+      type: 3}
 --- !u!1 &301929704116701343
 GameObject:
   m_ObjectHideFlags: 0
@@ -1407,8 +1498,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1528247580141134349}
-  - component: {fileID: 701900090864758069}
   - component: {fileID: 5885457226048909784}
+  - component: {fileID: 205227339901095598}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -1429,6 +1520,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3144556989304253482}
   - {fileID: 7233977710217450819}
   - {fileID: 5872801760559588989}
   - {fileID: 6022657206641458928}
@@ -1437,29 +1529,6 @@ Transform:
   - {fileID: 9086463874561173092}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &701900090864758069
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8010550444527742756}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 411e729afed24c62a04e2b99d9122e78, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Binds:
-  - MemberName: MMSoundManager
-    Object: {fileID: 6025450636858251264}
-  - MemberName: DamageNumber
-    Object: {fileID: 2252590890647906196}
-  - MemberName: FloatingTextPos
-    Object: {fileID: 2411596705273367731}
-  - MemberName: CritNumber
-    Object: {fileID: 1384228559328073463}
-  - MemberName: CritText
-    Object: {fileID: 8859015897876221205}
 --- !u!114 &5885457226048909784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1479,11 +1548,30 @@ MonoBehaviour:
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: SoulKnight3D.Global
   ViewControllerFullTypeName: 
+  PlayerPrefabs:
+  - {fileID: 8267456861666583796, guid: bb054c2ba2ace45719b555aba06584d3, type: 3}
+  - {fileID: 149824396902921431, guid: 1a62ffbeab6a6467991891b8fd83005a, type: 3}
+  GameFloor: {fileID: 11400000, guid: 247aa78eae2574197a14170d475d212e, type: 2}
+  MapGenerator: {fileID: 6218586280659333557}
+  Level: 1
   MMSoundManager: {fileID: 6025450636858251264}
   DamageNumber: {fileID: 2252590890647906196}
   FloatingTextPos: {fileID: 2411596705273367731}
   CritNumber: {fileID: 1384228559328073463}
   CritText: {fileID: 8859015897876221205}
+--- !u!114 &205227339901095598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8010550444527742756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 640d6c2e990524b28aabdf6b914a94be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MinimapTexture: {fileID: 8400000, guid: d9618055f197d497d9fef5e9c273ee07, type: 2}
 --- !u!1 &8865055308894078205
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,166 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &516839012681498140
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 380260089859614538, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 4259353473263515671, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_Name
+      value: Pickup Pirate Saber
+      objectReference: {fileID: 0}
+    - target: {fileID: 4801436569433358298, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: WeaponData
+      value: 
+      objectReference: {fileID: 11400000, guid: eb3093520f1294413b14b5bf550b5583,
+        type: 2}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813095144418236210, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 8964482448519308540, guid: 55c631b8eff0d436b9490852250ce262, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3657953988036446647, guid: 55c631b8eff0d436b9490852250ce262,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6520242865504654882}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 55c631b8eff0d436b9490852250ce262, type: 3}
+--- !u!4 &3886474066748733355 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3657953988036446647, guid: 55c631b8eff0d436b9490852250ce262,
+    type: 3}
+  m_PrefabInstance: {fileID: 516839012681498140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6770659744820720073
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3886474066748733355}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: aa6c8ec29b4e245999c92178d2226fbb,
+        type: 3}
+      propertyPath: m_Name
+      value: Pirate Saber
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aa6c8ec29b4e245999c92178d2226fbb, type: 3}
+--- !u!4 &6520242865504654882 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: aa6c8ec29b4e245999c92178d2226fbb,
+    type: 3}
+  m_PrefabInstance: {fileID: 6770659744820720073}
+  m_PrefabAsset: {fileID: 0}

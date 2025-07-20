@@ -17,9 +17,6 @@ namespace SoulKnight3D
         public float JumpForce = 5f;
         public float LookRotationTorque = 1f;
 
-        //public float Gravity = -15f;
-
-        
         [Header("Player Grounded")]
         [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
         public bool Grounded = true;
@@ -40,6 +37,7 @@ namespace SoulKnight3D
         [Tooltip("How far in degrees can you move the camera down")]
         public float BottomClamp = -30.0f;
 
+        public MinimapCam MinimapCam;
         private PlayerStats _playerStats;
 
         // cinemachine
@@ -60,6 +58,7 @@ namespace SoulKnight3D
         {
             Instance = this;
             _controlSystem = this.GetSystem<ControlSystem>();
+            DontDestroyOnLoad(gameObject);
         }
 
         private void OnDestroy()
@@ -217,12 +216,4 @@ namespace SoulKnight3D
             return Global.Interface;
         }
     }
-}
-
-
-public static class WeaponAnimationOffsets
-{
-    public static Vector3 Pistol = new Vector3(21.8f, 18f, 0);
-    public static Vector3 Rifle = new Vector3(21.8f, 46.5f, 0);
-    public static Vector3 DoubleGun = new Vector3(21.8f, 18f, 0);
 }

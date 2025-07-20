@@ -202,6 +202,7 @@ MonoBehaviour:
     decorSeed: 32438
     isExpanded: 1
   tileSize: 1
+  roomCollider: {fileID: 0}
   roofs: []
   floors:
   - prefab: {fileID: 8882883675912095528, guid: ad57a30edf352405092cbb1b60da09b5,

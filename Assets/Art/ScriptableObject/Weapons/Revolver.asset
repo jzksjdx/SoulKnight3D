@@ -17,9 +17,14 @@ MonoBehaviour:
   Sprite: {fileID: 21300000, guid: 9d2c972576c2b404ca497329eebb26c0, type: 2}
   Category: 0
   Rarity: 0
+  Animation: 0
   Damage: 8
   EnergyCost: 3
   CritChance: 5
   Inaccuracy: 3
   Price: 15
   Cooldown: 1
+  WeaponPrefab: {fileID: 437197427452384212, guid: 5035b4ae2bd16425db8d12648345b466,
+    type: 3}
+  PickUpPrefab: {fileID: 6493924236389136335, guid: 15d07ea3d7e674cb49522515548d435d,
+    type: 3}

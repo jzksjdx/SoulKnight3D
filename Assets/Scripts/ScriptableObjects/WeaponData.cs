@@ -12,6 +12,7 @@ namespace SoulKnight3D
         public Sprite Sprite;
         public WeaponCategory Category;
         public WeaponRarity Rarity;
+        public WeaponAnimation Animation;
         public int Damage;
         public int EnergyCost;
         public int CritChance;
@@ -19,9 +20,17 @@ namespace SoulKnight3D
         public int Price;
         public float Cooldown;
 
+        public GameObject WeaponPrefab;
+        public GameObject PickUpPrefab;
+
         public enum WeaponCategory
         {
-            Pistol, Rifle, Shotgun, DoubleGun, Rocket, Lazer, Bow, Melee
+            Pistol, Rifle, Shotgun, DoubleGun, Launcher, Lazer, Bow, Melee, Miscellaneous
+        }
+
+        public enum WeaponAnimation
+        {
+            Pistol, Rifle, DoubleGun, Melee, Bow, Launcher
         }
 
         public enum WeaponRarity

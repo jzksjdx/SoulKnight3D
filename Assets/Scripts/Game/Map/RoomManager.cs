@@ -9,18 +9,32 @@ namespace SoulKnight3D
     {
         [SerializeField] private List<GameObject> _roomItemPresets;
         [SerializeField] private LayerMask _itemLayerMask;
-        [SerializeField] private List<RoomGate> _gates;
+        private List<RoomGate> _gates;
         private EnemyWaveSO _enemyWaves;
 
+        [Header("Minimap")]
+        [SerializeField] private SpriteRenderer _roomIcon;
+        [SerializeField] private Sprite IconHome, IconChest, IconSpecial, IconBoss, IconProtal;
+        [HideInInspector] public SpriteRenderer MinimapTile;
+        [HideInInspector] public List<SpriteRenderer> HallwayMinimapTiles = new List<SpriteRenderer>();
+        [HideInInspector] public List<RoomManager> ConnectedRooms = new List<RoomManager>();
+        private Color _unexploredColor = Color.clear; // room not connected not entered
+        private Color _detectedColor = new Color(0.3f, 0.3f, 0.3f, 0.78f); // room connected but not entered
+        private Color _exploredColor = new Color(1f, 1f, 1f, 0.78f); // room entereds
+        public Transform IconTransform;
+        private PlayerController _player;
+
+        [Header("Room Parameters")]
         // room index from map generator
-        [SerializeField] private int _key;
+        private int _key;
 
         // distance from room center to gate
         private float _radius;
 
-        [SerializeField] private RoomType _roomType = RoomType.Battle;
-        [SerializeField] private RoomStatus _status = RoomStatus.Unexplored;
+        public RoomType Type = RoomType.Battle;
+        public RoomStatus Status = RoomStatus.Unexplored;
 
+        [Header("Chest Prefabs")]
         public GameObject WhiteChest;
         public GameObject DungeonChest;
 
@@ -40,7 +54,14 @@ namespace SoulKnight3D
 
         private void Start()
         {
+            IconTransform = _roomIcon.transform;
+            _player = PlayerController.Instance;
+        }
 
+        private void Update()
+        {
+            if (_roomIcon.sprite == null) { return; }
+            IconTransform.rotation = Quaternion.Euler(90f, _player.transform.eulerAngles.y, 0f);
         }
 
         public RoomManager SetDimension(Vector3 position, float radius)
@@ -70,31 +91,76 @@ namespace SoulKnight3D
 
         public RoomManager SetRoomType(RoomType type)
         {
-            _roomType = type;
+            Type = type;
             if (type == RoomType.Reward)
             {
                 GameObject newReward = Instantiate(DungeonChest, transform.position, Quaternion.identity);
                 newReward.transform.Translate(new Vector3(0, 0.043f, 0));
+                _roomIcon.sprite = IconChest;
+            }
+            else if (type == RoomType.Boss)
+            {
+                _roomIcon.sprite = IconBoss;
+            }
+            else if (type == RoomType.Home)
+            {
+                _roomIcon.sprite = IconHome;
+            }
+            else if (type == RoomType.Portal)
+            {
+                _roomIcon.sprite = IconProtal;
             }
             return this;
         }
 
         public RoomManager SetRoomStatus(RoomStatus status)
         {
-            _status = status;
+            Status = status;
             return this;
+        }
+
+        // set minimap tiles
+        public void AddHallwayMinimapTile(SpriteRenderer tile)
+        {
+            HallwayMinimapTiles.Add(tile);
+        }
+
+        public void AddConnectedRoom(RoomManager room)
+        {
+            ConnectedRooms.Add(room);
+        }
+
+        public SpriteRenderer GetRoomTile()
+        {
+            return MinimapTile;
+        }
+
+        public void InitializeForMinimap()
+        {
+            if (Type == RoomType.Home) { return; }
+            MinimapTile.color = _unexploredColor;
+            foreach(SpriteRenderer hallwayTile in HallwayMinimapTiles)
+            {
+                hallwayTile.color = _unexploredColor;
+            }
+            IconTransform.Hide();
         }
 
         public void CompleteSetup()
         {
-            if (_status != RoomStatus.Unexplored || _roomType != RoomType.Battle) { return; }
-            // setup mapitems
-            GameObject roomItems = Instantiate(_roomItemPresets[Random.Range(0, _roomItemPresets.Count)], transform)
-                .Position(transform.position);
-            if (roomItems.GetComponentInChildren<SpikeTilesController>())
+            if (Status != RoomStatus.Unexplored) { return; }
+            
+            if (Type == RoomType.Battle)
             {
-                _spikeTilesController = roomItems.GetComponentInChildren<SpikeTilesController>();
+                // setup map items
+                GameObject roomItems = Instantiate(_roomItemPresets[Random.Range(0, _roomItemPresets.Count)], transform)
+                .Position(transform.position);
+                if (roomItems.GetComponentInChildren<SpikeTilesController>())
+                {
+                    _spikeTilesController = roomItems.GetComponentInChildren<SpikeTilesController>();
+                }
             }
+            
 
             // setup gates
             foreach (RoomGate gate in _gates)
@@ -108,12 +174,13 @@ namespace SoulKnight3D
                     }
                     PlayerEntersRoom();
 
-                    if (_status != RoomStatus.Unexplored) { return; }
+                    if (Type != RoomType.Battle && Type != RoomType.Boss) { return; }
+                    if (Status != RoomStatus.Unexplored) { return; }
                     foreach (RoomGate mGate in _gates)
                     {
                         mGate.ToggleGate();
                     }
-                    _status = RoomStatus.InBattle;
+                    Status = RoomStatus.InBattle;
                     AudioKit.PlaySound("fx_door");
                     //Debug.Log("Closing Door");
                     StartCoroutine(WaveWorkFlow());
@@ -161,6 +228,17 @@ namespace SoulKnight3D
                 }
             }
 
+            // handle minimap cam
+            if (Type == RoomType.Battle || Type == RoomType.Boss)
+            {
+                _player.MinimapCam.TogglePosition(false);
+            }
+            // set connected room icon visible
+            foreach(RoomManager room in ConnectedRooms)
+            {
+                room.IconTransform.Show();
+            }
+
             // spawn white chest
             Vector3 spawnChestPosition;
             bool isChestPosValid;
@@ -181,13 +259,40 @@ namespace SoulKnight3D
                 mGate.ToggleGate();
             }
             AudioKit.PlaySound("fx_door");
-            _status = RoomStatus.Explored;
+            Status = RoomStatus.Explored;
 
             yield return null;
         }
 
-        private void PlayerEntersRoom()
+        public void PlayerEntersRoom()
         {
+            if (Type == RoomType.Portal || Type == RoomType.Reward)
+            {
+                Status = RoomStatus.Explored;
+            }
+            MinimapTile.color = _exploredColor;
+            foreach (SpriteRenderer hallwayTile in HallwayMinimapTiles)
+            {
+                hallwayTile.color = _exploredColor;
+            }
+            foreach(RoomManager room in ConnectedRooms)
+            {
+                if (room.Status == RoomStatus.Unexplored)
+                {
+                    room.MinimapTile.color = _detectedColor;
+                }
+            }
+
+            // handle minimap cam
+            if (Status == RoomStatus.Unexplored)
+            {
+                if (Type == RoomType.Battle || Type == RoomType.Boss)
+                {
+                    _player.MinimapCam.TogglePosition(true);
+                }
+            }
+
+            // handle spikes if any
             if (_spikeTilesController)
             {
                 _spikeTilesController.ToggleSpikeTiles(true);

@@ -20,7 +20,7 @@ namespace SoulKnight3D
                 newBullet.transform.rotation = Quaternion.LookRotation(bulletDirection);
             }
 
-            if (Data.EnergyCost > 0)
+            if (InGameData.EnergyCost > 0)
             {
                 OnWeaponFired.Trigger();
             }
@@ -28,7 +28,7 @@ namespace SoulKnight3D
             //feedback
             ShootFeedback?.PlayFeedbacks();
 
-            _cooldownTimeout = Data.Cooldown;
+            _cooldownTimeout = InGameData.Cooldown;
         }
     }
 }

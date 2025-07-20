@@ -2,19 +2,21 @@ using UnityEngine;
 using QFramework;
 using System;
 using System.Collections;
-using System.Threading.Tasks;
+using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
 	public partial class Bullet : ViewController
 	{
-		private string _weaponTag;
-		private int _damage;
-        private bool _isCritHit = false;
+		protected string _weaponTag;
+		protected int _damage;
+        protected bool _isCritHit = false;
 
         // timeouts
-        private float _destroyTimeout = 3f;
-        private float _destroyTimeoutDelta;
+        protected float _destroyTimeout = 3f;
+        protected float _destroyTimeoutDelta;
+
+        public bool _didHit = false;
 
         public void InitializeBullet(string weaponTag, int damage, bool isCritHit, GameObject prefabRef)
 		{
@@ -24,44 +26,52 @@ namespace SoulKnight3D
             PrefabRef = prefabRef;
 
             _destroyTimeoutDelta = _destroyTimeout;
+            _didHit = false;
+            if (TrailRenderer)
+            {
+                TrailRenderer.Clear();
+            }
         }
 
-        private void Awake()
+        protected virtual void Awake()
         {
-            SelfCapsuleCollider.OnTriggerEnterEvent((other) =>
-			{
-				if (other.tag == "Bullet") { return; }
+            SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
+            {
+                if (_didHit) { return; }
+                _didHit = true;
+                HandleCollision(other);
 
-                if (other.TryGetComponent(out TargetableObject targetableObject))
+                if (ImpactFeedback)
                 {
-                    if (other.tag == _weaponTag) { return; }
-                    if (targetableObject.IsDead) { return; }
-                    targetableObject.ApplyDamage(_damage);
-
-                    if (_weaponTag == "Player" && other.tag == "Enemy")
-                    {
-                        // player attaking other objects
-                        if (_isCritHit)
-                        {
-                            GameController.Instance.SpawnCritText(_damage, transform.position);
-                            AudioKit.PlaySound("fx_hit");
-                        } else
-                        {
-                            GameController.Instance.SpawnDamageText(_damage, transform.position);
-                        }
-                    }
+                    ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
+                    ImpactFeedback?.PlayFeedbacks();
                 }
                 DestroyBullet();
-                //Destroy(gameObject);
 
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
-        private void OnEnable()
+        private void HandleCollision(Collision other)
         {
-            if (TrailRenderer)
+            if (other.collider.TryGetComponent(out TargetableObject targetableObject))
             {
-                TrailRenderer.Clear();
+                if (targetableObject.IsDead) { return; }
+
+                targetableObject.ApplyDamage(_damage);
+
+                if (_weaponTag == "Player" && other.collider.CompareTag("Enemy"))
+                {
+                    // player attaking other objects
+                    if (_isCritHit)
+                    {
+                        GameController.Instance.SpawnCritText(_damage, transform.position);
+                        AudioKit.PlaySound("fx_hit");
+                    }
+                    else
+                    {
+                        GameController.Instance.SpawnDamageText(_damage, transform.position);
+                    }
+                }
             }
         }
 
@@ -77,7 +87,7 @@ namespace SoulKnight3D
             }
         }
 
-        private void DestroyBullet()
+        public void DestroyBullet()
         {
             GameObjectsManager.Instance.DespawnBullet(this);
         }
@@ -86,6 +96,7 @@ namespace SoulKnight3D
         {
             _destroyTimeoutDelta = _destroyTimeout;
             _isCritHit = false;
+            _didHit = false;
             gameObject.Hide();
         }
     }

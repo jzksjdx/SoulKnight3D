@@ -18,9 +18,7 @@ namespace SoulKnight3D
             BtnHome.onClick.AddListener(() =>
             {
                 Time.timeScale = 1;
-                SceneManager.LoadScene(0);
-                UIKit.ClosePanel<UIGamePanel>();
-                UIKit.ClosePanel<UIMobileControlPanel>();
+                GameController.Instance.QuitToMainScreen();
             });
 
             BtnResume.onClick.AddListener(() =>

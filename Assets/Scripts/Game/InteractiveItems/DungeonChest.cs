@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Random = UnityEngine.Random;
+using QFramework;
 
 namespace SoulKnight3D
 {
@@ -22,6 +23,7 @@ namespace SoulKnight3D
             base.Interact();
             Random.InitState((int)DateTime.Now.Ticks);
             _chestItem = Instantiate(WeaponPool[Random.Range(0, WeaponPool.Count)], transform);
+            _chestItem.GetComponent<PickupWeapon>().SelfRigidBody.isKinematic = true;
             _lerpTimeoutDelta = _lerpTimeout;
         }
 

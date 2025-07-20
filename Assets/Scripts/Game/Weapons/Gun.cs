@@ -10,9 +10,9 @@ namespace SoulKnight3D
 		public Transform shootPoint;
         public GameObject bulletPrefab;
 
-		void Start()
+		protected override void Start()
 		{
-			// Code Here
+			base.Start();
 		}
 
         protected override void Update()
@@ -20,7 +20,7 @@ namespace SoulKnight3D
 			base.Update();
         }
 
-        public virtual void Attack()
+        public override void Attack()
 		{
 			if (_cooldownTimeout > 0f) { return; }
 			Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
@@ -28,21 +28,18 @@ namespace SoulKnight3D
             newBullet.SelfRigidbody.velocity = bulletDirection * BulletSpeed;
 			newBullet.transform.rotation = Quaternion.LookRotation(bulletDirection);
 
-			if (Data.EnergyCost > 0)
-			{
-                OnWeaponFired.Trigger();
-            }
+            OnWeaponFired.Trigger();
 
-			//feedback
-			ShootFeedback?.PlayFeedbacks();
+            //feedback
+            ShootFeedback?.PlayFeedbacks();
 
-            _cooldownTimeout = Data.Cooldown;
+            _cooldownTimeout = InGameData.Cooldown;
         }
 
 		protected Vector3 DeviateBullet(Vector3 shootDirection)
 		{
 			//float deviateAmount = 0;
-            float deviateAmount = (float)Data.Inaccuracy / 500;
+            float deviateAmount = (float)InGameData.Inaccuracy / 500;
 			return new Vector3(
 				shootDirection.x + Random.Range(-deviateAmount, deviateAmount),
 				shootDirection.y + Random.Range(-deviateAmount, deviateAmount),
@@ -50,7 +47,7 @@ namespace SoulKnight3D
 				);
 		}
 
-		public void ShootWithDirection(Vector3 direction)
+		public virtual void ShootWithDirection(Vector3 direction)
 		{
 			Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
             newBullet.SelfRigidbody.velocity = direction * BulletSpeed;
@@ -59,12 +56,12 @@ namespace SoulKnight3D
             ShootFeedback?.PlayFeedbacks();
         }
 
-		public Bullet SpawnBulletFromPool(Vector3 position)
+		public virtual Bullet SpawnBulletFromPool(Vector3 position)
 		{
             GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)
 				.Position(position);
 			Bullet newBullet = newBulletObj.GetComponent<Bullet>();
-            newBullet.InitializeBullet(tag, Data.Damage, GetIsCritHit(), bulletPrefab);
+            newBullet.InitializeBullet(tag, InGameData.Damage, GetIsCritHit(), bulletPrefab);
 			newBulletObj.Show();
             return newBullet;
 		}

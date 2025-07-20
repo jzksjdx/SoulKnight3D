@@ -15,11 +15,16 @@ MonoBehaviour:
   Name: Shotgun
   NameCN: "\u9730\u5F39\u67AA"
   Sprite: {fileID: 21300000, guid: cb79414535e87bf47b0d69713605487d, type: 2}
-  Category: 1
+  Category: 2
   Rarity: 0
+  Animation: 1
   Damage: 3
   EnergyCost: 3
   CritChance: 0
   Inaccuracy: 40
   Price: 15
   Cooldown: 0.833
+  WeaponPrefab: {fileID: 437197427452384212, guid: 70add711c3eee4c4ba4797dd0b4bc57a,
+    type: 3}
+  PickUpPrefab: {fileID: 142270184362528395, guid: c22e7b61b7ad34857a33d99f1fcc5f64,
+    type: 3}

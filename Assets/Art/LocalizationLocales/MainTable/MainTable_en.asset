@@ -31,7 +31,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 65384106418176
-    m_Localized: Test Version 0.2.1
+    m_Localized: Test Version 0.3.0
     m_Metadata:
       m_Items: []
   - m_Id: 66840830140416
@@ -76,6 +76,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 85425631780864
     m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111755332512899072
+    m_Localized: Choose Character
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761415579099136
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761474941083648
+    m_Localized: Knight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 111761560504885248
+    m_Localized: Rouge
     m_Metadata:
       m_Items: []
   references:

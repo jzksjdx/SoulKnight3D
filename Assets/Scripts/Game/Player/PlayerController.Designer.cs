@@ -5,8 +5,8 @@ namespace SoulKnight3D
 {
 	public partial class PlayerController : QFramework.IController
 	{
-
-		public SoulKnight3D.Skill Skill;
+        [Header("Other References")]
+        public SoulKnight3D.Skill Skill;
 
 		public PlayerStats PlayerStats;
 

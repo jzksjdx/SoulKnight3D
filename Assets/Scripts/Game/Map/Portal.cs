@@ -15,10 +15,18 @@ namespace SoulKnight3D
 					// win game;
 					AudioKit.PlaySound("fx_transform");
 
-					UIKit.ClosePanel<UIGamePanel>();
-                    UIKit.ClosePanel<UIMobileControlPanel>();
-
-                    SceneManager.LoadScene(0);
+					int level = GameController.Instance.Level;
+					if (level > 2) // win
+					{
+                        GameController.Instance.ToggleGameFreeze(true);
+                        UIEndPanel endPanel = UIKit.OpenPanel<UIEndPanel>();
+                        endPanel.UpdateEndTitle(true);
+                    } else
+					{
+                        UIKit.ClosePanel<UIGamePanel>();
+                        UIKit.HidePanel<UIMobileControlPanel>();
+                        GameController.Instance.EnterNextLevel();
+                    }
 				}
 			});
 		}

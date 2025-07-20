@@ -488,6 +488,11 @@ ActionKit.OnApplicationFocus.Register(focus =>
         {
         }
 
+        public static object DelayFrame(Action value)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

@@ -57,7 +57,7 @@ MonoBehaviour:
   ArchitectureFullTypeName: 
   ViewControllerFullTypeName: 
   Data: {fileID: 11400000, guid: 15cfe149dc44742b8be7e709bde46c39, type: 2}
-  BulletSpeed: 15
+  BulletSpeed: 20
   shootPoint: {fileID: 3012229913411895298}
   bulletPrefab: {fileID: 68762428956772447, guid: 2812c5413c03544ac8dff53d8b552bd1,
     type: 3}
