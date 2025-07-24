@@ -10,7 +10,8 @@ namespace SoulKnight3D
 	}
 	public partial class UIGamePanel : UIPanel, IController
 	{
-        
+        private bool _isBugMode = false;
+
 		protected override void OnInit(IUIData uiData = null)
 		{
 			mData = uiData as UIGamePanelData ?? new UIGamePanelData();
@@ -115,6 +116,11 @@ namespace SoulKnight3D
             AudioKit.PlaySound("fx_btn");
             GameController.Instance.ToggleGameFreeze(true);
             PausePanel.Show();
+
+            if (_isBugMode)
+            {
+                UiBugMode.ToggleTexts(true);
+            }
         }
 
         private void HidePausePanel()
@@ -129,12 +135,23 @@ namespace SoulKnight3D
 
             GameController.Instance.ToggleGameFreeze(false);
             PausePanel.Hide();
+
+            if (_isBugMode)
+            {
+                UiBugMode.ToggleTexts(false);
+            }
         }
 
         public void UpdateUiLevelTexts(int level)
         {
             LevelFlagText.text = "1-" + level.ToString();
             MinimapLevelText.text = "1-" + level.ToString();
+        }
+
+        public void ToggleBugMode()
+        {
+            _isBugMode = true;
+            UiBugMode.Show();
         }
 
         protected override void OnOpen(IUIData uiData = null)

@@ -176,7 +176,14 @@ namespace SoulKnight3D
                     Vector3 randomDirection = new Vector3(Random.Range(-randomScale, randomScale), 0.5f, Random.Range(-randomScale, randomScale));
                     rb.AddForce(randomDirection * 5, ForceMode.Impulse);
                 }
-               
+
+                // recycle status if any
+                Status[] statuses = GetComponentsInChildren<Status>();
+                foreach(Status status in statuses)
+                {
+                    GameObjectsManager.Instance.DespawnStatus(status);
+                }
+
                 Destroy(gameObject, 3);
             }
         }

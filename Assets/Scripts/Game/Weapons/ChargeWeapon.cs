@@ -148,7 +148,7 @@ namespace SoulKnight3D
             ChargeWeaponData data = InGameData as ChargeWeaponData;
             float actualDamage = _chargeTimeDelta / _chargeTime * (data.MaxDamage - data.Damage) + data.Damage;
             int actualDamageInt = (int)Mathf.Clamp(actualDamage, data.Damage, data.MaxDamage);
-            newBullet.InitializeBullet(tag, actualDamageInt, GetIsCritHit(), bulletPrefab);
+            newBullet.InitializeBullet(tag, actualDamageInt, GetIsCritHit(), bulletPrefab, BulletSize);
             newBulletObj.Show();
             return newBullet;
         }

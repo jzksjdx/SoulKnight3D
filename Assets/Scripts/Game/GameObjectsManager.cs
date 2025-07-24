@@ -13,7 +13,11 @@ namespace SoulKnight3D {
         private SimpleObjectPool<GameObject> _energyOrbPool;
 
         private Dictionary<GameObject, SimpleObjectPool<GameObject>> _bulletPools = new Dictionary<GameObject, SimpleObjectPool<GameObject>>();
-        
+
+        private Dictionary<GameObject, SimpleObjectPool<GameObject>> _statusZonePools = new Dictionary<GameObject, SimpleObjectPool<GameObject>>();
+
+        private Dictionary<Status.StatusType, SimpleObjectPool<GameObject>> _statusPools = new Dictionary<Status.StatusType, SimpleObjectPool<GameObject>>();
+
         private void Awake()
         {
             Instance = this;
@@ -55,10 +59,12 @@ namespace SoulKnight3D {
             _energyOrbPool.Recycle(gameObject);
         }
 
+        // bullets
         public GameObject SpawnBullet(GameObject bulletPrefab)
         {
             if (_bulletPools.ContainsKey(bulletPrefab))
             {
+                //Debug.Log("Allocate bullet");
                 return _bulletPools[bulletPrefab].Allocate();
             } else
             {
@@ -85,6 +91,88 @@ namespace SoulKnight3D {
             } else
             {
                 Destroy(bullet.gameObject);
+            }
+        }
+
+        // status
+        public GameObject SpawnStatus(GameObject statusPrefab, TargetableObject target)
+        {
+            Status.StatusType statusType = statusPrefab.GetComponent<Status>().Type;
+            if (_statusPools.ContainsKey(statusType))
+            {
+                GameObject newStatus = _statusPools[statusType].Allocate();
+                newStatus.GetComponent<Status>().ActivateStatus(target);
+                return newStatus;
+            } else
+            {
+                SimpleObjectPool<GameObject> newStatusPool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
+                {
+                    return Instantiate(statusPrefab, transform).Hide();
+                }, initCount: 5,
+                resetMethod: (gameObject) =>
+                {
+                    gameObject.GetComponent<Status>().Reset();
+                });
+
+                _statusPools.Add(statusType, newStatusPool);
+
+                GameObject newStatus = newStatusPool.Allocate();
+                newStatus.GetComponent<Status>().ActivateStatus(target);
+                return newStatus;
+            }
+        }
+
+        public void DespawnStatus(Status status)
+        {
+            if (_statusPools.ContainsKey(status.Type))
+            {
+                _statusPools[status.Type].Recycle(status.gameObject);
+            } else
+            {
+                Destroy(status.gameObject);
+            }
+        }
+
+        // status zones
+        public GameObject SpawnStatusZone(GameObject statusZonePrefab, Vector3 position)
+        {
+            if (_statusZonePools.ContainsKey(statusZonePrefab))
+            {
+                GameObject statusZone = _statusZonePools[statusZonePrefab].Allocate();
+                statusZone.GetComponent<StatusZone>().ActivateStatusZone(position);
+                return statusZone;
+            }
+            else
+            {
+                SimpleObjectPool<GameObject> newStatusZonePool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
+                {
+                    GameObject newStatusZone = Instantiate(statusZonePrefab, transform).Hide();
+                    newStatusZone.GetComponent<StatusZone>().PrefabRef = statusZonePrefab;
+                    return newStatusZone;
+                }, initCount: 5,
+                resetMethod: (gameObject) =>
+                {
+                    gameObject.GetComponent<StatusZone>().Reset();
+                });
+
+                _statusZonePools.Add(statusZonePrefab, newStatusZonePool);
+
+                GameObject statusZone = newStatusZonePool.Allocate();
+                statusZone.GetComponent<StatusZone>().ActivateStatusZone(position);
+                return statusZone;
+
+            }
+        }
+
+        public void DespawnStatusZone(StatusZone statusZone)
+        {
+            if (_statusZonePools.ContainsKey(statusZone.PrefabRef))
+            {
+                _statusZonePools[statusZone.PrefabRef].Recycle(statusZone.gameObject);
+            }
+            else
+            {
+                Destroy(statusZone.gameObject);
             }
         }
     }

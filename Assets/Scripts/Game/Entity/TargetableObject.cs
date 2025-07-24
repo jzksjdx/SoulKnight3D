@@ -18,6 +18,8 @@ namespace SoulKnight3D
             }
         }
 
+        public List<Status.StatusType> Statuses = new List<Status.StatusType>();
+
         protected virtual void Start()
         {
             Health.Value = MaxHealth;

@@ -5,22 +5,23 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-    public class SpeedBuff : MonoBehaviour
+    public class SpeedBuff : Status
     {
-        public float Duration;
         public float SpeedChange;
-
         private float _originalSpeed;
 
-        public void ActivateBuff(TargetableObject target)
+        public override void ActivateStatus(TargetableObject target)
         {
+            base.ActivateStatus(target);
             _originalSpeed = target.Speed;
             ToggleBuff(target, true);
-            ActionKit.Delay(Duration, () =>
-            {
-                ToggleBuff(target, false);
-                Destroy(gameObject);
-            }).Start(this);
+          
+        }
+
+        protected override void HandleDespawn()
+        {
+            ToggleBuff(_target, false);
+            base.HandleDespawn();
         }
 
         public void ToggleBuff(TargetableObject target, bool isBuffOn)

@@ -5,14 +5,12 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-    public class Dodge : Skill, IUnRegisterList
+    public class Dodge : Skill
     {
         [SerializeField] float DodgeForce = 3f;
 
         Weapon _weaponCache;
         private int _critChanceCache = 0;
-
-        public List<IUnRegister> UnregisterList { get; } = new List<IUnRegister>();
 
         protected override void Start()
         {
@@ -22,10 +20,10 @@ namespace SoulKnight3D
             Weapon startWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
             _weaponCache = startWeapon;
             _critChanceCache = startWeapon.InGameData.CritChance;
-            startWeapon.OnWeaponFired.Register(() =>
+            PlayerController.Instance.PlayerAttack.OnPlayerAttaked.Register(() =>
             {
                 _weaponCache.InGameData.CritChance = _critChanceCache;
-            }).AddToUnregisterList(this);
+            }).UnRegisterWhenGameObjectDestroyed(this);
 
             PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData, weaponObject) =>
             {
@@ -33,17 +31,12 @@ namespace SoulKnight3D
                 if (_weaponCache)
                 {
                     _weaponCache.InGameData.CritChance = _critChanceCache;
-                    this.UnRegisterAll();
                 }
 
                 // handle new weapon
                 Weapon weapon = weaponObject.GetComponent<Weapon>();
                 _weaponCache = weapon;
                 _critChanceCache = weaponData.CritChance;
-                _weaponCache.OnWeaponFired.Register(() =>
-                {
-                    _weaponCache.InGameData.CritChance = _critChanceCache;
-                }).AddToUnregisterList(this);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
@@ -55,6 +48,10 @@ namespace SoulKnight3D
             AudioKit.PlaySound("fx_skill_c2");
             // apply force
             Vector2 movementVector = PlayerInputs.Instance.GetMovementVectorNormalized();
+            if (movementVector.magnitude == 0f)
+            {
+                movementVector = transform.up;
+            }
             Quaternion rotation = Quaternion.Euler(0, PlayerController.Instance.transform.eulerAngles.y, 0);
             Vector3 rotatedMovementVector = rotation * new Vector3(movementVector.x, 0, movementVector.y);
             Vector3 dodgeDir = rotatedMovementVector.normalized + Vector3.up * 0.1f;

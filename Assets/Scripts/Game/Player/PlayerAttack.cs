@@ -4,7 +4,7 @@ using QFramework;
 using UnityEngine;
 
 namespace SoulKnight3D {
-    public class PlayerAttack : MonoBehaviour
+    public class PlayerAttack : MonoBehaviour, IUnRegisterList
     {
         public List<GameObject> Weapons;
         public Transform WeaponPoint, LeftWeaponPoint;
@@ -27,6 +27,9 @@ namespace SoulKnight3D {
 
         public EasyEvent<InteractiveItem> OnInteractiveItemChanged = new EasyEvent<InteractiveItem>();
         public EasyEvent<WeaponData, GameObject> OnWeaponSwitched = new EasyEvent<WeaponData, GameObject>();
+        public EasyEvent OnPlayerAttaked = new EasyEvent();
+
+        public List<IUnRegister> UnregisterList { get; } = new List<IUnRegister>();
 
         void Start()
         {
@@ -48,7 +51,13 @@ namespace SoulKnight3D {
                 Interact();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-           
+            if (_currentWeapon)
+            {
+                _currentWeapon.OnWeaponFired.Register(() =>
+                {
+                    OnPlayerAttaked.Trigger();
+                }).AddToUnregisterList(this);
+            }
         }
 
         // Update is called once per frame
@@ -193,6 +202,12 @@ namespace SoulKnight3D {
             AudioKit.PlaySound("fx_switch");
 
             OnWeaponSwitched.Trigger(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
+
+            this.UnRegisterAll();
+            _currentWeapon.OnWeaponFired.Register(() =>
+            {
+                OnPlayerAttaked.Trigger();
+            }).AddToUnregisterList(this);
         }
 
         public Weapon GetCurrentWeapon()

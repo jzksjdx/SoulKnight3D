@@ -37,6 +37,11 @@ namespace SoulKnight3D
         {
             return InGameData.CritChance > Random.Range(0, 100);
         }
+
+        public WeaponData GetPrefabWeaponData()
+        {
+            return Data;
+        }
     }
 
 }

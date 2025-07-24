@@ -105,6 +105,7 @@ namespace SoulKnight3D
                     _lerpTimeoutDelta = _lerpTimeout;
                     break;
             }
+            Label.Hide();
         }
 
         private void Update()

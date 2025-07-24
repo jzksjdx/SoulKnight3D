@@ -238,6 +238,8 @@ namespace SoulKnight3D
             {
                 room.IconTransform.Show();
             }
+            // room clear
+            GameController.Instance.OnRoomClear.Trigger();
 
             // spawn white chest
             Vector3 spawnChestPosition;

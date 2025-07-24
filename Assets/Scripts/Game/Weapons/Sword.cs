@@ -108,7 +108,7 @@ namespace SoulKnight3D
                 HitEffect.Show();
             }
             SwingFeedback?.PlayFeedbacks();
-
+            OnWeaponFired?.Trigger();
         }
 
         private void ToggleNextSwing(bool shouldSwing)

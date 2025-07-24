@@ -9,6 +9,7 @@ namespace SoulKnight3D
 
 		public Transform shootPoint;
         public GameObject bulletPrefab;
+		public float BulletSize = 1f;
 
 		protected override void Start()
 		{
@@ -52,7 +53,6 @@ namespace SoulKnight3D
 			Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
             newBullet.SelfRigidbody.velocity = direction * BulletSpeed;
 			newBullet.transform.rotation = Quaternion.LookRotation(direction);
-
             ShootFeedback?.PlayFeedbacks();
         }
 
@@ -61,8 +61,8 @@ namespace SoulKnight3D
             GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)
 				.Position(position);
 			Bullet newBullet = newBulletObj.GetComponent<Bullet>();
-            newBullet.InitializeBullet(tag, InGameData.Damage, GetIsCritHit(), bulletPrefab);
-			newBulletObj.Show();
+            newBullet.InitializeBullet(tag, InGameData.Damage, GetIsCritHit(), bulletPrefab, BulletSize);
+            newBulletObj.Show();
             return newBullet;
 		}
     }

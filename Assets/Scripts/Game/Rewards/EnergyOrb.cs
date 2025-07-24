@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-    public class EnergyOrb : MonoBehaviour
+    public class EnergyOrb : MonoBehaviour, IPoolable
     {
         public float PickUpDistance = 2f;
         public float Speed = 1.5f;

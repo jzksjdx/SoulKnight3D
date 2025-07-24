@@ -18,10 +18,8 @@ namespace SoulKnight3D
             {
                 if (other.TryGetComponent(out TargetableObject targetable))
                 {
-                    if (targetable.GetComponentInChildren<SpeedBuff>()) { return; }
-                    GameObject newBuff = Instantiate(SpeedBuffPrefab, targetable.transform)
-                        .Position(targetable.transform.position);
-                    newBuff.GetComponent<SpeedBuff>().ActivateBuff(targetable);
+                    if (targetable.Statuses.Contains(Status.StatusType.SpeedUp) || targetable.Statuses.Contains(Status.StatusType.SpeedDown)) { return; }
+                    GameObjectsManager.Instance.SpawnStatus(SpeedBuffPrefab, targetable);
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }

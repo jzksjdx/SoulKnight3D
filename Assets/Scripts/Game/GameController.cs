@@ -25,6 +25,8 @@ namespace SoulKnight3D
         public MMF_Player CritNumber;
         public MMF_Player CritText;
 
+        public EasyEvent OnRoomClear = new EasyEvent();
+
         private void Awake()
         {
             Instance = this;

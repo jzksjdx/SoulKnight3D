@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &446974855823022795
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5686418262526688478}
+  - component: {fileID: 4562815725430832921}
+  m_Layer: 0
+  m_Name: VolumeAtkChip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5686418262526688478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 446974855823022795}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 47.791077, y: 0.87960964, z: 23.035694}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4562815725430832921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 446974855823022795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 991740997a8e64c929b17981e8e00f12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxProgress: 5
+  _icon: {fileID: 21300000, guid: 857c86fe6a25041748c548007fedb256, type: 3}
+  _title: "\u4EC0\u4E48\u52A8\u9759"
+  _description: "\u6E38\u620F\u5185\u97F3\u91CF\u8D8A\u4F4E\uFF0C\u6B66\u5668\u653B\u51FB\u901F\u5EA6\u8D8A\u4F4E\u3002"
+  _upgradedDesc: "\u6E38\u620F\u5185\u97F3\u91CF\u8D8A\u9AD8\uFF0C\u5B50\u5F39\u8D8A\u5927\u3002"

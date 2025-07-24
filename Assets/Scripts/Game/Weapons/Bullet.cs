@@ -6,7 +6,7 @@ using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
-	public partial class Bullet : ViewController
+	public partial class Bullet : ViewController,IPoolable
 	{
 		protected string _weaponTag;
 		protected int _damage;
@@ -18,7 +18,9 @@ namespace SoulKnight3D
 
         public bool _didHit = false;
 
-        public void InitializeBullet(string weaponTag, int damage, bool isCritHit, GameObject prefabRef)
+        private Vector3 _originalScale = Vector3.one;
+
+        public void InitializeBullet(string weaponTag, int damage, bool isCritHit, GameObject prefabRef, float bulletSize = 1f)
 		{
             _weaponTag = weaponTag;
             _isCritHit = isCritHit;
@@ -31,10 +33,13 @@ namespace SoulKnight3D
             {
                 TrailRenderer.Clear();
             }
+
+            transform.localScale = _originalScale * bulletSize;
         }
 
         protected virtual void Awake()
         {
+            _originalScale = transform.localScale;
             SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
             {
                 if (_didHit) { return; }
