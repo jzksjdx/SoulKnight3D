@@ -38,7 +38,7 @@ namespace SoulKnight3D
             AudioKit.PlaySound("fx_btn");
             this.GetSystem<ControlSystem>().ToggleCursor(false);
             Time.timeScale = 1;
-            Hide();
+            this.Hide();
         }
 
         protected override void OnBeforeDestroy()

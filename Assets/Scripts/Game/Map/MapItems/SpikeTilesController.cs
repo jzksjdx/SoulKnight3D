@@ -46,7 +46,7 @@ namespace SoulKnight3D
                 {
                     _isSpikeOut = true;
                     _spikeOutTimeoutDelta = _spikeOutTimeout;
-                    AudioKit.PlaySound("fx_spike", volumeScale: 0.1f);
+                    AudioKit.PlaySound("fx_spike", false, null, 0.1f);
                     foreach (SpikeTile spikeTile in SpikeTiles)
                     {
                         spikeTile.ToggleSpike(true);

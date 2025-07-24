@@ -6,7 +6,7 @@ using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
-	public partial class Bullet : ViewController,IPoolable
+	public partial class Bullet : ViewController, IPoolable
 	{
 		protected string _weaponTag;
 		protected int _damage;
