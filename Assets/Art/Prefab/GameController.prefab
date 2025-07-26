@@ -1559,6 +1559,10 @@ MonoBehaviour:
   FloatingTextPos: {fileID: 2411596705273367731}
   CritNumber: {fileID: 1384228559328073463}
   CritText: {fileID: 8859015897876221205}
+  _bugModeChips:
+  - {fileID: 7361980056828069960, guid: 232275178fbd541498766fd01b9f8a7a, type: 3}
+  - {fileID: 446974855823022795, guid: b78685b3fd97246ac80ddcad8c2db33d, type: 3}
+  - {fileID: 4848277086826772188, guid: 24b29311021e44dc6a4e2192a97c1139, type: 3}
 --- !u!114 &205227339901095598
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:d78bf1f7-c769-4bc5-8610-5caf10363103
+	// Generate Id:6d1ac610-05d7-468d-91bd-bd446ad4a35b
 	public partial class UIStartMenuPanel
 	{
 		public const string Name = "UIStartMenuPanel";
@@ -14,6 +14,8 @@ namespace SoulKnight3D
 		public UnityEngine.RectTransform MenuImage;
 		[SerializeField]
 		public UnityEngine.UI.Button StartButton;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnBugMode;
 		[SerializeField]
 		public UnityEngine.UI.Button BtnInstruction;
 		[SerializeField]
@@ -37,6 +39,7 @@ namespace SoulKnight3D
 		{
 			MenuImage = null;
 			StartButton = null;
+			BtnBugMode = null;
 			BtnInstruction = null;
 			BtnQuit = null;
 			BtnSettings = null;

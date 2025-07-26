@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:b7cab9f4-f77d-4f4c-916f-e85351fbdb18
+	// Generate Id:05aa6310-0806-46cf-85a4-b224f598b01d
 	public partial class UIGamePanel
 	{
 		public const string Name = "UIGamePanel";
@@ -46,6 +46,10 @@ namespace SoulKnight3D
 		public UnityEngine.UI.Text LevelFlagText;
 		[SerializeField]
 		public UiBugMode UiBugMode;
+		[SerializeField]
+		public RectTransform BossHealthRect;
+		[SerializeField]
+		public UnityEngine.UI.Image BossHealthBar;
 		
 		private UIGamePanelData mPrivateData = null;
 		
@@ -69,6 +73,8 @@ namespace SoulKnight3D
 			MinimapLevelText = null;
 			LevelFlagText = null;
 			UiBugMode = null;
+			BossHealthRect = null;
+			BossHealthBar = null;
 			
 			mData = null;
 		}

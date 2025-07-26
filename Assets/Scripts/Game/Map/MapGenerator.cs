@@ -10,6 +10,8 @@ namespace SoulKnight3D
 	public partial class MapGenerator : ViewController
 	{
         public List<EnemyWaveSO> EnemyWaveSOs = new List<EnemyWaveSO>();
+        public GameObject BossPrefab;
+
         [SerializeField] private RoomManager RoomManagerPrefab;
         [SerializeField] private bool _shouldGenerateMap = true;
 
@@ -34,6 +36,7 @@ namespace SoulKnight3D
         private Dictionary<int, RoomData> _roomDataDict = new Dictionary<int, RoomData>();
         private Dictionary<int, RoomManager> _generatedRooms = new Dictionary<int, RoomManager>(); // saves room managers
         private List<GameObject> _generatedHallways = new List<GameObject>();
+        private GameObject _generatedPortal;
 
         private struct RoomData
         {
@@ -193,9 +196,15 @@ namespace SoulKnight3D
                 {
                     var finalRoom = _roomDataDict[newRoomKey];
                     //finalRoom.status = RoomManager.RoomStatus.Explored;
-                    finalRoom.type = RoomManager.RoomType.Portal;
+                    if (GameController.Instance.IsFinalLevel)
+                    {
+                        finalRoom.type = RoomManager.RoomType.Boss;
+                    } else
+                    {
+                        finalRoom.type = RoomManager.RoomType.Portal;
+                    }
                     _roomDataDict[newRoomKey] = finalRoom;
-                    Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
+                    _generatedPortal = Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
                 }
                 // reward
                 if (isReward && deadEndKey != -99)
@@ -207,7 +216,7 @@ namespace SoulKnight3D
                 }
 
                 // setup room manager
-                SetupRoomManager(newRoomKey);
+                SetupRoomManager(newRoomKey, _generatedPortal);
                 GameObject newRoom = GenerateRoom(newRoomKey, newRoomWorldPosition);
 
                 // generate hallway
@@ -270,18 +279,24 @@ namespace SoulKnight3D
             return roomGenObj;
         }
 
-        private void SetupRoomManager(int roomKey)
+        private void SetupRoomManager(int roomKey, GameObject generatedPortal = null)
         {
             RoomManager newRoom = Instantiate(RoomManagerPrefab, transform);
+            if (generatedPortal)
+            {
+                newRoom.SetPortal(generatedPortal);
+            }
             newRoom
                 .SetDimension(_roomDataDict[roomKey].position, mapScale / 4)
                 .SetGates(_roomDataDict[roomKey].gates)
                 .SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)])
+                .SetBossPrefab(BossPrefab)
                 .SetKey(roomKey)
                 .SetRoomType(_roomDataDict[roomKey].type)
                 .SetRoomStatus(_roomDataDict[roomKey].status)
                 .CompleteSetup();
             _generatedRooms.Add(roomKey, newRoom);
+            
         }
 
         private void PrintMap()

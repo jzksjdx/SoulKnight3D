@@ -17,6 +17,7 @@ namespace SoulKnight3D
         public MapGenerator MapGenerator;
         //public int Floor = 1;
         public int Level = 1;
+        public bool IsFinalLevel = false;
 
         [Header("MoreMountains")]
         public MoreMountains.Tools.MMSoundManager MMSoundManager;
@@ -25,7 +26,11 @@ namespace SoulKnight3D
         public MMF_Player CritNumber;
         public MMF_Player CritText;
 
+        [Header("BugMode")]
+        [SerializeField] private List<GameObject> _bugModeChips;
+
         public EasyEvent OnRoomClear = new EasyEvent();
+        public EasyEvent OnReturnMenu = new EasyEvent();
 
         private void Awake()
         {
@@ -37,7 +42,9 @@ namespace SoulKnight3D
             }
 
             Level = this.GetSystem<SaveSystem>().LoadInt("Level", 1);
+            IsFinalLevel = Level == 3;
             MapGenerator.EnemyWaveSOs = GameFloor.GameLevels[Level - 1].LevelWaves;
+            MapGenerator.BossPrefab = GameFloor.BossPrefabs[Random.Range(0, GameFloor.BossPrefabs.Count)];
         }
 
         private void OnDestroy()
@@ -75,6 +82,16 @@ namespace SoulKnight3D
             AudioKit.PlayMusic("bgm_1Low");
 
             UIMinimapUpdater.Instance.UpdateMap();
+
+            // bug mode
+            if (this.GetSystem<SaveSystem>().LoadBool("BugMode"))
+            {
+                this.GetSystem<SaveSystem>().SaveBool("BugMode", false);
+                GameObject chip = Instantiate(_bugModeChips[Random.Range(0, _bugModeChips.Count)]);
+            } else
+            {
+                UIKit.GetPanel<UIGamePanel>().UiBugMode.Hide();
+            }
         }
 
         public void SpawnDamageText(int value, Vector3 position)
@@ -114,6 +131,7 @@ namespace SoulKnight3D
 
         public void QuitToMainScreen()
         {
+            OnReturnMenu.Trigger();
             Destroy(PlayerController.Instance.gameObject);
             SceneManager.LoadScene(0);
             UIKit.ClosePanel<UIGamePanel>();

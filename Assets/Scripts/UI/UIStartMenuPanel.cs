@@ -32,9 +32,17 @@ namespace SoulKnight3D
 
             StartButton.onClick.AddListener(() =>
 			{
-				AudioKit.PlaySound("fx_btn_start");
+                this.GetSystem<SaveSystem>().SaveBool("BugMode", false);
+                AudioKit.PlaySound("fx_btn_start");
                 StartCoroutine(DelayedStartGame());
 			});
+
+			BtnBugMode.onClick.AddListener(() =>
+			{
+                this.GetSystem<SaveSystem>().SaveBool("BugMode", true);
+                AudioKit.PlaySound("fx_btn_start");
+                StartCoroutine(DelayedStartGame());
+            });
 
 			CreditButton.onClick.AddListener(() =>
 			{

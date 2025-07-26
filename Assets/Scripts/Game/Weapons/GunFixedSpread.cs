@@ -21,17 +21,16 @@ namespace SoulKnight3D
                 Quaternion.Euler(deviateAmount, 0, -deviateAmount)
             };
 
-            StartCoroutine(SpawnBulletInSequence(angles));
-            //foreach(Quaternion angle in angles)
-            //{
-            //    Vector3 bulletDirection = angle * Vector3.up;
-                
-            //    Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
-            //    Vector3 worldDirection = shootPoint.TransformDirection(bulletDirection);
-            //    newBullet.SelfRigidbody.velocity = worldDirection * BulletSpeed;
-            //    newBullet.transform.rotation = Quaternion.LookRotation(worldDirection);
-            //}
-            
+            foreach (Quaternion angle in angles)
+            {
+                Vector3 bulletDirection = angle * Vector3.up;
+
+                Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
+                Vector3 worldDirection = shootPoint.TransformDirection(bulletDirection);
+                newBullet.SelfRigidbody.velocity = worldDirection * BulletSpeed;
+                newBullet.transform.rotation = Quaternion.LookRotation(worldDirection);
+            }
+
 
             if (InGameData.EnergyCost > 0)
             {
@@ -42,20 +41,6 @@ namespace SoulKnight3D
             ShootFeedback?.PlayFeedbacks();
 
             _cooldownTimeout = InGameData.Cooldown;
-        }
-
-        private IEnumerator SpawnBulletInSequence(List<Quaternion> angles)
-        {
-            foreach (Quaternion angle in angles)
-            {
-                yield return new WaitForSeconds(0.2f);
-                Vector3 bulletDirection = angle * Vector3.up;
-
-                Bullet newBullet = SpawnBulletFromPool(shootPoint.position);
-                Vector3 worldDirection = shootPoint.TransformDirection(bulletDirection);
-                newBullet.SelfRigidbody.velocity = worldDirection * BulletSpeed;
-                newBullet.transform.rotation = Quaternion.LookRotation(worldDirection);
-            }
         }
     }
 

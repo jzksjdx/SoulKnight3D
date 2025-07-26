@@ -11,6 +11,8 @@ namespace SoulKnight3D
         [SerializeField] private LayerMask _itemLayerMask;
         private List<RoomGate> _gates;
         private EnemyWaveSO _enemyWaves;
+        private GameObject _bossPrefab;
+        private GameObject _generatedPortal;
 
         [Header("Minimap")]
         [SerializeField] private SpriteRenderer _roomIcon;
@@ -80,6 +82,18 @@ namespace SoulKnight3D
         public RoomManager SetEnemyWaves(EnemyWaveSO waves)
         {
             _enemyWaves = waves;
+            return this;
+        }
+
+        public RoomManager SetBossPrefab(GameObject bossPrefab)
+        {
+            _bossPrefab = bossPrefab;
+            return this;
+        }
+
+        public RoomManager SetPortal(GameObject generatedPortal)
+        {
+            _generatedPortal = generatedPortal;
             return this;
         }
 
@@ -160,6 +174,10 @@ namespace SoulKnight3D
                     _spikeTilesController = roomItems.GetComponentInChildren<SpikeTilesController>();
                 }
             }
+            else if (Type == RoomType.Boss)
+            {
+                _generatedPortal.Hide();
+            }
             
 
             // setup gates
@@ -182,8 +200,30 @@ namespace SoulKnight3D
                     }
                     Status = RoomStatus.InBattle;
                     AudioKit.PlaySound("fx_door");
+                    _roomIcon.Hide();
                     //Debug.Log("Closing Door");
-                    StartCoroutine(WaveWorkFlow());
+
+                    if (Type == RoomType.Boss)
+                    {
+                        GameObject generatedBoss = Instantiate(_bossPrefab, transform.position + Vector3.up * 0.05f, Quaternion.identity);
+                        generatedBoss.transform.SetParent(transform);
+                        AudioKit.PlaySound("fx_show_up");
+                        AudioKit.PlayMusic("bgm_boss");
+                        UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = 1;
+                        UIKit.GetPanel<UIGamePanel>().BossHealthRect.Show();
+                        UIKit.OpenPanel<UIBossFight>();
+                        generatedBoss.GetComponent<Werewolf>().OnDeath.Register(() =>
+                        {
+                            _generatedPortal.Show();
+                            AudioKit.StopMusic();
+                            _roomIcon.Show();
+                        }).UnRegisterWhenGameObjectDestroyed(generatedBoss);
+                    }
+                    else if (Type == RoomType.Battle)
+                    {
+                        StartCoroutine(WaveWorkFlow());
+                    }
+                    
                 }).UnRegisterWhenGameObjectDestroyed(gameObject);
             }
         }

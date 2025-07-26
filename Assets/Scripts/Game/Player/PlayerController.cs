@@ -91,7 +91,6 @@ namespace SoulKnight3D
 
         private void Update()
         {
-            //transform.Translate(new Vector3(0.005f, 0, 0f));
             GroundedCheck();
         }
 

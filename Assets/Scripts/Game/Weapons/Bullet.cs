@@ -60,6 +60,7 @@ namespace SoulKnight3D
         {
             if (other.collider.TryGetComponent(out TargetableObject targetableObject))
             {
+
                 if (targetableObject.IsDead) { return; }
 
                 targetableObject.ApplyDamage(_damage);
@@ -94,6 +95,7 @@ namespace SoulKnight3D
 
         public void DestroyBullet()
         {
+            if (!gameObject.activeSelf) { return; }
             GameObjectsManager.Instance.DespawnBullet(this);
         }
 

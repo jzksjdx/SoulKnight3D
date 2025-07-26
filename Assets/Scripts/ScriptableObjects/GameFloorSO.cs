@@ -9,6 +9,7 @@ namespace SoulKnight3D
     public class GameFloorSO: ScriptableObject
     {
         public List<GameLevel> GameLevels = new List<GameLevel>();
+        public List<GameObject> BossPrefabs = new List<GameObject>();
     }
 
     [Serializable]

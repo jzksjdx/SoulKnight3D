@@ -12,7 +12,7 @@ namespace SoulKnight3D
         {
             Debug.Log("Global Auto init");
             ResKit.Init();
-            Application.targetFrameRate = -1;
+            //Application.targetFrameRate = -1;
         }
 
         protected override void Init()

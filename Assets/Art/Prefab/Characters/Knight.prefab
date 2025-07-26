@@ -1194,9 +1194,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6b7d9437acff4938a42c3875596c405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _skillCooldown: 10
+  _skillDuration: 5
+  IsUsingSkill: 0
   LeftHandWeaponPos: {fileID: 4993430893836585402}
   SkillEffect: {fileID: 4715560309431736335}
-  IsUsingSkill: 0
 --- !u!114 &8403453759952915731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4611,9 +4613,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxHealth: 6
   Speed: 1.5
+  Statuses: 
   MaxArmor: 5
   MaxEnergy: 200
-  _isInvincible: 0
+  IsInvincible: 0
 --- !u!114 &8669217510933041131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4656,7 +4659,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 459
   ChargeBar: {fileID: 2397799674995378271}
-  IsUsingBareHand: 0
+  DisableAttack: 0
 --- !u!114 &2279892939217942340
 MonoBehaviour:
   m_ObjectHideFlags: 0

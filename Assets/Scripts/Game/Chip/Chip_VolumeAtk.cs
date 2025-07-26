@@ -11,14 +11,13 @@ namespace SoulKnight3D
         private float _soundVolume = 1f;
 
         private float _minAtkSpeedFactor = 0.3f;
-        private float _maxBulletSize = 3f;
+        private float _maxBulletSize = 5f;
         private Weapon _weapon;
 
         protected override void Start()
         {
             base.Start();
 
-            _isUpgraded = true;
             ActionKit.DelayFrame(1, () =>
             {
                 _weapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();

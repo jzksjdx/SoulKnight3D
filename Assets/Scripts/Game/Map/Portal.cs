@@ -14,9 +14,8 @@ namespace SoulKnight3D
 				{
 					// win game;
 					AudioKit.PlaySound("fx_transform");
-
-					int level = GameController.Instance.Level;
-					if (level > 2) // win
+                    AudioKit.StopMusic();
+                    if (GameController.Instance.IsFinalLevel) // win
 					{
                         GameController.Instance.ToggleGameFreeze(true);
                         UIEndPanel endPanel = UIKit.OpenPanel<UIEndPanel>();

@@ -19,6 +19,8 @@ namespace SoulKnight3D
         [SerializeField] private string _description;
         [SerializeField] private string _upgradedDesc;
 
+        GameController gameController;
+
         protected virtual void Start()
         {
             ActionKit.DelayFrame(1, () =>
@@ -27,16 +29,39 @@ namespace SoulKnight3D
                 UpdateBugModeUi();
             }).Start(this);
 
+            gameController = GameController.Instance;
             GameController.Instance.OnRoomClear.Register(() =>
             {
                 AddProgress();
-            }).UnRegisterWhenGameObjectDestroyed(this);
+            }).UnRegisterWhenGameObjectDestroyed(GameController.Instance);
+
+            GameController.Instance.OnReturnMenu.Register(() =>
+            {
+                Destroy(gameObject);
+            }).UnRegisterWhenGameObjectDestroyed(GameController.Instance);
+
+            DontDestroyOnLoad(gameObject);
         }
 
-        // Update is called once per frame
-        void Update()
+        private void FixedUpdate()
         {
+            if (gameController == null)
+            {
+                gameController = FindObjectOfType<GameController>();
+                if (gameController)
+                {
+                    gameController.OnRoomClear.Register(() =>
+                    {
+                        AddProgress();
+                    }).UnRegisterWhenGameObjectDestroyed(gameController);
 
+                    ActionKit.DelayFrame(1, () =>
+                    {
+                        UIKit.GetPanel<UIGamePanel>().ToggleBugMode();
+                        UpdateBugModeUi();
+                    }).Start(this);
+                }
+            }
         }
 
         public virtual void AddProgress()
