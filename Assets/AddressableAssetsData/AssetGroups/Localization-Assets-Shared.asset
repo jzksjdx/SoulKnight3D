@@ -17,14 +17,13 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: b02f0a38d9d69417893408f4f76d2b6e
   m_SerializeEntries:
-  - m_GUID: 17739ebe8814c4f609ed2d6efb6510ad
-    m_Address: Assets/Art/LocalizationLocales/MainTable/MainTable Shared Data.asset
+  - m_GUID: 0e3f337dfeacf40b2a2387d70fdcb2c5
+    m_Address: Assets/Art/LocalizationLocales/GameTable/GameTable Shared Data.asset
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ea4f219605edb4458acc7f6d109d6f56
-    m_Address: Assets/Art/LocalizationLocales/GameAssetsTable/GameAssetsTable Shared
-      Data.asset
+  - m_GUID: 17739ebe8814c4f609ed2d6efb6510ad
+    m_Address: Assets/Art/LocalizationLocales/MainTable/MainTable Shared Data.asset
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -34,8 +33,9 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0e3f337dfeacf40b2a2387d70fdcb2c5
-    m_Address: Assets/Art/LocalizationLocales/GameTable/GameTable Shared Data.asset
+  - m_GUID: ea4f219605edb4458acc7f6d109d6f56
+    m_Address: Assets/Art/LocalizationLocales/GameAssetsTable/GameAssetsTable Shared
+      Data.asset
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

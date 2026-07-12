@@ -17,14 +17,14 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: e9a2113e7251740558bb9d9b7c808e51
   m_SerializeEntries:
-  - m_GUID: 8529eec71db6c4dd5b215232e0021a6a
-    m_Address: MainTable_zh
+  - m_GUID: 66a6e884b45d4411ab1f7a9741ebd7b4
+    m_Address: SettingsTable_zh
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-zh
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 66a6e884b45d4411ab1f7a9741ebd7b4
-    m_Address: SettingsTable_zh
+  - m_GUID: 8529eec71db6c4dd5b215232e0021a6a
+    m_Address: MainTable_zh
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-zh

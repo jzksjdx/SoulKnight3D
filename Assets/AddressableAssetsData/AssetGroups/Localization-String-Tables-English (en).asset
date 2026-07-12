@@ -23,14 +23,14 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-en
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 72934c0f22d9f43179c50e4b6eb5c903
-    m_Address: SettingsTable_en
+  - m_GUID: 0eb426bcf6f4d427d86604761d190069
+    m_Address: GameTable_en
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-en
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0eb426bcf6f4d427d86604761d190069
-    m_Address: GameTable_en
+  - m_GUID: 72934c0f22d9f43179c50e4b6eb5c903
+    m_Address: SettingsTable_en
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-en
