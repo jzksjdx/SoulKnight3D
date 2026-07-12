@@ -168,7 +168,7 @@ namespace SoulKnight3D
 
             if (Grounded)
             {
-                //PlayerAnimation.SetAnimatorJump(false);
+                _fallTimeoutDelta = _fallTimeout;
                 PlayerAnimation.SetAnimatorFreeFall(false);
             } else
             {

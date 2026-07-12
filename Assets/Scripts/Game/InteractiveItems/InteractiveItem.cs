@@ -9,10 +9,25 @@ namespace SoulKnight3D
     {
         public Collider InteractCollider;
         public InteractLabel Label;
+        public bool IsInteractable { get; private set; } = true;
 
         protected LanguageSystem _languageSystem;
 
         public virtual void Interact() { }
+
+        protected void SetInteractable(bool isInteractable)
+        {
+            IsInteractable = isInteractable;
+            if (InteractCollider != null)
+            {
+                InteractCollider.enabled = isInteractable;
+            }
+
+            if (!isInteractable && Label != null)
+            {
+                Label.Hide();
+            }
+        }
 
         protected virtual void Start()
         {

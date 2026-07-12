@@ -43,6 +43,8 @@ namespace SoulKnight3D
         // room objects references
         private List<GameObject> _enemies = new List<GameObject>();
         private SpikeTilesController _spikeTilesController;
+        private static readonly WaitForSeconds EnemyWavePollDelay = new WaitForSeconds(1f);
+        private const int SpawnPositionMaxAttempts = 32;
 
         public enum RoomType
         {
@@ -54,15 +56,28 @@ namespace SoulKnight3D
             Unexplored, InBattle, Explored
         }
 
-        private void Start()
+        private void Awake()
         {
             IconTransform = _roomIcon.transform;
             _player = PlayerController.Instance;
         }
 
+        private void Start()
+        {
+            if (_player == null)
+            {
+                _player = PlayerController.Instance;
+            }
+        }
+
         private void Update()
         {
-            if (_roomIcon.sprite == null) { return; }
+            if (_roomIcon.sprite == null || IconTransform == null || !IconTransform.gameObject.activeInHierarchy) { return; }
+            if (_player == null)
+            {
+                _player = PlayerController.Instance;
+                if (_player == null) { return; }
+            }
             IconTransform.rotation = Quaternion.Euler(90f, _player.transform.eulerAngles.y, 0f);
         }
 
@@ -109,6 +124,7 @@ namespace SoulKnight3D
             if (type == RoomType.Reward)
             {
                 GameObject newReward = Instantiate(DungeonChest, transform.position, Quaternion.identity);
+                newReward.transform.SetParent(transform);
                 newReward.transform.Translate(new Vector3(0, 0.043f, 0));
                 _roomIcon.sprite = IconChest;
             }
@@ -186,7 +202,13 @@ namespace SoulKnight3D
                 gate.OnPlayerEnter.Register(() =>
                 {
                     // determine if player in room
-                    if ((PlayerController.Instance.transform.position - transform.position).magnitude > _radius) {
+                    if (_player == null)
+                    {
+                        _player = PlayerController.Instance;
+                    }
+                    if (_player == null) { return; }
+
+                    if ((_player.transform.position - transform.position).sqrMagnitude > _radius * _radius) {
                         PlayerExitsRoom();
                         return;
                     }
@@ -212,7 +234,8 @@ namespace SoulKnight3D
                         UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = 1;
                         UIKit.GetPanel<UIGamePanel>().BossHealthRect.Show();
                         UIKit.OpenPanel<UIBossFight>();
-                        generatedBoss.GetComponent<Werewolf>().OnDeath.Register(() =>
+                        Werewolf boss = generatedBoss.GetComponent<Werewolf>();
+                        boss.OnDeath.Register(() =>
                         {
                             _generatedPortal.Show();
                             AudioKit.StopMusic();
@@ -238,22 +261,15 @@ namespace SoulKnight3D
                     for(int i = 1; i <= enemyWave.Count; i ++)
                     {
                         // ensure no room items around
-                        Vector3 spawnPosition;
-                        bool isValidPosition;
-                        do
-                        {
-                            Vector3 randomOffset = new Vector3(Random.Range(-reducedRadius, reducedRadius), 0.05f, Random.Range(-reducedRadius, reducedRadius));
-                            spawnPosition = transform.position + randomOffset;
-                            isValidPosition = !Physics.CheckSphere(spawnPosition, 0.5f, _itemLayerMask);
-                        }
-                        while (!isValidPosition);
+                        Vector3 spawnPosition = GetOpenPosition(reducedRadius, 0.05f, 0.5f);
 
                         // generate new enemy
                         GameObject newEnemy = Instantiate(enemyWave.EnemyPrefab, spawnPosition, Quaternion.identity);
                         newEnemy.transform.SetParent(transform);
                         _enemies.Add(newEnemy);
 
-                        newEnemy.GetComponent<Enemy>().OnDeath.Register(() =>
+                        Enemy enemy = newEnemy.GetComponent<Enemy>();
+                        enemy.OnDeath.Register(() =>
                         {
                             _enemies.Remove(newEnemy);
                         }).UnRegisterWhenGameObjectDestroyed(newEnemy);
@@ -264,7 +280,7 @@ namespace SoulKnight3D
                 // wait for current wave
                 while (_enemies.Count > 0)
                 {
-                    yield return new WaitForSeconds(1f);
+                    yield return EnemyWavePollDelay;
                 }
             }
 
@@ -282,15 +298,7 @@ namespace SoulKnight3D
             GameController.Instance.OnRoomClear.Trigger();
 
             // spawn white chest
-            Vector3 spawnChestPosition;
-            bool isChestPosValid;
-            do
-            {
-                Vector3 randomOffset = new Vector3(Random.Range(-_radius, _radius), 0.043f, Random.Range(-_radius, _radius));
-                spawnChestPosition = transform.position + randomOffset;
-                isChestPosValid = !Physics.CheckSphere(spawnChestPosition, 0.5f, _itemLayerMask);
-            }
-            while (!isChestPosValid);
+            Vector3 spawnChestPosition = GetOpenPosition(_radius, 0.043f, 0.5f);
             AudioKit.PlaySound("fx_show_up");
             GameObject newWhiteChest = Instantiate(WhiteChest, spawnChestPosition, Quaternion.identity);
             newWhiteChest.transform.SetParent(transform);
@@ -312,7 +320,10 @@ namespace SoulKnight3D
             {
                 Status = RoomStatus.Explored;
             }
-            MinimapTile.color = _exploredColor;
+            if (MinimapTile != null)
+            {
+                MinimapTile.color = _exploredColor;
+            }
             foreach (SpriteRenderer hallwayTile in HallwayMinimapTiles)
             {
                 hallwayTile.color = _exploredColor;
@@ -321,7 +332,10 @@ namespace SoulKnight3D
             {
                 if (room.Status == RoomStatus.Unexplored)
                 {
-                    room.MinimapTile.color = _detectedColor;
+                    if (room.MinimapTile != null)
+                    {
+                        room.MinimapTile.color = _detectedColor;
+                    }
                 }
             }
 
@@ -330,6 +344,11 @@ namespace SoulKnight3D
             {
                 if (Type == RoomType.Battle || Type == RoomType.Boss)
                 {
+                    if (_player == null)
+                    {
+                        _player = PlayerController.Instance;
+                    }
+                    if (_player == null) { return; }
                     _player.MinimapCam.TogglePosition(true);
                 }
             }
@@ -347,6 +366,21 @@ namespace SoulKnight3D
             {
                 _spikeTilesController.ToggleSpikeTiles(false);
             }
+        }
+
+        private Vector3 GetOpenPosition(float radius, float yOffset, float checkRadius)
+        {
+            for (int attempt = 0; attempt < SpawnPositionMaxAttempts; attempt++)
+            {
+                Vector3 randomOffset = new Vector3(Random.Range(-radius, radius), yOffset, Random.Range(-radius, radius));
+                Vector3 candidate = transform.position + randomOffset;
+                if (!Physics.CheckSphere(candidate, checkRadius, _itemLayerMask))
+                {
+                    return candidate;
+                }
+            }
+
+            return transform.position + Vector3.up * yOffset;
         }
     }
 }

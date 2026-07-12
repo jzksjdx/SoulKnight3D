@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
-using System;
 using Random = UnityEngine.Random;
 
 namespace SoulKnight3D
@@ -36,42 +35,7 @@ namespace SoulKnight3D
             string chestLabelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese ? "宝箱" : "Chest";
             Label.SetLabelText(chestLabelText, WeaponData.WeaponRarity.White);
 
-            // calculate rewards, determine reward category
-            //Random.InitState((int)DateTime.Now.Ticks);
-            float totalRewardTypeRate = 0f;
-            foreach (ChestRewardData.RewardCategory category in ChestReward.ChestRewards)
-            {
-                totalRewardTypeRate += category.Rate;
-            }
-            float randomRewardTypeRate = Random.Range(0f, totalRewardTypeRate);
-            float currRewardTypeRate = 0f;
-            for (int i = 0; i < ChestReward.ChestRewards.Count; i++)
-            {
-                currRewardTypeRate += ChestReward.ChestRewards[i].Rate;
-                if (currRewardTypeRate >= randomRewardTypeRate)
-                {
-                    _rewardTypeIndex = i;
-                    _selectedType = ChestReward.ChestRewards[i].Type;
-                    break;
-                }
-            }
-            // determine reward item
-            float totalRewardItemRate = 0f;
-            foreach(ChestRewardData.RewardItem item in ChestReward.ChestRewards[_rewardTypeIndex].Items)
-            {
-                totalRewardItemRate += item.Rate;
-            }
-            float randomRewardItemRate = Random.Range(0f, totalRewardItemRate);
-            float currRewardItemRate = 0f;
-            for (int j = 0; j < ChestReward.ChestRewards[_rewardTypeIndex].Items.Count; j++)
-            {
-                currRewardItemRate += ChestReward.ChestRewards[_rewardTypeIndex].Items[j].Rate;
-                if (currRewardItemRate >= randomRewardItemRate)
-                {
-                    _rewardItemIndex = j;
-                    break;
-                }
-            }
+            SelectReward();
             // for weapon reward
             _startPos = transform.position;
             _finalPos = _startPos + new Vector3(0, 0.4f, 0);
@@ -79,14 +43,16 @@ namespace SoulKnight3D
 
         public override void Interact()
         {
-            InteractCollider.enabled = false;
+            if (!IsInteractable) { return; }
+
+            SetInteractable(false);
             AudioKit.PlaySound("fx_chest_open");
             _animator.SetTrigger(_animIdOpen);
 
             switch(_selectedType)
             {
                 case ChestRewardData.ChestRewardType.EnergyAndCoin:
-                    for (int i = 0; i <= 3; i++)
+                    for (int i = 0; i < 4; i++)
                     {
                         GameObject newOrb = GameObjectsManager.Instance.SpawnEnergyOrb(transform.position);
                         Rigidbody rb = newOrb.GetComponent<Rigidbody>();
@@ -96,16 +62,22 @@ namespace SoulKnight3D
                     }
                     break;
                 case ChestRewardData.ChestRewardType.Potion:
-                    Instantiate(ChestReward.ChestRewards[_rewardTypeIndex].Items[_rewardItemIndex].Item, transform);
+                    GameObject potionReward = GetSelectedRewardItem();
+                    if (potionReward != null)
+                    {
+                        Instantiate(potionReward, transform);
+                    }
                     break;
                 case ChestRewardData.ChestRewardType.Weapon:
-                    Random.InitState((int)DateTime.Now.Ticks);
-                    _chestItem = Instantiate(ChestReward.ChestRewards[_rewardTypeIndex].Items[_rewardItemIndex].Item, transform);
-                    _chestItem.GetComponent<PickupWeapon>().SelfRigidBody.isKinematic = true;
-                    _lerpTimeoutDelta = _lerpTimeout;
+                    GameObject weaponReward = GetSelectedRewardItem();
+                    if (weaponReward != null)
+                    {
+                        _chestItem = Instantiate(weaponReward, transform);
+                        _chestItem.GetComponent<PickupWeapon>().SelfRigidBody.isKinematic = true;
+                        _lerpTimeoutDelta = _lerpTimeout;
+                    }
                     break;
             }
-            Label.Hide();
         }
 
         private void Update()
@@ -117,6 +89,75 @@ namespace SoulKnight3D
                 _chestItem.transform.position = Vector3.Lerp(_startPos, _finalPos, percent);
                 _chestItem.transform.localScale = Vector3.Lerp(_startScale, Vector3.one, percent);
             }
+        }
+
+        private void SelectReward()
+        {
+            if (ChestReward == null || ChestReward.ChestRewards.Count == 0) { return; }
+
+            _rewardTypeIndex = SelectRewardCategoryIndex();
+            _selectedType = ChestReward.ChestRewards[_rewardTypeIndex].Type;
+
+            List<ChestRewardData.RewardItem> rewardItems = ChestReward.ChestRewards[_rewardTypeIndex].Items;
+            _rewardItemIndex = rewardItems.Count == 0 ? 0 : SelectRewardItemIndex(rewardItems);
+        }
+
+        private int SelectRewardCategoryIndex()
+        {
+            float totalRate = 0f;
+            foreach (ChestRewardData.RewardCategory category in ChestReward.ChestRewards)
+            {
+                totalRate += Mathf.Max(0f, category.Rate);
+            }
+
+            if (totalRate <= 0f) { return 0; }
+
+            float randomRate = Random.Range(0f, totalRate);
+            float currentRate = 0f;
+            for (int i = 0; i < ChestReward.ChestRewards.Count; i++)
+            {
+                currentRate += Mathf.Max(0f, ChestReward.ChestRewards[i].Rate);
+                if (currentRate >= randomRate)
+                {
+                    return i;
+                }
+            }
+
+            return ChestReward.ChestRewards.Count - 1;
+        }
+
+        private int SelectRewardItemIndex(List<ChestRewardData.RewardItem> rewardItems)
+        {
+            float totalRate = 0f;
+            foreach (ChestRewardData.RewardItem item in rewardItems)
+            {
+                totalRate += Mathf.Max(0f, item.Rate);
+            }
+
+            if (totalRate <= 0f) { return 0; }
+
+            float randomRate = Random.Range(0f, totalRate);
+            float currentRate = 0f;
+            for (int i = 0; i < rewardItems.Count; i++)
+            {
+                currentRate += Mathf.Max(0f, rewardItems[i].Rate);
+                if (currentRate >= randomRate)
+                {
+                    return i;
+                }
+            }
+
+            return rewardItems.Count - 1;
+        }
+
+        private GameObject GetSelectedRewardItem()
+        {
+            if (ChestReward == null || ChestReward.ChestRewards.Count <= _rewardTypeIndex) { return null; }
+
+            List<ChestRewardData.RewardItem> rewardItems = ChestReward.ChestRewards[_rewardTypeIndex].Items;
+            if (rewardItems.Count <= _rewardItemIndex) { return null; }
+
+            return rewardItems[_rewardItemIndex].Item;
         }
 
 

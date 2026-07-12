@@ -7,10 +7,22 @@ namespace SoulKnight3D
     public class InteractLabel : MonoBehaviour
     {
         public TextMesh LabelText;
+        private Camera _mainCamera;
+
+        private void Start()
+        {
+            _mainCamera = Camera.main;
+        }
 
         void Update()
         {
-            transform.LookAt(Camera.main.transform);
+            if (_mainCamera == null)
+            {
+                _mainCamera = Camera.main;
+                if (_mainCamera == null) { return; }
+            }
+
+            transform.LookAt(_mainCamera.transform);
         }
 
         public void SetLabelText(string text, WeaponData.WeaponRarity color)

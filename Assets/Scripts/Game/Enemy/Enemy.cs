@@ -1,8 +1,6 @@
 using UnityEngine;
 using QFramework;
 using System.Collections.Generic;
-using MoonSharp.Interpreter;
-using UnityEditor;
 
 namespace SoulKnight3D
 {
@@ -38,6 +36,7 @@ namespace SoulKnight3D
         private List<Material> _dissolveMaterials = new List<Material>();
 
         protected Vector3 _moveDirection;
+        private PlayerController _player;
 
         protected override void Start()
 		{
@@ -47,6 +46,7 @@ namespace SoulKnight3D
             _animIdAttack = Animator.StringToHash("Attack");
             _animIdDie = Animator.StringToHash("Die");
             SelfAnimator.SetTrigger(_animIdMove);
+            _player = PlayerController.Instance;
 
             // set time out delta
             _dissolveTimeoutDelta = 0f;
@@ -73,6 +73,7 @@ namespace SoulKnight3D
                 return;
             }
 
+            if (Player == null) { return; }
             LookAtPlayer();
 
             switch (State)
@@ -93,8 +94,9 @@ namespace SoulKnight3D
 
         protected virtual void LookAtPlayer()
         {
-            _moveDirection = PlayerController.Instance.transform.position - transform.position;
+            _moveDirection = Player.transform.position - transform.position;
             Vector3 lookDirection = new Vector3(_moveDirection.x, 0, _moveDirection.z);
+            if (lookDirection.sqrMagnitude <= 0.0001f) { return; }
             Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
             transform.rotation = lookRotation;
             _currRotation = lookRotation;
@@ -102,7 +104,7 @@ namespace SoulKnight3D
 
         protected virtual void HandleChasing()
         {
-            if (_moveDirection.magnitude <= Range)
+            if (_moveDirection.sqrMagnitude <= Range * Range)
             {
                 // attack
                 SelfAnimator.SetTrigger(_animIdAttack);
@@ -112,7 +114,8 @@ namespace SoulKnight3D
             else
             {
                 // move
-                Vector3 moveSpeed = new Vector3(_moveDirection.normalized.x * Speed, SelfRigidbody.velocity.y, _moveDirection.normalized.z * Speed);
+                Vector3 chaseDirection = new Vector3(_moveDirection.x, 0f, _moveDirection.z).normalized;
+                Vector3 moveSpeed = new Vector3(chaseDirection.x * Speed, SelfRigidbody.velocity.y, chaseDirection.z * Speed);
                 SelfRigidbody.velocity = moveSpeed;
             }
         }
@@ -125,10 +128,7 @@ namespace SoulKnight3D
             }
             else
             {
-                _patrolDirection = new Vector3(
-                    transform.position.x + Random.Range(-5, 5),
-                    transform.position.y,
-                    transform.position.z + Random.Range(-5, 5)).normalized;
+                _patrolDirection = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
 
                 SelfAnimator.SetTrigger(_animIdMove);
                 _patrolTimeoutDelta = _patrolTimeout;
@@ -188,13 +188,13 @@ namespace SoulKnight3D
             }
         }
 
-		public void MeleeAttackAnimationEffect()
+        public void MeleeAttackAnimationEffect()
         {
             AudioKit.PlaySound("fx_sword");
-            float distance = (PlayerController.Instance.transform.position - transform.position).magnitude;
-            if (distance <= Range)
+            if (Player == null) { return; }
+            if ((Player.transform.position - transform.position).sqrMagnitude <= Range * Range)
             {
-                PlayerController.Instance.PlayerStats.ApplyDamage(Attack);
+                Player.PlayerStats.ApplyDamage(Attack);
             }
 		}
 
@@ -203,6 +203,18 @@ namespace SoulKnight3D
             for (int i = 0; i < _dissolveMaterials.Count; i++)
             {
                 _dissolveMaterials[i].SetFloat("_Dissolve", value);
+            }
+        }
+
+        protected PlayerController Player
+        {
+            get
+            {
+                if (_player == null)
+                {
+                    _player = PlayerController.Instance;
+                }
+                return _player;
             }
         }
 

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
 
@@ -41,6 +39,7 @@ namespace SoulKnight3D
 
         public virtual void Reset()
         {
+            _durationTimer = 0f;
             gameObject.Hide();
         }
 

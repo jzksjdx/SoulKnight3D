@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
-using QFramework;
 
 namespace SoulKnight3D
 {
@@ -11,36 +7,26 @@ namespace SoulKnight3D
         [SerializeField] private int _damage;
         [SerializeField] private float _damageCooldown;
 
-        private IEnumerator _damageTask;
+        private float _damageCooldownTimer;
 
-        public override void ActivateStatus(TargetableObject target)
+        protected override void OnStatusApplied()
         {
-            base.ActivateStatus(target);
-
-            gameObject.Show();
-            _damageTask = AppyDamage();
-            StartCoroutine(_damageTask);
+            _damageCooldownTimer = 0f;
         }
 
-        private IEnumerator AppyDamage()
+        protected override void OnStatusTick(float deltaTime)
         {
-            while(_target != null)
+            if (_target == null) { return; }
+
+            _damageCooldownTimer -= deltaTime;
+            if (_damageCooldownTimer > 0f) { return; }
+
+            _damageCooldownTimer = _damageCooldown;
+            if (_target.CompareTag("Enemy")) // only apply damage to enemies
             {
-                if (_target.CompareTag("Enemy")) // only apply damage to enemies
-                {
-                    _target.ApplyDamage(_damage);
-                    GameController.Instance.SpawnDamageText(_damage, _target.transform.position);
-                }
-                
-                yield return new WaitForSeconds(_damageCooldown);
+                _target.ApplyDamage(_damage);
+                GameController.Instance.SpawnDamageText(_damage, _target.transform.position);
             }
-        }
-
-        protected override void HandleDespawn()
-        {
-            base.HandleDespawn();
-            StopCoroutine(_damageTask);
-            _damageTask = null;
         }
     }
 

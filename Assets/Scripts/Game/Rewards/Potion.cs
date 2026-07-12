@@ -23,6 +23,9 @@ namespace SoulKnight3D
 
         public override void Interact()
         {
+            if (!IsInteractable) { return; }
+
+            SetInteractable(false);
             PlayerStats stats = PlayerController.Instance.PlayerStats;
             stats.RecoverEnergy(_recoverEnergyValue);
             stats.RecoverHealth(_recoverHealValue);

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using QFramework;
 
 namespace SoulKnight3D
 {
@@ -10,18 +7,18 @@ namespace SoulKnight3D
         public float SpeedChange;
         private float _originalSpeed;
 
-        public override void ActivateStatus(TargetableObject target)
+        protected override void OnStatusApplied()
         {
-            base.ActivateStatus(target);
-            _originalSpeed = target.Speed;
-            ToggleBuff(target, true);
-          
+            _originalSpeed = _target.Speed;
+            ToggleBuff(_target, true);
         }
 
-        protected override void HandleDespawn()
+        protected override void OnStatusRemoved()
         {
-            ToggleBuff(_target, false);
-            base.HandleDespawn();
+            if (_target != null)
+            {
+                ToggleBuff(_target, false);
+            }
         }
 
         public void ToggleBuff(TargetableObject target, bool isBuffOn)

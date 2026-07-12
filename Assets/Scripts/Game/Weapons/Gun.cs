@@ -41,11 +41,12 @@ namespace SoulKnight3D
 		{
 			//float deviateAmount = 0;
             float deviateAmount = (float)InGameData.Inaccuracy / 500;
-			return new Vector3(
+			Vector3 deviatedDirection = new Vector3(
 				shootDirection.x + Random.Range(-deviateAmount, deviateAmount),
 				shootDirection.y + Random.Range(-deviateAmount, deviateAmount),
 				shootDirection.z + Random.Range(-deviateAmount, deviateAmount)
 				);
+            return deviatedDirection.sqrMagnitude <= 0.0001f ? shootDirection.normalized : deviatedDirection.normalized;
 		}
 
 		public virtual void ShootWithDirection(Vector3 direction)
@@ -62,7 +63,7 @@ namespace SoulKnight3D
 				.Position(position);
 			Bullet newBullet = newBulletObj.GetComponent<Bullet>();
             newBullet.InitializeBullet(tag, InGameData.Damage, GetIsCritHit(), bulletPrefab, BulletSize);
-            newBulletObj.Show();
+            newBullet.ShowFromPool();
             return newBullet;
 		}
     }

@@ -44,6 +44,8 @@ namespace SoulKnight3D
         {
             Instance = null;
 
+            if (inputActions == null) { return; }
+
             inputActions.Player.Jump.performed -= Jump_performed;
             inputActions.Player.Attack.performed -= Attack_performed;
             inputActions.Player.Attack.canceled -= Attack_canceled;
@@ -51,6 +53,8 @@ namespace SoulKnight3D
             inputActions.Player.Switch.performed -= Switch_performed;
             inputActions.Player.Interact.performed -= Interact_performed;
             inputActions.Player.Pause.performed -= Pause_performed;
+            inputActions.Player.Disable();
+            inputActions.Dispose();
         }
 
         public void DisableMoveAndAtk()
@@ -100,6 +104,7 @@ namespace SoulKnight3D
 
         private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
+            if (Time.timeScale == 0) { return; }
             OnInteractPerformed.Trigger();
         }
 

@@ -22,6 +22,7 @@ namespace SoulKnight3D {
 
         private float _interactDistance = 2f;
         private InteractiveItem _interactiveItem;
+        private Camera _mainCamera;
 
         public bool DisableAttack = false;
 
@@ -35,6 +36,7 @@ namespace SoulKnight3D {
         {
             _playerStats = GetComponent<PlayerStats>();
             PlayerAnimation = GetComponent<PlayerAnimation>();
+            _mainCamera = Camera.main;
 
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
             {
@@ -53,10 +55,7 @@ namespace SoulKnight3D {
 
             if (_currentWeapon)
             {
-                _currentWeapon.OnWeaponFired.Register(() =>
-                {
-                    OnPlayerAttaked.Trigger();
-                }).AddToUnregisterList(this);
+                RegisterCurrentWeaponFiredEvent();
             }
         }
 
@@ -70,45 +69,7 @@ namespace SoulKnight3D {
                 Attack();
             }
 
-            Vector2 screenCenterPoint = new Vector2(Screen.width / 2, Screen.height / 2);
-            Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
-            // raycast for aiming
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, 100f, AimLayer))
-            {
-                target.position = raycastHit.point;
-            }
-
-            // raycast for interaction
-            if (Physics.Raycast(ray, out RaycastHit interactableHit, _interactDistance, AimLayer))
-            {
-                if (interactableHit.transform.TryGetComponent(out InteractiveItem interactiveItem))
-                {
-                    if (interactiveItem != _interactiveItem)
-                    {
-                        _interactiveItem = interactiveItem;
-                        interactiveItem.Label.gameObject.Show();
-                        OnInteractiveItemChanged.Trigger(interactiveItem);
-                    }
-                }
-                else
-                {
-                    if (_interactiveItem != null)
-                    {
-                        _interactiveItem.Label.gameObject.Hide();
-                        _interactiveItem = null;
-                        OnInteractiveItemChanged.Trigger(null);
-                    }
-                }
-            }
-            else
-            {
-                if (_interactiveItem != null)
-                {
-                    _interactiveItem.Label.gameObject.Hide();
-                    _interactiveItem = null;
-                    OnInteractiveItemChanged.Trigger(null);
-                }
-            }
+            UpdateAimAndInteraction();
         }
 
         private void Attack()
@@ -121,10 +82,20 @@ namespace SoulKnight3D {
 
         public void Interact()
         {
-            if (_interactiveItem == null) { return; }
-            _interactiveItem.Interact();
+            if (_interactiveItem == null)
+            {
+                SetInteractiveItem(null);
+                return;
+            }
+            if (!_interactiveItem.IsInteractable)
+            {
+                SetInteractiveItem(null);
+                return;
+            }
 
-            OnInteractiveItemChanged.Trigger(null);
+            InteractiveItem item = _interactiveItem;
+            SetInteractiveItem(null);
+            item.Interact();
         }
 
         public void TakeNewWeapon(GameObject newWeapon)
@@ -134,80 +105,37 @@ namespace SoulKnight3D {
                 DropCurrentWeapon();
             }
             Weapons.Add(newWeapon);
-            SwitchWeapon();
+            EquipWeapon(Weapons.Count - 1, true);
         }
 
         public void DropCurrentWeapon()
         {
+            if (_currentWeapon == null || Weapons.Count == 0) { return; }
+
             GameObject oldWeapon = Weapons[_currentWeaponIndex];
-            Weapons.Remove(Weapons[_currentWeaponIndex]);
+            Weapons.RemoveAt(_currentWeaponIndex);
             GameObject droppedWeapon = Instantiate(_currentWeapon.InGameData.PickUpPrefab, WeaponPoint.position, Quaternion.identity);
             droppedWeapon.GetComponent<PickupWeapon>().SelfRigidBody.AddForce(transform.forward * 3f, ForceMode.Impulse);
             _currentWeapon = null;
+            _currentWeaponIndex = Mathf.Clamp(_currentWeaponIndex, 0, Mathf.Max(Weapons.Count - 1, 0));
             Destroy(oldWeapon);
         }
 
         public void SwitchWeapon()
         {
-            // handle one weapon
+            if (Weapons.Count == 0) { return; }
+
             if (Weapons.Count == 1)
             {
-                // handle no weapon / game start
                 if (_currentWeapon == null)
                 {
-                    _currentWeapon = Weapons[0].GetComponent<Weapon>();
-                    PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
-                    _currentWeapon.OnWeaponFired.Register(() =>
-                    {
-                        _playerStats.Energy.Value -= _currentWeapon.InGameData.EnergyCost;
-                    }).UnRegisterWhenDisabled(_currentWeapon);
-                    OnWeaponSwitched.Trigger(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
-
-                    if (Skill.TryGetComponent(out DualWield skill))
-                    {
-                        skill.HandleRightHandWeaponChange(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
-                    }
-                    
+                    EquipWeapon(0, false);
                 }
                 return;
             }
 
-            // handle more than one weapon
-            Weapons[_currentWeaponIndex].Hide();
-
-            if (_currentWeaponIndex + 1 == Weapons.Count)
-            {
-                _currentWeaponIndex = 0;
-            }
-            else
-            {
-                _currentWeaponIndex++;
-
-            }
-            Weapons[_currentWeaponIndex].Show();
-
-            Weapon mWeapon = Weapons[_currentWeaponIndex].GetComponent<Weapon>();
-            mWeapon.OnWeaponFired.Register(() =>
-            {
-                _playerStats.Energy.Value -= mWeapon.InGameData.EnergyCost;
-            }).UnRegisterWhenDisabled(mWeapon);
-
-            _currentWeapon = Weapons[_currentWeaponIndex].GetComponent<Weapon>();
-
-            if (Skill.IsUsingSkill == false)
-            {
-                PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
-            }
-
-            AudioKit.PlaySound("fx_switch");
-
-            OnWeaponSwitched.Trigger(_currentWeapon.InGameData, Weapons[_currentWeaponIndex]);
-
-            this.UnRegisterAll();
-            _currentWeapon.OnWeaponFired.Register(() =>
-            {
-                OnPlayerAttaked.Trigger();
-            }).AddToUnregisterList(this);
+            int nextWeaponIndex = _currentWeapon == null ? _currentWeaponIndex : (_currentWeaponIndex + 1) % Weapons.Count;
+            EquipWeapon(nextWeaponIndex, true);
         }
 
         public Weapon GetCurrentWeapon()
@@ -217,6 +145,7 @@ namespace SoulKnight3D {
 
         public void AllowChargeWeaponToShoot()
         {
+            if (_currentWeapon == null) { return; }
             if (_currentWeapon.TryGetComponent(out ChargeWeapon chargeWeapon))
             {
                 chargeWeapon.AllowShoot();
@@ -240,6 +169,7 @@ namespace SoulKnight3D {
 
         public void HandleMeleeWeaponAttack()
         {
+            if (_currentWeapon == null) { return; }
             if (_currentWeapon.TryGetComponent(out Sword sword))
             {
                 sword.AttackFromAniamtion();
@@ -248,17 +178,126 @@ namespace SoulKnight3D {
 
         public void ToggleBareHandAttack(bool isBareHand)
         {
+            if (_currentWeapon == null || Weapons.Count == 0) { return; }
+
             if (isBareHand)
             {
                 Weapons[_currentWeaponIndex].Hide();
             } else
             {
                 Weapons[_currentWeaponIndex].Show();
-                _currentWeapon.OnWeaponFired.Register(() =>
-                {
-                    _playerStats.Energy.Value -= _currentWeapon.InGameData.EnergyCost;
-                }).UnRegisterWhenDisabled(_currentWeapon);
+                RegisterWeaponEnergySpend(_currentWeapon);
             }
+        }
+
+        private void UpdateAimAndInteraction()
+        {
+            if (_mainCamera == null)
+            {
+                _mainCamera = Camera.main;
+            }
+
+            if (_mainCamera == null)
+            {
+                SetInteractiveItem(null);
+                return;
+            }
+
+            Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
+            Ray ray = _mainCamera.ScreenPointToRay(screenCenterPoint);
+
+            if (!Physics.Raycast(ray, out RaycastHit raycastHit, 100f, AimLayer))
+            {
+                SetInteractiveItem(null);
+                return;
+            }
+
+            target.position = raycastHit.point;
+
+            if (raycastHit.distance <= _interactDistance
+                && raycastHit.transform.TryGetComponent(out InteractiveItem interactiveItem)
+                && interactiveItem.IsInteractable)
+            {
+                SetInteractiveItem(interactiveItem);
+            }
+            else
+            {
+                SetInteractiveItem(null);
+            }
+        }
+
+        private void SetInteractiveItem(InteractiveItem interactiveItem)
+        {
+            if (ReferenceEquals(_interactiveItem, interactiveItem)) { return; }
+
+            if (_interactiveItem != null)
+            {
+                _interactiveItem.Label.Hide();
+            }
+
+            _interactiveItem = interactiveItem;
+
+            if (_interactiveItem != null)
+            {
+                _interactiveItem.Label.Show();
+            }
+
+            OnInteractiveItemChanged.Trigger(_interactiveItem);
+        }
+
+        private void EquipWeapon(int weaponIndex, bool playSound)
+        {
+            if (weaponIndex < 0 || weaponIndex >= Weapons.Count) { return; }
+
+            bool isInitialEquip = _currentWeapon == null;
+            if (_currentWeapon != null && _currentWeaponIndex >= 0 && _currentWeaponIndex < Weapons.Count)
+            {
+                Weapons[_currentWeaponIndex].Hide();
+            }
+
+            _currentWeaponIndex = weaponIndex;
+            GameObject weaponObject = Weapons[_currentWeaponIndex];
+            weaponObject.Show();
+            _currentWeapon = weaponObject.GetComponent<Weapon>();
+
+            RegisterWeaponEnergySpend(_currentWeapon);
+            RegisterCurrentWeaponFiredEvent();
+
+            if (Skill == null || Skill.IsUsingSkill == false)
+            {
+                PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
+            }
+
+            if (playSound)
+            {
+                AudioKit.PlaySound("fx_switch");
+            }
+
+            OnWeaponSwitched.Trigger(_currentWeapon.InGameData, weaponObject);
+
+            if (isInitialEquip && Skill != null && Skill.TryGetComponent(out DualWield skill))
+            {
+                skill.HandleRightHandWeaponChange(_currentWeapon.InGameData, weaponObject);
+            }
+        }
+
+        private void RegisterWeaponEnergySpend(Weapon weapon)
+        {
+            weapon.OnWeaponFired.Register(() =>
+            {
+                _playerStats.Energy.Value -= weapon.InGameData.EnergyCost;
+            }).UnRegisterWhenDisabled(weapon);
+        }
+
+        private void RegisterCurrentWeaponFiredEvent()
+        {
+            this.UnRegisterAll();
+            if (_currentWeapon == null) { return; }
+
+            _currentWeapon.OnWeaponFired.Register(() =>
+            {
+                OnPlayerAttaked.Trigger();
+            }).AddToUnregisterList(this);
         }
     }
 }

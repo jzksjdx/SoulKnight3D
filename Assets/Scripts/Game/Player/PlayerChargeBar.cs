@@ -10,10 +10,15 @@ namespace SoulKnight3D
 
         public void UpdateChargeBar(float progress) // progress in 0 to 1
         {
-            if (progress > 1) { return; }
-            int gridNum = Mathf.FloorToInt(progress * 5);
-            float currentGridPercent = progress * 5 - gridNum;
-            ChargeBarGrids[gridNum].color = new Color(1, 1, 1, currentGridPercent);
+            if (ChargeBarGrids.Count == 0) { return; }
+
+            progress = Mathf.Clamp01(progress);
+            float scaledProgress = progress * ChargeBarGrids.Count;
+            for (int i = 0; i < ChargeBarGrids.Count; i++)
+            {
+                float gridFill = Mathf.Clamp01(scaledProgress - i);
+                ChargeBarGrids[i].color = new Color(1, 1, 1, gridFill);
+            }
         }
 
         public void ResetChargeBar()

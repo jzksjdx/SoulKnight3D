@@ -18,11 +18,17 @@ namespace SoulKnight3D
 
             // register starting weapon
             Weapon startWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
-            _weaponCache = startWeapon;
-            _critChanceCache = startWeapon.InGameData.CritChance;
+            if (startWeapon != null)
+            {
+                _weaponCache = startWeapon;
+                _critChanceCache = startWeapon.InGameData.CritChance;
+            }
             PlayerController.Instance.PlayerAttack.OnPlayerAttaked.Register(() =>
             {
-                _weaponCache.InGameData.CritChance = _critChanceCache;
+                if (_weaponCache != null)
+                {
+                    _weaponCache.InGameData.CritChance = _critChanceCache;
+                }
             }).UnRegisterWhenGameObjectDestroyed(this);
 
             PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData, weaponObject) =>
@@ -40,9 +46,9 @@ namespace SoulKnight3D
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
-        public override void UseSkill()
+        public override bool UseSkill()
         {
-            base.UseSkill();
+            if (!base.UseSkill()) { return false; }
             PlayerController.Instance.PlayerAnimation.ToggleDodge(true);
             PlayerController.Instance.PlayerAttack.DisableAttack = true;
             AudioKit.PlaySound("fx_skill_c2");
@@ -58,6 +64,7 @@ namespace SoulKnight3D
             PlayerController.Instance.SelfRigidbody.AddForce(dodgeDir * DodgeForce, ForceMode.Impulse);
             PlayerController.Instance.PlayerStats.IsInvincible = true;
             Physics.IgnoreLayerCollision(3, 10, true);
+            return true;
         }
 
 
@@ -66,7 +73,10 @@ namespace SoulKnight3D
             base.HandleSkillEnd();
 
             // enforce critical attack
-            _weaponCache.InGameData.CritChance = 100;
+            if (_weaponCache != null)
+            {
+                _weaponCache.InGameData.CritChance = 100;
+            }
 
             PlayerController.Instance.PlayerAnimation.ToggleDodge(false);
             PlayerController.Instance.PlayerAttack.DisableAttack = false;

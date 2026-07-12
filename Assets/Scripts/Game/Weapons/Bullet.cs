@@ -1,7 +1,5 @@
 using UnityEngine;
 using QFramework;
-using System;
-using System.Collections;
 using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
@@ -31,6 +29,7 @@ namespace SoulKnight3D
             _didHit = false;
             if (TrailRenderer)
             {
+                TrailRenderer.emitting = false;
                 TrailRenderer.Clear();
             }
 
@@ -44,22 +43,22 @@ namespace SoulKnight3D
             {
                 if (_didHit) { return; }
                 _didHit = true;
-                HandleCollision(other);
-
-                if (ImpactFeedback)
-                {
-                    ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
-                    ImpactFeedback?.PlayFeedbacks();
-                }
-                DestroyBullet();
-
+                OnBulletCollision(other);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
-        private void HandleCollision(Collision other)
+        protected virtual void OnBulletCollision(Collision other)
+        {
+            HandleCollision(other);
+            PlayImpactFeedback();
+            DestroyBullet();
+        }
+
+        protected void HandleCollision(Collision other)
         {
             if (other.collider.TryGetComponent(out TargetableObject targetableObject))
             {
+                if (other.collider.CompareTag(_weaponTag)) { return; }
 
                 if (targetableObject.IsDead) { return; }
 
@@ -81,6 +80,18 @@ namespace SoulKnight3D
             }
         }
 
+        protected void PlayImpactFeedback()
+        {
+            if (!ImpactFeedback) { return; }
+
+            MMF_ParticlesInstantiation particles = ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>();
+            if (particles != null)
+            {
+                particles.TargetWorldPosition = transform.position;
+            }
+            ImpactFeedback.PlayFeedbacks();
+        }
+
         private void Update()
         {
             if (_destroyTimeoutDelta >= 0)
@@ -96,7 +107,14 @@ namespace SoulKnight3D
         public void DestroyBullet()
         {
             if (!gameObject.activeSelf) { return; }
-            GameObjectsManager.Instance.DespawnBullet(this);
+            if (GameObjectsManager.Instance)
+            {
+                GameObjectsManager.Instance.DespawnBullet(this);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         public void Reset()
@@ -104,7 +122,27 @@ namespace SoulKnight3D
             _destroyTimeoutDelta = _destroyTimeout;
             _isCritHit = false;
             _didHit = false;
+            if (SelfRigidbody != null)
+            {
+                SelfRigidbody.velocity = Vector3.zero;
+                SelfRigidbody.angularVelocity = Vector3.zero;
+            }
+            transform.localScale = _originalScale;
+            if (TrailRenderer)
+            {
+                TrailRenderer.emitting = false;
+                TrailRenderer.Clear();
+            }
             gameObject.Hide();
+        }
+
+        public void ShowFromPool()
+        {
+            gameObject.Show();
+            if (!TrailRenderer) { return; }
+
+            TrailRenderer.Clear();
+            TrailRenderer.emitting = true;
         }
     }
 }

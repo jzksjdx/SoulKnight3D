@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
@@ -10,13 +9,14 @@ namespace SoulKnight3D {
 
         public GameObject EnergyOrbPrefab;
 
-        private SimpleObjectPool<GameObject> _energyOrbPool;
+        private SimpleObjectPool<EnergyOrb> _energyOrbPool;
 
-        private Dictionary<GameObject, SimpleObjectPool<GameObject>> _bulletPools = new Dictionary<GameObject, SimpleObjectPool<GameObject>>();
+        private readonly Dictionary<GameObject, SimpleObjectPool<Bullet>> _bulletPools = new Dictionary<GameObject, SimpleObjectPool<Bullet>>();
 
-        private Dictionary<GameObject, SimpleObjectPool<GameObject>> _statusZonePools = new Dictionary<GameObject, SimpleObjectPool<GameObject>>();
+        private readonly Dictionary<GameObject, SimpleObjectPool<StatusZone>> _statusZonePools = new Dictionary<GameObject, SimpleObjectPool<StatusZone>>();
 
-        private Dictionary<Status.StatusType, SimpleObjectPool<GameObject>> _statusPools = new Dictionary<Status.StatusType, SimpleObjectPool<GameObject>>();
+        private readonly Dictionary<Status.StatusType, SimpleObjectPool<Status>> _statusPools = new Dictionary<Status.StatusType, SimpleObjectPool<Status>>();
+        private readonly Dictionary<GameObject, Status.StatusType> _statusTypeCache = new Dictionary<GameObject, Status.StatusType>();
 
         private void Awake()
         {
@@ -31,64 +31,69 @@ namespace SoulKnight3D {
         // Start is called before the first frame update
         void Start()
         {
-            _energyOrbPool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
+            _energyOrbPool = new SimpleObjectPool<EnergyOrb>(factoryMethod: () =>
             {
                 GameObject newEnergyOrb = Instantiate(EnergyOrbPrefab, transform);
                 newEnergyOrb.Hide();
-                return newEnergyOrb;
+                return newEnergyOrb.GetComponent<EnergyOrb>();
             },
             initCount: 5,
-            resetMethod: (gameObject) =>
+            resetMethod: (energyOrb) =>
             {
-                gameObject.GetComponent<EnergyOrb>().Reset();
+                energyOrb.Reset();
             });
 
         }
 
         public GameObject SpawnEnergyOrb(Vector3 position)
         {
-            GameObject newOrb = _energyOrbPool
-                .Allocate()
-                .Position(position)
-                .Show();
-            return newOrb;
+            EnergyOrb newOrb = _energyOrbPool.Allocate();
+            newOrb.transform.position = position;
+            newOrb.gameObject.Show();
+            return newOrb.gameObject;
         }
 
         public void DespawnEnergyOrb(GameObject gameObject)
         {
-            _energyOrbPool.Recycle(gameObject);
+            if (gameObject.TryGetComponent(out EnergyOrb energyOrb))
+            {
+                _energyOrbPool.Recycle(energyOrb);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         // bullets
         public GameObject SpawnBullet(GameObject bulletPrefab)
         {
-            if (_bulletPools.ContainsKey(bulletPrefab))
+            if (_bulletPools.TryGetValue(bulletPrefab, out SimpleObjectPool<Bullet> bulletPool))
             {
-                //Debug.Log("Allocate bullet");
-                return _bulletPools[bulletPrefab].Allocate();
-            } else
-            {
-                SimpleObjectPool<GameObject> newBulletPool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
-                {
-                    return Instantiate(bulletPrefab, transform).Hide();
-                }, initCount: 5,
-                resetMethod: (gameObject) =>
-                {
-                    gameObject.GetComponent<Bullet>().Reset();
-                });
-
-                _bulletPools.Add(bulletPrefab, newBulletPool);
-                return newBulletPool.Allocate();
-
+                return bulletPool.Allocate().gameObject;
             }
+
+            SimpleObjectPool<Bullet> newBulletPool = new SimpleObjectPool<Bullet>(factoryMethod: () =>
+            {
+                GameObject bulletObject = Instantiate(bulletPrefab, transform).Hide();
+                return bulletObject.GetComponent<Bullet>();
+            }, initCount: 5,
+            resetMethod: (bullet) =>
+            {
+                bullet.Reset();
+            });
+
+            _bulletPools.Add(bulletPrefab, newBulletPool);
+            return newBulletPool.Allocate().gameObject;
         }
 
         public void DespawnBullet(Bullet bullet)
         {
-            if (_bulletPools.ContainsKey(bullet.PrefabRef))
+            if (_bulletPools.TryGetValue(bullet.PrefabRef, out SimpleObjectPool<Bullet> bulletPool))
             {
-                _bulletPools[bullet.PrefabRef].Recycle(bullet.gameObject);
-            } else
+                bulletPool.Recycle(bullet);
+            }
+            else
             {
                 Destroy(bullet.gameObject);
             }
@@ -97,37 +102,45 @@ namespace SoulKnight3D {
         // status
         public GameObject SpawnStatus(GameObject statusPrefab, TargetableObject target)
         {
-            Status.StatusType statusType = statusPrefab.GetComponent<Status>().Type;
-            if (_statusPools.ContainsKey(statusType))
+            if (target == null) { return null; }
+
+            Status.StatusType statusType = GetStatusType(statusPrefab);
+            if (target.Statuses.Contains(statusType))
             {
-                GameObject newStatus = _statusPools[statusType].Allocate();
-                newStatus.GetComponent<Status>().ActivateStatus(target);
-                return newStatus;
-            } else
+                return null;
+            }
+
+            if (!_statusPools.TryGetValue(statusType, out SimpleObjectPool<Status> statusPool))
             {
-                SimpleObjectPool<GameObject> newStatusPool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
+                statusPool = new SimpleObjectPool<Status>(factoryMethod: () =>
                 {
-                    return Instantiate(statusPrefab, transform).Hide();
+                    GameObject statusObject = Instantiate(statusPrefab, transform).Hide();
+                    return statusObject.GetComponent<Status>();
                 }, initCount: 5,
-                resetMethod: (gameObject) =>
+                resetMethod: (status) =>
                 {
-                    gameObject.GetComponent<Status>().Reset();
+                    status.Reset();
                 });
 
-                _statusPools.Add(statusType, newStatusPool);
-
-                GameObject newStatus = newStatusPool.Allocate();
-                newStatus.GetComponent<Status>().ActivateStatus(target);
-                return newStatus;
+                _statusPools.Add(statusType, statusPool);
             }
+
+            Status newStatus = statusPool.Allocate();
+            if (!newStatus.ActivateStatus(target))
+            {
+                statusPool.Recycle(newStatus);
+                return null;
+            }
+            return newStatus.gameObject;
         }
 
         public void DespawnStatus(Status status)
         {
-            if (_statusPools.ContainsKey(status.Type))
+            if (_statusPools.TryGetValue(status.Type, out SimpleObjectPool<Status> statusPool))
             {
-                _statusPools[status.Type].Recycle(status.gameObject);
-            } else
+                statusPool.Recycle(status);
+            }
+            else
             {
                 Destroy(status.gameObject);
             }
@@ -136,44 +149,54 @@ namespace SoulKnight3D {
         // status zones
         public GameObject SpawnStatusZone(GameObject statusZonePrefab, Vector3 position)
         {
-            if (_statusZonePools.ContainsKey(statusZonePrefab))
+            if (_statusZonePools.TryGetValue(statusZonePrefab, out SimpleObjectPool<StatusZone> statusZonePool))
             {
-                GameObject statusZone = _statusZonePools[statusZonePrefab].Allocate();
-                statusZone.GetComponent<StatusZone>().ActivateStatusZone(position);
-                return statusZone;
+                StatusZone statusZone = statusZonePool.Allocate();
+                statusZone.ActivateStatusZone(position);
+                return statusZone.gameObject;
             }
-            else
+
+            SimpleObjectPool<StatusZone> newStatusZonePool = new SimpleObjectPool<StatusZone>(factoryMethod: () =>
             {
-                SimpleObjectPool<GameObject> newStatusZonePool = new SimpleObjectPool<GameObject>(factoryMethod: () =>
-                {
-                    GameObject newStatusZone = Instantiate(statusZonePrefab, transform).Hide();
-                    newStatusZone.GetComponent<StatusZone>().PrefabRef = statusZonePrefab;
-                    return newStatusZone;
-                }, initCount: 5,
-                resetMethod: (gameObject) =>
-                {
-                    gameObject.GetComponent<StatusZone>().Reset();
-                });
-
-                _statusZonePools.Add(statusZonePrefab, newStatusZonePool);
-
-                GameObject statusZone = newStatusZonePool.Allocate();
-                statusZone.GetComponent<StatusZone>().ActivateStatusZone(position);
+                GameObject newStatusZone = Instantiate(statusZonePrefab, transform).Hide();
+                StatusZone statusZone = newStatusZone.GetComponent<StatusZone>();
+                statusZone.PrefabRef = statusZonePrefab;
                 return statusZone;
+            }, initCount: 5,
+            resetMethod: (statusZone) =>
+            {
+                statusZone.Reset();
+            });
 
-            }
+            _statusZonePools.Add(statusZonePrefab, newStatusZonePool);
+
+            StatusZone newStatusZone = newStatusZonePool.Allocate();
+            newStatusZone.ActivateStatusZone(position);
+            return newStatusZone.gameObject;
         }
 
         public void DespawnStatusZone(StatusZone statusZone)
         {
-            if (_statusZonePools.ContainsKey(statusZone.PrefabRef))
+            if (_statusZonePools.TryGetValue(statusZone.PrefabRef, out SimpleObjectPool<StatusZone> statusZonePool))
             {
-                _statusZonePools[statusZone.PrefabRef].Recycle(statusZone.gameObject);
+                statusZonePool.Recycle(statusZone);
             }
             else
             {
                 Destroy(statusZone.gameObject);
             }
+        }
+
+        private Status.StatusType GetStatusType(GameObject statusPrefab)
+        {
+            if (_statusTypeCache.TryGetValue(statusPrefab, out Status.StatusType statusType))
+            {
+                return statusType;
+            }
+
+            statusType = statusPrefab.GetComponent<Status>().Type;
+            _statusTypeCache.Add(statusPrefab, statusType);
+            return statusType;
         }
     }
 }

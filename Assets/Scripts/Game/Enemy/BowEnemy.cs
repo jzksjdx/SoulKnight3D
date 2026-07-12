@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
 
 namespace SoulKnight3D
@@ -10,6 +7,7 @@ namespace SoulKnight3D
         public GameObject Weapon;
         [SerializeField] private Transform RightHand;
         private ChargeWeapon _bow;
+        private Gun _gun;
         private bool _IsAnimatingBowString = false;
 
         protected override void Start()
@@ -17,6 +15,7 @@ namespace SoulKnight3D
             base.Start();
 
             _bow = Weapon.GetComponent<ChargeWeapon>();
+            _gun = _bow;
         }
 
         protected override void Update()
@@ -43,8 +42,9 @@ namespace SoulKnight3D
             _IsAnimatingBowString = false;
             _bow.UpdateBowString(false);
             // shoot arrow
-            Vector3 direction = PlayerController.Instance.CameraTarget.transform.position - _bow.ArrowHead.position;
-            Weapon.GetComponent<Gun>().ShootWithDirection(direction.normalized);
+            if (Player == null) { return; }
+            Vector3 direction = Player.CameraTarget.transform.position - _bow.ArrowHead.position;
+            _gun.ShootWithDirection(direction.normalized);
         }
     }
 

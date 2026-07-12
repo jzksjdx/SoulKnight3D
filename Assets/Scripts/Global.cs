@@ -10,9 +10,7 @@ namespace SoulKnight3D
         [RuntimeInitializeOnLoadMethod]
         public static void AutoInit()
         {
-            Debug.Log("Global Auto init");
             ResKit.Init();
-            //Application.targetFrameRate = -1;
         }
 
         protected override void Init()

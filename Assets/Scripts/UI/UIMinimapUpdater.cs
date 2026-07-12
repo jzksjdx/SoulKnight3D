@@ -11,9 +11,17 @@ namespace SoulKnight3D
         public static UIMinimapUpdater Instance;
         [SerializeField] private Texture MinimapTexture;
 
-        void Start()
+        void Awake()
         {
             Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         public void UpdateMap()

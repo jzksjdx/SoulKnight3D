@@ -18,6 +18,7 @@ namespace SoulKnight3D
 		private LanguageSystem _languageSystem;
 
 		private int _selectedCharacterIndex = 0;
+        private bool _isStartingGame;
 		private List<string> _characterNames = new List<string>
         {
             "Knight", "Rouge"
@@ -86,7 +87,7 @@ namespace SoulKnight3D
                 UpdateMenuImage();
             }).UnRegisterWhenGameObjectDestroyed(this);
 
-			_selectedCharacterIndex = this.GetSystem<SaveSystem>().LoadInt("Character");
+			_selectedCharacterIndex = Mathf.Clamp(this.GetSystem<SaveSystem>().LoadInt("Character"), 0, _characterNames.Count - 1);
             SetCharacterName(_characterNames[_selectedCharacterIndex]);
             BtnSelectCharacterRight.onClick.AddListener(() =>
 			{
@@ -120,7 +121,6 @@ namespace SoulKnight3D
 			if (MenuImage == null) { return; }
 			if (_languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese)
 			{
-				Debug.Log("Changed to chinese");
                 MenuImage.rotation = Quaternion.Euler(0, 0, 0);
             } else
 			{
@@ -130,12 +130,22 @@ namespace SoulKnight3D
 
         private IEnumerator DelayedStartGame()
 		{
-			UIKit.OpenPanel<UILoadingPanel>();
-            yield return new WaitForSeconds(0.5f);
+            if (_isStartingGame)
+            {
+                yield break;
+            }
+
+            _isStartingGame = true;
+			UIKit.OpenPanel<UILoadingPanel>(UILevel.PopUI);
+            yield return null;
+            yield return new WaitForSecondsRealtime(0.5f);
             CloseSelf();
 			this.GetSystem<SaveSystem>().SaveInt("Level", 1);
-            SceneManager.LoadScene(1);
-			yield return null;
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(1);
+            while (loadOperation != null && !loadOperation.isDone)
+            {
+                yield return null;
+            }
         }
 
         public void SetCharacterName(string characterKey)

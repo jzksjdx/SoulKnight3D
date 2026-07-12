@@ -2,6 +2,7 @@ using UnityEngine;
 using QFramework;
 using MoreMountains.Feedbacks;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace SoulKnight3D
@@ -31,17 +32,18 @@ namespace SoulKnight3D
 
         public EasyEvent OnRoomClear = new EasyEvent();
         public EasyEvent OnReturnMenu = new EasyEvent();
+        private bool _isSceneTransitioning;
 
         private void Awake()
         {
             Instance = this;
             if (PlayerController.Instance == null)
             {
-                int characterIndex = this.GetSystem<SaveSystem>().LoadInt("Character");
+                int characterIndex = Mathf.Clamp(this.GetSystem<SaveSystem>().LoadInt("Character"), 0, PlayerPrefabs.Count - 1);
                 Instantiate(PlayerPrefabs[characterIndex]);
             }
 
-            Level = this.GetSystem<SaveSystem>().LoadInt("Level", 1);
+            Level = Mathf.Clamp(this.GetSystem<SaveSystem>().LoadInt("Level", 1), 1, GameFloor.GameLevels.Count);
             IsFinalLevel = Level == 3;
             MapGenerator.EnemyWaveSOs = GameFloor.GameLevels[Level - 1].LevelWaves;
             MapGenerator.BossPrefab = GameFloor.BossPrefabs[Random.Range(0, GameFloor.BossPrefabs.Count)];
@@ -73,31 +75,43 @@ namespace SoulKnight3D
 
             PlayerController.Instance.PlayerAttack.SwitchWeapon();
             PlayerController.Instance.gameObject.Hide();
-            ActionKit.Delay(0.1f, () => 
-            {
-                PlayerController.Instance.transform.position = _playerSpawnPoint;
-                PlayerController.Instance.gameObject.Show();
-            }).Start(this);
+            StartCoroutine(PreparePlayerAfterMapReady());
             
             AudioKit.PlayMusic("bgm_1Low");
-
-            UIMinimapUpdater.Instance.UpdateMap();
 
             // bug mode
             if (this.GetSystem<SaveSystem>().LoadBool("BugMode"))
             {
                 this.GetSystem<SaveSystem>().SaveBool("BugMode", false);
-                GameObject chip = Instantiate(_bugModeChips[Random.Range(0, _bugModeChips.Count)]);
+                Instantiate(_bugModeChips[Random.Range(0, _bugModeChips.Count)]);
             } else
             {
                 UIKit.GetPanel<UIGamePanel>().UiBugMode.Hide();
             }
         }
 
+        private IEnumerator PreparePlayerAfterMapReady()
+        {
+            while (MapGenerator != null && !MapGenerator.IsMapReady)
+            {
+                yield return null;
+            }
+
+            if (PlayerController.Instance == null)
+            {
+                yield break;
+            }
+
+            PlayerController.Instance.transform.position = _playerSpawnPoint;
+            PlayerController.Instance.gameObject.Show();
+            UIMinimapUpdater.Instance?.UpdateMap();
+        }
+
         public void SpawnDamageText(int value, Vector3 position)
         {
             FloatingTextPos.position = position;
             MMF_FloatingText floatingText = DamageNumber?.GetFeedbackOfType<MMF_FloatingText>();
+            if (floatingText == null) { return; }
             floatingText.Value = value.ToString();
             DamageNumber?.PlayFeedbacks();
         }
@@ -106,6 +120,7 @@ namespace SoulKnight3D
         {
             FloatingTextPos.position = position;
             MMF_FloatingText floatingText = CritNumber?.GetFeedbackOfType<MMF_FloatingText>();
+            if (floatingText == null) { return; }
             floatingText.Value = value.ToString();
             CritNumber?.PlayFeedbacks();
             CritText?.PlayFeedbacks();
@@ -124,15 +139,36 @@ namespace SoulKnight3D
 
         public void EnterNextLevel()
         {
-            UIKit.OpenPanel<UILoadingPanel>();
+            if (_isSceneTransitioning)
+            {
+                return;
+            }
+
             SaveCurrentLevel(Level + 1);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            StartCoroutine(LoadCurrentSceneAsync());
+        }
+
+        private IEnumerator LoadCurrentSceneAsync()
+        {
+            _isSceneTransitioning = true;
+            Time.timeScale = 1;
+            UIKit.OpenPanel<UILoadingPanel>(UILevel.PopUI);
+            yield return null;
+
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
+            while (loadOperation != null && !loadOperation.isDone)
+            {
+                yield return null;
+            }
         }
 
         public void QuitToMainScreen()
         {
             OnReturnMenu.Trigger();
-            Destroy(PlayerController.Instance.gameObject);
+            if (PlayerController.Instance != null)
+            {
+                Destroy(PlayerController.Instance.gameObject);
+            }
             SceneManager.LoadScene(0);
             UIKit.ClosePanel<UIGamePanel>();
             UIKit.HidePanel<UIMobileControlPanel>();

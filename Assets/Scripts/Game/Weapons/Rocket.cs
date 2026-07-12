@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
-using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
@@ -10,15 +7,9 @@ namespace SoulKnight3D
     {
         [SerializeField] float ExplosionRadius = 1f;
 
-        protected override void Awake()
+        protected override void OnBulletCollision(Collision other)
         {
-            SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
-            {
-                if (_didHit) { return; }
-                _didHit = true;
-                Explode();
-
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            Explode();
         }
 
         private void Explode()
@@ -29,7 +20,7 @@ namespace SoulKnight3D
                 if (target.TryGetComponent(out TargetableObject targetableObject))
                 {
                     if (targetableObject.IsDead) { continue; }
-                    if (_weaponTag == "Player" && target.CompareTag("Player")) { continue; }
+                    if (target.CompareTag(_weaponTag)) { continue; }
                     targetableObject.ApplyDamage(_damage);
 
                     if (_weaponTag == "Player" && target.CompareTag("Enemy"))
@@ -48,12 +39,7 @@ namespace SoulKnight3D
                 }
             }
 
-            if (ImpactFeedback)
-            {
-                ImpactFeedback.GetFeedbackOfType<MMF_ParticlesInstantiation>().TargetWorldPosition = transform.position;
-                ImpactFeedback?.PlayFeedbacks();
-            }
-
+            PlayImpactFeedback();
             DestroyBullet();
         }
 

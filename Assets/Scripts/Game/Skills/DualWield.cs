@@ -69,13 +69,22 @@ namespace SoulKnight3D
                     _leftHandWeaponObj.Hide();
                 }
 
-                ChangePlayerAnimation(_rightHandWeaponObj.GetComponent<Gun>().InGameData.Animation);
+                if (_rightHandWeapon != null)
+                {
+                    ChangePlayerAnimation(_rightHandWeapon.InGameData.Animation);
+                }
             }
         }
 
-        public override void UseSkill()
+        public override bool UseSkill()
         {
-            base.UseSkill();
+            if (_rightHandWeapon == null)
+            {
+                _rightHandWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+                _rightHandWeaponObj = _rightHandWeapon != null ? _rightHandWeapon.gameObject : null;
+            }
+            if (_rightHandWeapon == null || !base.UseSkill()) { return false; }
+
             // skill
             if (_rightHandWeapon.InGameData.Animation == WeaponData.WeaponAnimation.Bow)
             {
@@ -114,6 +123,7 @@ namespace SoulKnight3D
             SkillEffect.Show();
             SkillEffect.Play();
             AudioKit.PlaySound("fx_skill_c1");
+            return true;
         }
 
         private void AddNewWeaponToLeftHand()
@@ -129,7 +139,7 @@ namespace SoulKnight3D
         private void LeftHandAttack()
         {
             if (!_leftHandWeapon) { return; }
-            if (_leftHandWeapon.InGameData.EnergyCost >= PlayerController.Instance.PlayerStats.Energy.Value) { return; }
+            if (_leftHandWeapon.InGameData.EnergyCost > PlayerController.Instance.PlayerStats.Energy.Value) { return; }
             if (_leftHandWeapon.InGameData)
             {
                 _leftHandWeapon.Attack();

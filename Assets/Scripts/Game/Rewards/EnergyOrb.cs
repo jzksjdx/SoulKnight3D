@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
 
@@ -30,12 +28,11 @@ namespace SoulKnight3D
 
             _pickUpCollider.OnTriggerEnterEvent((other) =>
             {
-                if (other.gameObject.tag == "Player")
+                if (other.gameObject.CompareTag("Player"))
                 {
                     PlayerController.Instance.PlayerStats.RecoverEnergy(Amount);
                     AudioKit.PlaySound("fx_energy");
                     GameObjectsManager.Instance.DespawnEnergyOrb(gameObject);
-                    //Destroy(gameObject);
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
@@ -71,6 +68,11 @@ namespace SoulKnight3D
         {
             _isPickingUp = false;
             _pickUpDelayTimeoutDelta = _pickUpDelayTimeout;
+            if (_rigidbody != null)
+            {
+                _rigidbody.velocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
+            }
             this.Hide();
         }
     }

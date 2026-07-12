@@ -63,11 +63,12 @@ namespace SoulKnight3D
             _skillCooldownDelta = _skillCooldown;
         }
 
-        public virtual void UseSkill()
+        public virtual bool UseSkill()
         {
-            if (_skillCooldownDelta > 0f) { return; }
+            if (_skillCooldownDelta > 0f || IsUsingSkill) { return false; }
             _skillDurationDelta = _skillDuration;
             IsUsingSkill = true;
+            return true;
         }
     }
 

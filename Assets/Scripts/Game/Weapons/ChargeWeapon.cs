@@ -37,7 +37,7 @@ namespace SoulKnight3D
 
             PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((_, weaponObject) =>
             {
-                if (weaponObject == this) { return; }
+                if (weaponObject == gameObject) { return; }
                 ResetChargeProgress();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
@@ -149,7 +149,7 @@ namespace SoulKnight3D
             float actualDamage = _chargeTimeDelta / _chargeTime * (data.MaxDamage - data.Damage) + data.Damage;
             int actualDamageInt = (int)Mathf.Clamp(actualDamage, data.Damage, data.MaxDamage);
             newBullet.InitializeBullet(tag, actualDamageInt, GetIsCritHit(), bulletPrefab, BulletSize);
-            newBulletObj.Show();
+            newBullet.ShowFromPool();
             return newBullet;
         }
 

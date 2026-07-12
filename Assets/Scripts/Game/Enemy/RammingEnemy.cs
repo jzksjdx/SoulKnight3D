@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using MoreMountains.Feedbacks;
 using QFramework;
@@ -32,9 +30,10 @@ namespace SoulKnight3D
             {
                 if (other.gameObject.CompareTag("Player") && State == EnemyState.Chasing)
                 {
-                    PlayerController.Instance.PlayerStats.ApplyDamage(Attack);
+                    if (Player == null) { return; }
+                    Player.PlayerStats.ApplyDamage(Attack);
                     Vector3 hitForce = new Vector3(_moveDirection.x * _hitForce, _hitForce / 5, _moveDirection.z * _hitForce);
-                    PlayerController.Instance.SelfRigidbody.AddForce(hitForce, ForceMode.Impulse);
+                    Player.SelfRigidbody.AddForce(hitForce, ForceMode.Impulse);
                 }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
@@ -46,8 +45,10 @@ namespace SoulKnight3D
 
         override protected void LookAtPlayer()
         {
-            _moveDirection = PlayerController.Instance.transform.position - transform.position;
+            if (Player == null) { return; }
+            _moveDirection = Player.transform.position - transform.position;
             Vector3 lookDirection = new Vector3(_moveDirection.x, 0, _moveDirection.z);
+            if (lookDirection.sqrMagnitude <= 0.0001f) { return; }
             Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
             if (State != EnemyState.Chasing)
             {
@@ -81,10 +82,7 @@ namespace SoulKnight3D
         override protected void HandleAttacking()
         {
             _attackTimeoutDelta = 0f;
-            _patrolDirection = new Vector3(
-                   transform.position.x + Random.Range(-5, 5),
-                   transform.position.y,
-                   transform.position.z + Random.Range(-5, 5)).normalized;
+            _patrolDirection = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
 
             SelfAnimator.SetTrigger(_animIdMove);
             _patrolTimeoutDelta = _patrolTimeout;
@@ -103,7 +101,8 @@ namespace SoulKnight3D
             }
             else
             {
-                _rammingDirection = PlayerController.Instance.transform.position - transform.position;
+                if (Player == null) { return; }
+                _rammingDirection = Player.transform.position - transform.position;
                 _ramTimeoutDelta = _ramTimeout;
                 RammingFeedbacks?.PlayFeedbacks();
                 RammingParticles.Show();

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
@@ -45,6 +44,8 @@ namespace SoulKnight3D
         protected Vector3 _moveDirection;
         protected Quaternion _currRotation;
         private int _attackCount = 0;
+        private PlayerController _player;
+        private const int SpawnPositionMaxAttempts = 32;
 
         // events
         public EasyEvent OnDeath = new EasyEvent();
@@ -57,6 +58,7 @@ namespace SoulKnight3D
             _animIdDie = Animator.StringToHash("Die");
             _animIdSkillCall = Animator.StringToHash("Call");
             _animIdSkillJump = Animator.StringToHash("Jump");
+            _player = PlayerController.Instance;
 
             FSM.AddState(State.Idle, new IdleState(FSM, this));
             FSM.AddState(State.Chase, new ChaseState(FSM, this));
@@ -116,8 +118,10 @@ namespace SoulKnight3D
 
         protected virtual void LookAtPlayer()
         {
-            _moveDirection = PlayerController.Instance.transform.position - transform.position;
+            if (Player == null) { return; }
+            _moveDirection = Player.transform.position - transform.position;
             Vector3 lookDirection = new Vector3(_moveDirection.x, 0, _moveDirection.z);
+            if (lookDirection.sqrMagnitude <= 0.0001f) { return; }
             Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
             transform.rotation = lookRotation;
             _currRotation = lookRotation;
@@ -126,10 +130,10 @@ namespace SoulKnight3D
         public void AnimationAttackEffectEvent()
         {
             _feedbackAtk?.PlayFeedbacks();
-            float distance = (PlayerController.Instance.transform.position - transform.position).magnitude;
-            if (distance <= _range)
+            if (Player == null) { return; }
+            if ((Player.transform.position - transform.position).sqrMagnitude <= _range * _range)
             {
-                PlayerController.Instance.PlayerStats.ApplyDamage(_attack);
+                Player.PlayerStats.ApplyDamage(_attack);
             }
         }
 
@@ -141,10 +145,11 @@ namespace SoulKnight3D
             // effects
             _feedbackJump?.PlayFeedbacks();
             // damage
-            float distance = (PlayerController.Instance.transform.position - transform.position).magnitude;
-            if (distance <= _range * 1.5f)
+            if (Player == null) { return; }
+            float jumpRange = _range * 1.5f;
+            if ((Player.transform.position - transform.position).sqrMagnitude <= jumpRange * jumpRange)
             {
-                PlayerController.Instance.PlayerStats.ApplyDamage(_attack);
+                Player.PlayerStats.ApplyDamage(_attack);
             }
         }
 
@@ -156,15 +161,7 @@ namespace SoulKnight3D
             int enemyCoutn = Random.Range(3, 5);
             for(int i = 0; i < enemyCoutn; i++)
             {
-                Vector3 spawnPosition;
-                bool isValidPosition;
-                do
-                {
-                    Vector3 randomOffset = new Vector3(Random.Range(-spawnRadius, spawnRadius), 0.05f, Random.Range(-spawnRadius, spawnRadius));
-                    spawnPosition = transform.position + randomOffset;
-                    isValidPosition = !Physics.CheckSphere(spawnPosition, 0.5f, _itemLayerMask);
-                }
-                while (!isValidPosition);
+                Vector3 spawnPosition = GetOpenPosition(spawnRadius, 0.05f, 0.5f);
                 Instantiate(_minionPrefabs[Random.Range(0, _minionPrefabs.Count)], spawnPosition, Quaternion.identity);
             }
             AudioKit.PlaySound("fx_show_up");
@@ -232,7 +229,7 @@ namespace SoulKnight3D
                 _chaseTimer = Random.Range(mTarget._chaseTime * 0.5f, mTarget._chaseTime * 1.5f);
                 mTarget.SelfAnimator.SetTrigger(mTarget._animIdWalk);
 
-                if (mTarget._attackCount >= 3f) // force use skill if attacked too many times
+                if (mTarget._attackCount >= 3) // force use skill if attacked too many times
                 {
                     if (Random.Range(0, 1f) >= 0.5f) // 50% chance to use each skill
                     {
@@ -261,7 +258,7 @@ namespace SoulKnight3D
             {
                 if (_chaseTimer >= 0f)
                 {
-                    _chaseTimer -= Time.deltaTime;
+                    _chaseTimer -= Time.fixedDeltaTime;
 
                     // move
                     mTarget.LookAtPlayer();
@@ -272,7 +269,7 @@ namespace SoulKnight3D
                     mTarget.SelfRigidbody.velocity = moveSpeed;
 
                     
-                    if (mTarget._moveDirection.magnitude <= mTarget._range)
+                    if (mTarget._moveDirection.sqrMagnitude <= mTarget._range * mTarget._range)
                     {
                         // attack stage
                         mFSM.ChangeState(State.Attack);
@@ -351,6 +348,33 @@ namespace SoulKnight3D
             {
                 mTarget._attackCount = 0;
                 mTarget.SelfAnimator.SetTrigger(mTarget._animIdSkillCall);
+            }
+        }
+
+        private Vector3 GetOpenPosition(float radius, float yOffset, float checkRadius)
+        {
+            for (int attempt = 0; attempt < SpawnPositionMaxAttempts; attempt++)
+            {
+                Vector3 randomOffset = new Vector3(Random.Range(-radius, radius), yOffset, Random.Range(-radius, radius));
+                Vector3 candidate = transform.position + randomOffset;
+                if (!Physics.CheckSphere(candidate, checkRadius, _itemLayerMask))
+                {
+                    return candidate;
+                }
+            }
+
+            return transform.position + Vector3.up * yOffset;
+        }
+
+        private PlayerController Player
+        {
+            get
+            {
+                if (_player == null)
+                {
+                    _player = PlayerController.Instance;
+                }
+                return _player;
             }
         }
     }

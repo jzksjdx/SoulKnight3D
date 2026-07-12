@@ -9,11 +9,15 @@ namespace SoulKnight3D
         public WeaponData WeaponData;
 		public Transform WeaponModel;
         [SerializeField] private Outline Outline;
+        [SerializeField] private float _modelRotationSpeed = 18f;
 
 		public override void Interact()
 		{
+            if (!IsInteractable) { return; }
+
 			PlayerAttack playerAtk = PlayerController.Instance.PlayerAttack;
 			if (!playerAtk) { return; }
+            SetInteractable(false);
 
             Transform weaponTransform;
             WeaponData.WeaponAnimation weaponAnimation = WeaponData.Animation;
@@ -24,8 +28,8 @@ namespace SoulKnight3D
             {
                 weaponTransform = playerAtk.WeaponPoint;
             }
-            GameObject newWeapon = Instantiate(WeaponData.WeaponPrefab, weaponTransform.position, Quaternion.identity, weaponTransform);
-            newWeapon.transform.rotation = new Quaternion(0, 0, 0, 0);
+            GameObject newWeapon = Instantiate(WeaponData.WeaponPrefab, weaponTransform);
+            newWeapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             playerAtk.TakeNewWeapon(newWeapon);
             Destroy(gameObject);
         }
@@ -41,7 +45,7 @@ namespace SoulKnight3D
 
         private void Update()
         {
-            WeaponModel.Rotate(Vector3.up * 0.3f);
+            WeaponModel.Rotate(Vector3.up * (_modelRotationSpeed * Time.deltaTime));
         }
 
         private Color GetRarityColor()
@@ -55,7 +59,7 @@ namespace SoulKnight3D
                 case WeaponData.WeaponRarity.Blue:
                     return new Color(14f / 255f, 165f / 255f, 255f / 255f);
                 case WeaponData.WeaponRarity.Magenta:
-                    return new Color(14f / 255f, 165f / 255f, 255f / 255f);
+                    return new Color(255f / 255f, 67f / 255f, 214f / 255f);
                 case WeaponData.WeaponRarity.Purple:
                     return new Color(190f / 255f, 7f / 255f, 201f / 255f);
                 case WeaponData.WeaponRarity.Orange:
