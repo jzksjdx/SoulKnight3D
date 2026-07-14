@@ -98,11 +98,16 @@ namespace SoulKnight3D
                 ActionKit.Delay(3f, () =>
                 {
                     GameController.Instance.ToggleGameFreeze(true);
-                    UIEndPanel endPanel = UIKit.OpenPanel<UIEndPanel>();
-                    endPanel.UpdateEndTitle(false);
+                    StartCoroutine(ShowEndPanel(false));
                 }).Start(this);
                 
             }
+        }
+
+        private IEnumerator ShowEndPanel(bool playerWon)
+        {
+            yield return UIKit.OpenPanelAsync<UIEndPanel>();
+            UIKit.GetPanel<UIEndPanel>()?.UpdateEndTitle(playerWon);
         }
 
         public void RecoverHealth(int amount)

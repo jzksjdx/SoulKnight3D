@@ -47,6 +47,12 @@ namespace QFramework
                 {
                     CreateUIAsync(panelSearchKeys, (panel) =>
                     {
+                        if (panel == null)
+                        {
+                            onLoad?.Invoke(null);
+                            return;
+                        }
+
                         retPanel = panel;
                         retPanel.Open(panelSearchKeys.UIData);
                         retPanel.Show();
@@ -68,6 +74,12 @@ namespace QFramework
             {
                 CreateUIAsync(panelSearchKeys, (panel) =>
                 {
+                    if (panel == null)
+                    {
+                        onLoad?.Invoke(null);
+                        return;
+                    }
+
                     panel.Open(panelSearchKeys.UIData);
                     panel.Show();
                     onLoad?.Invoke(panel);
@@ -220,6 +232,12 @@ namespace QFramework
         {
             UIKit.Config.LoadPanelAsync(panelSearchKeys, panel =>
             {
+                if (panel == null)
+                {
+                    onPanelCreate?.Invoke(null);
+                    return;
+                }
+
                 UIKit.Root.SetLevelOfPanel(panelSearchKeys.Level, panel);
 
                 UIKit.Config.SetDefaultSizeOfPanel(panel);

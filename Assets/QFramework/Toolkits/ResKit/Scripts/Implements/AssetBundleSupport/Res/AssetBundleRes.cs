@@ -140,11 +140,12 @@ namespace QFramework
                     yield return request;
                     mAssetBundleCreateRequest = null;
 
-                    if (!request.isDone)
+                    if (abcR.result != UnityWebRequest.Result.Success)
                     {
-                        Debug.LogError("AssetBundleCreateRequest Not Done! Path:" + mAssetName);
+                        Debug.LogError($"Failed to download AssetBundle '{mAssetName}' from '{url}': {abcR.error}");
                         OnResLoadFaild();
                         finishCallback();
+                        abcR.Dispose();
                         yield break;
                     }
                     
@@ -154,6 +155,14 @@ namespace QFramework
                     
                     // 销毁
                     abcR.Dispose();
+
+                    if (AssetBundle == null)
+                    {
+                        Debug.LogError($"Downloaded AssetBundle '{mAssetName}' could not be opened: {url}");
+                        OnResLoadFaild();
+                        finishCallback();
+                        yield break;
+                    }
                 }
                 else
                 {

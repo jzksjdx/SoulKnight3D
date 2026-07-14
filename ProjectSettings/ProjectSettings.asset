@@ -145,6 +145,7 @@ PlayerSettings:
   preloadedAssets:
   - {fileID: 11400000, guid: 24a24a6beec0d42588bed588697f0211, type: 2}
   - {fileID: 11400000, guid: cc5a5823fda5743788d5425ea6b9775c, type: 2}
+  - {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -812,7 +813,7 @@ PlayerSettings:
   webGLWasmArithmeticExceptions: 0
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
-  webGLDecompressionFallback: 0
+  webGLDecompressionFallback: 1
   webGLInitialMemorySize: 32
   webGLMaximumMemorySize: 2048
   webGLMemoryGrowthMode: 2
@@ -833,7 +834,7 @@ PlayerSettings:
     Stadia: UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE
     Standalone: MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED;UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE
     VisionOS: UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE
-    WebGL: UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE
+    WebGL: UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
     Windows Store Apps: URP_OUTLINE
     XboxOne: UNITY_POST_PROCESSING_STACK_V2;URP_OUTLINE
     iPhone: MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED;URP_OUTLINE

@@ -29,7 +29,7 @@ namespace SoulKnight3D
             BtnSettings.onClick.AddListener(() =>
             {
                 AudioKit.PlaySound("fx_btn");
-                UIKit.OpenPanel<UISettingsPanel>();
+                StartCoroutine(UIKit.OpenPanelAsync<UISettingsPanel>());
             });
         }
 

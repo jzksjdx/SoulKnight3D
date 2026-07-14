@@ -62,6 +62,15 @@ namespace QFramework
 
             panelLoader.LoadPanelPrefabAsync(panelSearchKeys, (panelPrefab) =>
             {
+                if (panelPrefab == null)
+                {
+                    Debug.LogError($"Failed to load UI panel prefab '{panelSearchKeys.PanelType?.Name ?? panelSearchKeys.GameObjName}'.");
+                    panelLoader.Unload();
+                    PanelLoaderPool.RecycleLoader(panelLoader);
+                    onPanelLoad?.Invoke(null);
+                    return;
+                }
+
                 var obj = Object.Instantiate(panelPrefab);
 
                 var retScript = obj.GetComponent<UIPanel>();

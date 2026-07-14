@@ -108,7 +108,7 @@ namespace QFramework
                 {
                     var streamingPath = Application.streamingAssetsPath + "/AssetBundles/" +
                                         AssetBundlePathHelper.GetPlatformName() + "/" + ResDatas.FileName;
-                    outResult.Add(pathPrefix + streamingPath);
+                    outResult.Add(pathPrefix + AssetBundleSettings.GetStreamingAssetUrl(streamingPath));
                 }
                 // 进行过热更
                 else

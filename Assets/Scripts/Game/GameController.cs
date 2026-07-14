@@ -4,6 +4,7 @@ using MoreMountains.Feedbacks;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Localization.Settings;
 
 namespace SoulKnight3D
 {
@@ -54,8 +55,15 @@ namespace SoulKnight3D
             Instance = null;
         }
 
-        void Start()
+        private IEnumerator Start()
 		{
+            if (!ResMgr.ResMgrInited)
+            {
+                yield return ResKit.InitAsync();
+            }
+
+            yield return LocalizationSettings.InitializationOperation;
+
             this.GetSystem<AudioSystem>().MusicVolume.RegisterWithInitValue((value) =>
             {
 				MMSoundManager.SetVolumeMusic(value);
@@ -68,9 +76,9 @@ namespace SoulKnight3D
 
             if (this.GetSystem<ControlSystem>().IsMobile)
             {
-                UIKit.OpenPanel<UIMobileControlPanel>();
+                yield return UIKit.OpenPanelAsync<UIMobileControlPanel>();
             }
-            UIKit.OpenPanel<UIGamePanel>();
+            yield return UIKit.OpenPanelAsync<UIGamePanel>();
             UIKit.GetPanel<UIGamePanel>().UpdateUiLevelTexts(Level);
 
             PlayerController.Instance.PlayerAttack.SwitchWeapon();
@@ -152,8 +160,7 @@ namespace SoulKnight3D
         {
             _isSceneTransitioning = true;
             Time.timeScale = 1;
-            UIKit.OpenPanel<UILoadingPanel>(UILevel.PopUI);
-            yield return null;
+            yield return UIKit.OpenPanelAsync<UILoadingPanel>(UILevel.PopUI);
 
             AsyncOperation loadOperation = SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
             while (loadOperation != null && !loadOperation.isDone)

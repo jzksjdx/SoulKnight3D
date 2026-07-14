@@ -71,8 +71,20 @@ namespace QFramework
                 return retUrl;
             }
 
-            return AssetBundlePathHelper.StreamingAssetsPath + "AssetBundles/" +
-                   AssetBundlePathHelper.GetPlatformName() + "/" + name;
+            retUrl = AssetBundlePathHelper.StreamingAssetsPath + "AssetBundles/" +
+                     AssetBundlePathHelper.GetPlatformName() + "/" + name;
+            return GetStreamingAssetUrl(retUrl);
+        }
+
+        public static string GetStreamingAssetUrl(string url)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            if (!url.EndsWith(".unityweb", StringComparison.OrdinalIgnoreCase))
+            {
+                return url + ".unityweb";
+            }
+#endif
+            return url;
         }
 
         //导出目录

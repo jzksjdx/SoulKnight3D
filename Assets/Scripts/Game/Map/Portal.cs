@@ -1,6 +1,6 @@
 using UnityEngine;
 using QFramework;
-using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace SoulKnight3D
 {
@@ -18,8 +18,7 @@ namespace SoulKnight3D
                     if (GameController.Instance.IsFinalLevel) // win
 					{
                         GameController.Instance.ToggleGameFreeze(true);
-                        UIEndPanel endPanel = UIKit.OpenPanel<UIEndPanel>();
-                        endPanel.UpdateEndTitle(true);
+                        StartCoroutine(ShowEndPanel(true));
                     } else
 					{
                         UIKit.ClosePanel<UIGamePanel>();
@@ -29,5 +28,11 @@ namespace SoulKnight3D
 				}
 			});
 		}
+
+        private IEnumerator ShowEndPanel(bool playerWon)
+        {
+            yield return UIKit.OpenPanelAsync<UIEndPanel>();
+            UIKit.GetPanel<UIEndPanel>()?.UpdateEndTitle(playerWon);
+        }
 	}
 }

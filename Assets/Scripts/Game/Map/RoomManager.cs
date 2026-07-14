@@ -233,7 +233,7 @@ namespace SoulKnight3D
                         AudioKit.PlayMusic("bgm_boss");
                         UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = 1;
                         UIKit.GetPanel<UIGamePanel>().BossHealthRect.Show();
-                        UIKit.OpenPanel<UIBossFight>();
+                        StartCoroutine(UIKit.OpenPanelAsync<UIBossFight>());
                         Werewolf boss = generatedBoss.GetComponent<Werewolf>();
                         boss.OnDeath.Register(() =>
                         {

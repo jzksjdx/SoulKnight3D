@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
-using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 
 namespace SoulKnight3D
@@ -18,6 +15,7 @@ namespace SoulKnight3D
         public Languages CurrentLanguage = Languages.Chinese;
 
         private SaveSystem _saveSystem;
+        private bool _waitingForLocalization;
 
         public EasyEvent<Languages> OnLanguageChanged = new EasyEvent<Languages>();
 
@@ -28,30 +26,46 @@ namespace SoulKnight3D
             saveLanguageIndex = Mathf.Clamp(saveLanguageIndex, 0, System.Enum.GetValues(typeof(Languages)).Length - 1);
             CurrentLanguage = (Languages)saveLanguageIndex;
             SetLanguage(CurrentLanguage);
-
-            //LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
         }
-
-        //private void LocalizationSettings_SelectedLocaleChanged(Locale obj)
-        //{
-        //    OnLanguageChanged.Trigger(CurrentLanguage);
-        //}
 
         public void SetLanguage(Languages language)
         {
-            int languageIndex = Mathf.Clamp((int)language, 0, LocalizationSettings.AvailableLocales.Locales.Count - 1);
-            language = (Languages)languageIndex;
-            if (LocalizationSettings.SelectedLocale == LocalizationSettings.AvailableLocales.Locales[(int)language])
+            int languageIndex = Mathf.Clamp(
+                (int)language,
+                0,
+                System.Enum.GetValues(typeof(Languages)).Length - 1);
+            CurrentLanguage = (Languages)languageIndex;
+            _saveSystem.SaveInt("Language", languageIndex);
+
+            if (!TryApplyLanguage(CurrentLanguage) && !_waitingForLocalization)
             {
-                return;
+                _waitingForLocalization = true;
+                LocalizationSettings.InitializationOperation.Completed += _ =>
+                {
+                    _waitingForLocalization = false;
+                    TryApplyLanguage(CurrentLanguage);
+                };
             }
-            else
+        }
+
+        private bool TryApplyLanguage(Languages language)
+        {
+            var locales = LocalizationSettings.AvailableLocales?.Locales;
+            if (locales == null || locales.Count == 0)
             {
-                LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[(int)language];
-                CurrentLanguage = language;
-                _saveSystem.SaveInt("Language", (int)language);
-                OnLanguageChanged.Trigger(CurrentLanguage);
+                return false;
             }
+
+            int languageIndex = Mathf.Clamp((int)language, 0, locales.Count - 1);
+            var selectedLocale = locales[languageIndex];
+            if (LocalizationSettings.SelectedLocale != selectedLocale)
+            {
+                LocalizationSettings.SelectedLocale = selectedLocale;
+            }
+
+            CurrentLanguage = (Languages)languageIndex;
+            OnLanguageChanged.Trigger(CurrentLanguage);
+            return true;
         }
     }
 }

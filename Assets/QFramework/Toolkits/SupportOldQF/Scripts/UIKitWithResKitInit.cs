@@ -50,10 +50,7 @@ namespace QFramework
                 {
                     mResLoader.Add2Load<GameObject>(panelSearchKeys.PanelType.Name, (success, res) =>
                     {
-                        if (success)
-                        {
-                            onLoad(res.Asset as GameObject);
-                        }
+                        onLoad(success ? res.Asset as GameObject : null);
                     });
                     mResLoader.LoadAsync();
                     return;
@@ -64,10 +61,7 @@ namespace QFramework
                     mResLoader.Add2Load<GameObject>(panelSearchKeys.AssetBundleName, panelSearchKeys.GameObjName,
                         (success, res) =>
                         {
-                            if (success)
-                            {
-                                onLoad(res.Asset as GameObject);
-                            }
+                            onLoad(success ? res.Asset as GameObject : null);
                         });
                     mResLoader.LoadAsync();
                     return;
@@ -75,10 +69,7 @@ namespace QFramework
 
                 mResLoader.Add2Load<GameObject>(panelSearchKeys.GameObjName, (success, res) =>
                 {
-                    if (success)
-                    {
-                        onLoad(res.Asset as GameObject);
-                    }
+                    onLoad(success ? res.Asset as GameObject : null);
                 });
                 mResLoader.LoadAsync();
             }

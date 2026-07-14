@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Components;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace SoulKnight3D
 {
@@ -24,6 +25,7 @@ namespace SoulKnight3D
             "Knight", "Rouge"
 		};
         [SerializeField] private LocalizeStringEvent _localizedStringEvent;
+        private int _characterNameRequestVersion;
 
         protected override void OnInit(IUIData uiData = null)
 		{
@@ -76,8 +78,8 @@ namespace SoulKnight3D
 
 			BtnSettings.onClick.AddListener(() =>
 			{
-                AudioKit.PlaySound("fx_btn");
-                UIKit.OpenPanel<UISettingsPanel>();
+				AudioKit.PlaySound("fx_btn");
+                StartCoroutine(UIKit.OpenPanelAsync<UISettingsPanel>());
             });
 
             UpdateMenuImage();
@@ -136,8 +138,7 @@ namespace SoulKnight3D
             }
 
             _isStartingGame = true;
-			UIKit.OpenPanel<UILoadingPanel>(UILevel.PopUI);
-            yield return null;
+            yield return UIKit.OpenPanelAsync<UILoadingPanel>(UILevel.PopUI);
             yield return new WaitForSecondsRealtime(0.5f);
             CloseSelf();
 			this.GetSystem<SaveSystem>().SaveInt("Level", 1);
@@ -150,11 +151,30 @@ namespace SoulKnight3D
 
         public void SetCharacterName(string characterKey)
         {
-            // Get the localized character name
-            string localizedCharacterName = LocalizationSettings.StringDatabase.GetLocalizedString("MainTable", "CharacterName." + characterKey);
+            StartCoroutine(SetCharacterNameAsync(characterKey, ++_characterNameRequestVersion));
+        }
 
-            // Set the argument for the {0} placeholder
-            _localizedStringEvent.StringReference.Arguments = new object[] { localizedCharacterName };
+        private IEnumerator SetCharacterNameAsync(string characterKey, int requestVersion)
+        {
+            AsyncOperationHandle<string> operation = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                "MainTable",
+                "CharacterName." + characterKey);
+
+            yield return operation;
+
+            // Ignore an older lookup if the player switched characters again while it was loading.
+            if (requestVersion != _characterNameRequestVersion)
+            {
+                yield break;
+            }
+
+            if (operation.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.LogError($"Failed to localize character name: {characterKey}");
+                yield break;
+            }
+
+            _localizedStringEvent.StringReference.Arguments = new object[] { operation.Result };
             _localizedStringEvent.RefreshString();
         }
 
@@ -172,6 +192,7 @@ namespace SoulKnight3D
 		
 		protected override void OnClose()
 		{
+			_characterNameRequestVersion++;
 		}
 
         public IArchitecture GetArchitecture()
