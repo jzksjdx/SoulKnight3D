@@ -1,6 +1,7 @@
 using UnityEngine;
 using QFramework;
 using System.Collections.Generic;
+using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
@@ -21,9 +22,11 @@ namespace SoulKnight3D
 
         // timeout deltatime
         protected float _patrolTimeoutDelta;
-        protected float _patrolTimeout = 2f;
+        [SerializeField] protected float _patrolTimeout = 2f;
         protected float _attackTimeoutDelta;
-        protected float _attackTimeout = 3f;
+         [SerializeField] protected float _attackTimeout = 3f;
+        [SerializeField, Min(0f)] private float _deathCleanupDelay = 3f;
+        [SerializeField] private MMF_Player _deadFeedbacks;
         private float _dissolveTimeoutDelta;
         private float _dissolveTimeout = 3f;
 
@@ -107,6 +110,7 @@ namespace SoulKnight3D
             if (_moveDirection.sqrMagnitude <= Range * Range)
             {
                 // attack
+                SelfRigidbody.velocity = new Vector3(0f, SelfRigidbody.velocity.y, 0f);
                 SelfAnimator.SetTrigger(_animIdAttack);
                 State = EnemyState.Attacking;
                 _attackTimeoutDelta = _attackTimeout;
@@ -165,7 +169,7 @@ namespace SoulKnight3D
                 SelfRigidbody.isKinematic = true;
                 SelfRigidbody.DestroySelf();
                 MinimapIcon.Hide();
-                AudioKit.PlaySound("human2 hurt2");
+                _deadFeedbacks?.PlayFeedbacks();
                 OnDeath.Trigger();
                 // spawn energy orb
                 if (0.2f >= Random.Range(0f, 1f))
@@ -184,7 +188,7 @@ namespace SoulKnight3D
                     GameObjectsManager.Instance.DespawnStatus(status);
                 }
 
-                Destroy(gameObject, 3);
+                Destroy(gameObject, _deathCleanupDelay);
             }
         }
 

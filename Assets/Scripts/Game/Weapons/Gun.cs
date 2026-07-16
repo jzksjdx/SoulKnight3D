@@ -57,6 +57,15 @@ namespace SoulKnight3D
             ShootFeedback?.PlayFeedbacks();
         }
 
+        public virtual void ShootAtTarget(Transform target, Vector3 aimPosition)
+        {
+            if (target == null || shootPoint == null) { return; }
+
+            Vector3 direction = aimPosition - shootPoint.position;
+            if (direction.sqrMagnitude <= 0.0001f) { return; }
+            ShootWithDirection(direction.normalized);
+        }
+
 		public virtual Bullet SpawnBulletFromPool(Vector3 position)
 		{
             GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)

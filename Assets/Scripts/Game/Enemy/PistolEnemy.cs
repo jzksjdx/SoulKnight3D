@@ -16,8 +16,7 @@ namespace SoulKnight3D
         public void PistolAttackAnimationEffect()
         {
             if (Player == null) { return; }
-            Vector3 direction = Player.CameraTarget.transform.position - Weapon.transform.position;
-            _gun.ShootWithDirection(direction.normalized);
+            _gun.ShootAtTarget(Player.transform, Player.CameraTarget.transform.position);
         }
     }
 }
