@@ -4436,6 +4436,8 @@ MonoBehaviour:
   ViewControllerFullTypeName: 
   JumpForce: 5
   LookRotationTorque: 1
+  _airbornePhysicsMaterial: {fileID: 13400000, guid: 25b08d64ca09c4d108837844d6c4af1b, type: 2}
+  _sideContactMaxUpDot: 0.5
   Grounded: 1
   GroundedOffset: -0.14
   GroundedRadius: 0.28
@@ -4574,7 +4576,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 1
 --- !u!136 &3690259232335356246
 CapsuleCollider:

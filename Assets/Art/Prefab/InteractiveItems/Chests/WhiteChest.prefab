@@ -135,6 +135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InteractCollider: {fileID: 6095219560726355617}
   Label: {fileID: 1507682831692059557}
+  _touchOpenCollider: {fileID: 7399272818621409042}
   ChestReward: {fileID: 11400000, guid: 7132b5c60dcc84bcba86f874600ca215, type: 2}
 --- !u!95 &1709326660904849564
 Animator:
@@ -559,7 +560,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8779742414494015006}
-  m_Material: {fileID: 13400000, guid: 25b08d64ca09c4d108837844d6c4af1b, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

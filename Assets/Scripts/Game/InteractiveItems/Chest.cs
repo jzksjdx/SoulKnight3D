@@ -15,6 +15,8 @@ namespace SoulKnight3D
         private Animator _animator;
         private int _animIdOpen;
 
+        [SerializeField] private Collider _touchOpenCollider;
+
         public ChestRewardData ChestReward;
 
         // for weapon reward
@@ -35,6 +37,17 @@ namespace SoulKnight3D
             base.Start();
             _animator = GetComponent<Animator>();
             _animIdOpen = Animator.StringToHash("Open");
+
+            if (_touchOpenCollider != null)
+            {
+                _touchOpenCollider.OnCollisionEnterEvent(collision =>
+                {
+                    if (collision.gameObject.CompareTag("Player"))
+                    {
+                        Interact();
+                    }
+                }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            }
 
             string chestLabelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese ? "宝箱" : "Chest";
             Label.SetLabelText(chestLabelText, WeaponData.WeaponRarity.White);

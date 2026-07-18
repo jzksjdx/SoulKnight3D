@@ -6,6 +6,7 @@ using QFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine.SceneManagement;
 
 namespace SoulKnight3D
@@ -16,6 +17,12 @@ namespace SoulKnight3D
 
         public float JumpForce = 5f;
         public float LookRotationTorque = 1f;
+
+        [Header("Player Physics")]
+        [Tooltip("Used while airborne so vertical surfaces cannot hold the player up through friction.")]
+        [SerializeField] private PhysicMaterial _airbornePhysicsMaterial;
+        [Tooltip("Contacts with an absolute vertical normal below this value are treated as frictionless sides.")]
+        [SerializeField, Range(0f, 1f)] private float _sideContactMaxUpDot = 0.5f;
 
         [Header("Player Grounded")]
         [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
@@ -44,6 +51,11 @@ namespace SoulKnight3D
         private float _lookSensitivity = 1f;
         private float _lookSensitivityFactor = 5f;
         private float _cinemachineTargetPitch;
+        private float _targetYaw;
+
+        private CapsuleCollider _movementCollider;
+        private PhysicMaterial _groundedPhysicsMaterial;
+        private int _movementColliderInstanceId;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -58,7 +70,29 @@ namespace SoulKnight3D
         {
             Instance = this;
             _controlSystem = this.GetSystem<ControlSystem>();
+            _movementCollider = GetComponent<CapsuleCollider>();
+            _groundedPhysicsMaterial = _movementCollider != null ? _movementCollider.sharedMaterial : null;
+            if (_movementCollider != null)
+            {
+                _movementCollider.hasModifiableContacts = true;
+                _movementColliderInstanceId = _movementCollider.GetInstanceID();
+            }
+            _targetYaw = transform.eulerAngles.y;
+            SelfRigidbody.constraints |= RigidbodyConstraints.FreezeRotation;
+            SelfRigidbody.angularVelocity = Vector3.zero;
             DontDestroyOnLoad(gameObject);
+        }
+
+        private void OnEnable()
+        {
+            Physics.ContactModifyEvent += HandleContactModification;
+            Physics.ContactModifyEventCCD += HandleContactModification;
+        }
+
+        private void OnDisable()
+        {
+            Physics.ContactModifyEvent -= HandleContactModification;
+            Physics.ContactModifyEventCCD -= HandleContactModification;
         }
 
         private void OnDestroy()
@@ -73,6 +107,7 @@ namespace SoulKnight3D
             // reset our timeouts on start
             _jumpTimeoutDelta = _jumpTimeout;
             _fallTimeoutDelta = _fallTimeout;
+            SetGroundedState(true);
 
             PlayerInputs.Instance.OnJumpPerformed.Register(() =>
             {
@@ -97,6 +132,9 @@ namespace SoulKnight3D
         private void FixedUpdate()
         {
             if (_playerStats.IsDead) { return; }
+
+            SelfRigidbody.MoveRotation(Quaternion.Euler(0f, _targetYaw, 0f));
+
             // move
             Vector2 movementVector = PlayerInputs.Instance.GetMovementVectorNormalized();
             Vector2 horizontalVelocity = new Vector2(SelfRigidbody.velocity.x, SelfRigidbody.velocity.z);
@@ -126,8 +164,7 @@ namespace SoulKnight3D
             SelfRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
             PlayerAnimation.SetAnimatorJump();
             _jumpTimeoutDelta = _jumpTimeout;
-            Grounded = false;
-            PlayerAnimation.SetAnimatorGrounded(Grounded);
+            SetGroundedState(false);
         }
 
         private void CameraRotation()
@@ -135,15 +172,9 @@ namespace SoulKnight3D
             Vector2 lookVector = PlayerInputs.Instance.GetLookVector();
             _cinemachineTargetPitch += lookVector.y * _lookSensitivityFactor * _lookSensitivity;
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
+            _targetYaw += lookVector.x * _lookSensitivityFactor * _lookSensitivity * LookRotationTorque;
 
-            CameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, CameraTarget.transform.rotation.eulerAngles.y, 0f);
-            //CameraTarget.transform.Rotate(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
-            //transform.Rotate(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
-            SelfRigidbody.AddTorque(new Vector3(0f, lookVector.x * _lookSensitivityFactor * _lookSensitivity * LookRotationTorque, 0f));
-
-            //SelfRigidbody.AddTorque(new Vector3(0f, lookVector.x * lookSensitivity, 0f));
-            //transform.Rotate(new Vector3(0f, 20 * Time.deltaTime, 0f));
-            //transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + lookVector.x * lookSensitivity, transform.rotation.eulerAngles.z));
+            CameraTarget.transform.localRotation = Quaternion.Euler(_cinemachineTargetPitch, 0f, 0f);
         }
 
         private void GroundedCheck()
@@ -154,17 +185,13 @@ namespace SoulKnight3D
                 _jumpTimeoutDelta -= Time.deltaTime;
                 return;
             }
-            if (Mathf.Abs(SelfRigidbody.velocity.y) > 0.1f )
-            {
-                return;
-            }
-
             // set sphere position, with offset
             Vector3 checkPosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
             Ray groundedCheckRay = new Ray(checkPosition, Vector3.down);
-            Grounded = Physics.Raycast(groundedCheckRay, 0.2f, GroundLayers);
-            PlayerAnimation.SetAnimatorGrounded(Grounded);
+            bool isGrounded = SelfRigidbody.velocity.y <= 0.1f
+                && Physics.Raycast(groundedCheckRay, 0.2f, GroundLayers, QueryTriggerInteraction.Ignore);
+            SetGroundedState(isGrounded);
 
             if (Grounded)
             {
@@ -181,6 +208,42 @@ namespace SoulKnight3D
                     PlayerAnimation.SetAnimatorFreeFall(true);
                 }
 
+            }
+        }
+
+        private void SetGroundedState(bool isGrounded)
+        {
+            Grounded = isGrounded;
+            PlayerAnimation.SetAnimatorGrounded(isGrounded);
+
+            if (_movementCollider != null)
+            {
+                _movementCollider.sharedMaterial = isGrounded
+                    ? _groundedPhysicsMaterial
+                    : _airbornePhysicsMaterial;
+            }
+        }
+
+        private void HandleContactModification(PhysicsScene scene, NativeArray<ModifiableContactPair> pairs)
+        {
+            for (int pairIndex = 0; pairIndex < pairs.Length; pairIndex++)
+            {
+                ModifiableContactPair pair = pairs[pairIndex];
+                if (pair.colliderInstanceID != _movementColliderInstanceId
+                    && pair.otherColliderInstanceID != _movementColliderInstanceId)
+                {
+                    continue;
+                }
+
+                for (int contactIndex = 0; contactIndex < pair.contactCount; contactIndex++)
+                {
+                    float normalY = pair.GetNormal(contactIndex).y;
+                    if (normalY > -_sideContactMaxUpDot && normalY < _sideContactMaxUpDot)
+                    {
+                        pair.SetStaticFriction(contactIndex, 0f);
+                        pair.SetDynamicFriction(contactIndex, 0f);
+                    }
+                }
             }
         }
 
