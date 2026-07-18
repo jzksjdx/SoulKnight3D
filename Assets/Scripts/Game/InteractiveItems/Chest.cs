@@ -86,7 +86,7 @@ namespace SoulKnight3D
                     }
                     break;
                 case ChestRewardData.ChestRewardType.Weapon:
-                    GameObject weaponReward = GetSelectedRewardItem();
+                    GameObject weaponReward = GetSelectedWeaponReward();
                     if (weaponReward != null)
                     {
                         _chestItem = Instantiate(weaponReward, transform);
@@ -185,6 +185,36 @@ namespace SoulKnight3D
             return rewardItems[_rewardItemIndex].Item;
         }
 
+        private GameObject GetSelectedWeaponReward()
+        {
+            if (ChestReward == null || ChestReward.ChestRewards.Count <= _rewardTypeIndex) { return null; }
+
+            ChestRewardData.RewardCategory category = ChestReward.ChestRewards[_rewardTypeIndex];
+            if (category.UseWeaponPool && category.WeaponPool != null)
+            {
+                int poolLevel = GetWeaponPoolLevel(category);
+                GameObject poolReward = category.WeaponPool.GetRandomPickupPrefab(poolLevel, RewardRandom);
+                if (poolReward != null)
+                {
+                    return poolReward;
+                }
+
+                Debug.LogWarning($"Weapon pool '{category.WeaponPool.name}' has no valid weapon for level {poolLevel}. Falling back to direct chest items.");
+            }
+
+            return GetSelectedRewardItem();
+        }
+
+        private static int GetWeaponPoolLevel(ChestRewardData.RewardCategory category)
+        {
+            int baseLevel = category.FixedWeaponPoolLevel >= 0
+                ? category.FixedWeaponPoolLevel
+                : (GameController.Instance != null ? GameController.Instance.Level : 1);
+
+            return Mathf.Clamp(baseLevel + category.WeaponPoolLevelOffset,
+                category.MinWeaponPoolLevel,
+                category.MaxWeaponPoolLevel);
+        }
 
     }
 }

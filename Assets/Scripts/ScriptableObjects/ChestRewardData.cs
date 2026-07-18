@@ -21,6 +21,14 @@ namespace SoulKnight3D
             public ChestRewardType Type;
             public float Rate;
             public List<RewardItem> Items = new List<RewardItem>();
+            [Header("Weapon Pool")]
+            public bool UseWeaponPool;
+            public WeaponDropPoolSO WeaponPool;
+            [Tooltip("-1 uses GameController.Level. Non-negative values use this fixed pool level.")]
+            public int FixedWeaponPoolLevel = -1;
+            public int WeaponPoolLevelOffset;
+            public int MinWeaponPoolLevel = 0;
+            public int MaxWeaponPoolLevel = 6;
         }
 
         [Serializable]

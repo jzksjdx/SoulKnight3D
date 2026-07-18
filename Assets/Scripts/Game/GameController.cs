@@ -21,6 +21,10 @@ namespace SoulKnight3D
         public int Level = 1;
         public bool IsFinalLevel = false;
 
+        [Header("Level 1 Starter Chest")]
+        [SerializeField] private GameObject _levelOneStarterChestPrefab;
+        [SerializeField, Min(0.5f)] private float _levelOneStarterChestDistance = 2.25f;
+
         [Header("MoreMountains")]
         public MoreMountains.Tools.MMSoundManager MMSoundManager;
         public MMF_Player DamageNumber;
@@ -116,9 +120,78 @@ namespace SoulKnight3D
             }
 
             PlayerController.Instance.transform.position = _playerSpawnPoint;
+            SpawnLevelOneStarterChest(PlayerController.Instance.transform);
             PlayerController.Instance.gameObject.Show();
             PlayerController.Instance.PlayerAttack.RestoreWeaponState();
             UIMinimapUpdater.Instance?.UpdateMap();
+        }
+
+        private void SpawnLevelOneStarterChest(Transform playerTransform)
+        {
+            if (Level != 1 || _levelOneStarterChestPrefab == null)
+            {
+                return;
+            }
+
+            Vector3 forward = Vector3.ProjectOnPlane(playerTransform.forward, Vector3.up).normalized;
+            if (forward.sqrMagnitude < 0.01f)
+            {
+                forward = Vector3.forward;
+            }
+
+            Vector3 spawnPosition = playerTransform.position + forward * _levelOneStarterChestDistance;
+            Physics.SyncTransforms();
+            if (TryFindFloorHeight(spawnPosition, playerTransform.position.y + 0.1f,
+                out float floorHeight))
+            {
+                spawnPosition.y = floorHeight;
+            }
+            else
+            {
+                spawnPosition.y = _playerSpawnPoint.y - 0.05f;
+            }
+
+            Quaternion rotation = Quaternion.LookRotation(-forward, Vector3.up);
+            GameObject chest = Instantiate(_levelOneStarterChestPrefab, spawnPosition, rotation);
+            SnapNonTriggerColliderToFloor(chest, spawnPosition.y);
+        }
+
+        private static bool TryFindFloorHeight(Vector3 position, float maximumHeight,
+            out float floorHeight)
+        {
+            RaycastHit[] hits = Physics.RaycastAll(position + Vector3.up * 5f,
+                Vector3.down, 10f, Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore);
+            floorHeight = float.NegativeInfinity;
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                RaycastHit hit = hits[i];
+                if (hit.normal.y > 0.5f && hit.point.y <= maximumHeight)
+                {
+                    floorHeight = Mathf.Max(floorHeight, hit.point.y);
+                }
+            }
+
+            return !float.IsNegativeInfinity(floorHeight);
+        }
+
+        private static void SnapNonTriggerColliderToFloor(GameObject target, float floorHeight)
+        {
+            Collider[] colliders = target.GetComponentsInChildren<Collider>(true);
+            float lowestPoint = float.PositiveInfinity;
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (!colliders[i].isTrigger)
+                {
+                    lowestPoint = Mathf.Min(lowestPoint, colliders[i].bounds.min.y);
+                }
+            }
+
+            if (!float.IsPositiveInfinity(lowestPoint))
+            {
+                target.transform.position += Vector3.up * (floorHeight - lowestPoint);
+            }
         }
 
         public void SpawnDamageText(int value, Vector3 position)

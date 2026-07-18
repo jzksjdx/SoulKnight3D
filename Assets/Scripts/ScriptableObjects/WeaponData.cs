@@ -19,9 +19,31 @@ namespace SoulKnight3D
         public int Inaccuracy;
         public int Price;
         public float Cooldown;
+        [Tooltip("-1 means this weapon is excluded from normal chest weapon pools.")]
+        public int DropLevel = 1;
+        [Tooltip("Extra weapon pool levels this weapon can appear in.")]
+        public List<int> ExtraDropLevels = new List<int>();
 
         public GameObject WeaponPrefab;
         public GameObject PickUpPrefab;
+
+        public bool CanDropAtLevel(int level)
+        {
+            if (DropLevel == level)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < ExtraDropLevels.Count; i++)
+            {
+                if (ExtraDropLevels[i] == level)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public enum WeaponCategory
         {

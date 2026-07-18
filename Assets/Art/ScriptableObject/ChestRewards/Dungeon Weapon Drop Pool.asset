@@ -1,0 +1,141 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 148a33fb0085f2343a39644a000952d5, type: 3}
+  m_Name: Dungeon Weapon Drop Pool
+  m_EditorClassIdentifier: 
+  Levels:
+  - Level: 0
+    Entries:
+    - Weapon: {fileID: 11400000, guid: 754aecfd1c5704a7589f534f59a04e49, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 4f08d3a3a9fc444b5b34e52011e49c52, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0430d438c112744578cd481486fa192d, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 3b1fa776462cc457380c8362f6fcd668, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: af5ae985fdb5d409ebdc0fa9d23d71ff, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+  - Level: 1
+    Entries:
+    - Weapon: {fileID: 11400000, guid: 754aecfd1c5704a7589f534f59a04e49, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 89c48f271e5d94f10a85cbdac21f53bd, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 4f08d3a3a9fc444b5b34e52011e49c52, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0430d438c112744578cd481486fa192d, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: f47a541f640404103bc72714c4a3fce9, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0b7f279c4f43e4c7395c385e14fe1f1e, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 4e4be085ae0374dff9c8c04451329caa, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: d51612280a3b748699c6f2faed1ba407, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: a79234049b9744b54b08560db4ab8409, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 3b1fa776462cc457380c8362f6fcd668, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: af5ae985fdb5d409ebdc0fa9d23d71ff, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 31e1a560b01004109b7ae59a99771ab0, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+  - Level: 2
+    Entries:
+    - Weapon: {fileID: 11400000, guid: cc121d89af3e14a3a8acac6dde41783a, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: eb3093520f1294413b14b5bf550b5583, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 7d8b13101ca0e46e79a370165528215d, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+  - Level: 3
+    Entries:
+    - Weapon: {fileID: 11400000, guid: f4ed91c39c2ae4fc6a77b95234851510, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: cbea94a38d3614267b92095d4ba0a9e7, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 803b7c6b151fc46efa60e5df3f8de1ce, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 510585847bd01421594f96dd6c04b7a4, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 15cfe149dc44742b8be7e709bde46c39, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+  - Level: 4
+    Entries:
+    - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1

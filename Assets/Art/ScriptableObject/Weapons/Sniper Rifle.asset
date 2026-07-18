@@ -24,6 +24,8 @@ MonoBehaviour:
   Inaccuracy: 0
   Price: 16
   Cooldown: 0.833
+  DropLevel: 3
+  ExtraDropLevels:
   WeaponPrefab: {fileID: 437197427452384212, guid: cc870a4f75fde4ed396a41e986253468,
     type: 3}
   PickUpPrefab: {fileID: 3904313527459923930, guid: af76c9c1cf5824ff68158c534c1387f2,

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 478afb4c92a294630bc9681a472d035c, type: 3}
-  m_Name: BrownChestRewards
+  m_Name: BlueChestRewards
   m_EditorClassIdentifier: 
   ChestRewards:
   - Type: 1
@@ -19,6 +19,6 @@ MonoBehaviour:
     UseWeaponPool: 1
     WeaponPool: {fileID: 11400000, guid: 54534e6228ac44e46bf9c2a4f2ac42e4, type: 2}
     FixedWeaponPoolLevel: -1
-    WeaponPoolLevelOffset: 0
+    WeaponPoolLevelOffset: 1
     MinWeaponPoolLevel: 0
     MaxWeaponPoolLevel: 6

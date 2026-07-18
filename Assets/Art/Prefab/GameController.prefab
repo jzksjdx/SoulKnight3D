@@ -52,7 +52,11 @@ MonoBehaviour:
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
   ViewControllerFullTypeName: 
+  EnemySpawnProfile: {fileID: 0}
+  EnemySpawnLevel: 1
+  EnemySpawnSeed: 0
   EnemyWaveSOs: []
+  BossPrefab: {fileID: 0}
   RoomManagerPrefab: {fileID: 8739863374466118545, guid: 109cf7629f80f4367b30bd57db2fed9c,
     type: 3}
   _shouldGenerateMap: 1
@@ -1554,6 +1558,10 @@ MonoBehaviour:
   GameFloor: {fileID: 11400000, guid: 247aa78eae2574197a14170d475d212e, type: 2}
   MapGenerator: {fileID: 6218586280659333557}
   Level: 1
+  IsFinalLevel: 0
+  _levelOneStarterChestPrefab: {fileID: 5028523851695631656, guid: fc6061cdd18273541ba4760221e57cd6,
+    type: 3}
+  _levelOneStarterChestDistance: 2.25
   MMSoundManager: {fileID: 6025450636858251264}
   DamageNumber: {fileID: 2252590890647906196}
   FloatingTextPos: {fileID: 2411596705273367731}
