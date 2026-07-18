@@ -75,6 +75,16 @@ crashlytics-build.properties
 
 # additional files
 /[Aa]ssets/Plugins
+!/[Aa]ssets/Plugins/
+/[Aa]ssets/Plugins/*
+!/[Aa]ssets/Plugins/TPS Controls/
+/[Aa]ssets/Plugins/TPS Controls/*
+!/[Aa]ssets/Plugins/TPS Controls/Scripts/
+/[Aa]ssets/Plugins/TPS Controls/Scripts/*
+!/[Aa]ssets/Plugins/TPS Controls/Scripts/JoystickLeft.cs
+!/[Aa]ssets/Plugins/TPS Controls/Scripts/JoystickLeft.cs.meta
+!/[Aa]ssets/Plugins/TPS Controls/Scripts/JoystickRight.cs
+!/[Aa]ssets/Plugins/TPS Controls/Scripts/JoystickRight.cs.meta
 /[Aa]ssets/[Ss]treamingAssets
 *.0.json
 .DS_Store

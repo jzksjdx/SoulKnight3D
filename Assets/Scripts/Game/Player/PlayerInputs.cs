@@ -113,8 +113,7 @@ namespace SoulKnight3D
             if (Time.timeScale == 0) { return Vector2.zero; }
             if (_isMobile)
             {
-                Vector2 JoystickVector = new Vector2(JoystickLeft.positionX, JoystickLeft.positionY);
-                return JoystickVector;
+                return JoystickLeft.Movement;
             } else
             {
                 Vector2 inputVector = inputActions.Player.Move.ReadValue<Vector2>();
@@ -123,17 +122,12 @@ namespace SoulKnight3D
             
         }
 
-        private Vector2 prevJoystickRot;
-
         public Vector2 GetLookVector()
         {
             if (Time.timeScale == 0) { return Vector2.zero; }
             if (_isMobile)
             {
-                Vector2 currJoystickPos = new Vector2(JoystickRight.rotX, JoystickRight.rotY);
-                Vector2 JoystickVector = (currJoystickPos - prevJoystickRot) * 0.5f;
-                prevJoystickRot = currJoystickPos;
-                return JoystickVector;
+                return JoystickRight.ConsumeLookDelta();
             }
             else
             {

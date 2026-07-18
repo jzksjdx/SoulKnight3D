@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,9 @@ namespace SoulKnight3D
 {
     public class Chest : InteractiveItem
     {
+        private static readonly System.Random RewardRandom = new System.Random(
+            unchecked(Environment.TickCount ^ (int)DateTime.UtcNow.Ticks));
+
         private Animator _animator;
         private int _animIdOpen;
 
@@ -112,12 +116,12 @@ namespace SoulKnight3D
 
             if (totalRate <= 0f) { return 0; }
 
-            float randomRate = Random.Range(0f, totalRate);
+            float randomRate = NextRewardRate(totalRate);
             float currentRate = 0f;
             for (int i = 0; i < ChestReward.ChestRewards.Count; i++)
             {
                 currentRate += Mathf.Max(0f, ChestReward.ChestRewards[i].Rate);
-                if (currentRate >= randomRate)
+                if (randomRate < currentRate)
                 {
                     return i;
                 }
@@ -136,18 +140,26 @@ namespace SoulKnight3D
 
             if (totalRate <= 0f) { return 0; }
 
-            float randomRate = Random.Range(0f, totalRate);
+            float randomRate = NextRewardRate(totalRate);
             float currentRate = 0f;
             for (int i = 0; i < rewardItems.Count; i++)
             {
                 currentRate += Mathf.Max(0f, rewardItems[i].Rate);
-                if (currentRate >= randomRate)
+                if (randomRate < currentRate)
                 {
                     return i;
                 }
             }
 
             return rewardItems.Count - 1;
+        }
+
+        private static float NextRewardRate(float totalRate)
+        {
+            lock (RewardRandom)
+            {
+                return (float)(RewardRandom.NextDouble() * totalRate);
+            }
         }
 
         private GameObject GetSelectedRewardItem()

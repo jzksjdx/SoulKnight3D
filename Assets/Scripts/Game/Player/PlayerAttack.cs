@@ -138,6 +138,39 @@ namespace SoulKnight3D {
             EquipWeapon(nextWeaponIndex, true);
         }
 
+        public void RestoreWeaponState()
+        {
+            Weapons.RemoveAll(weapon => weapon == null);
+            if (Weapons.Count == 0)
+            {
+                _currentWeapon = null;
+                _currentWeaponIndex = 0;
+                return;
+            }
+
+            int equippedIndex = _currentWeapon == null
+                ? -1
+                : Weapons.IndexOf(_currentWeapon.gameObject);
+
+            if (equippedIndex < 0)
+            {
+                _currentWeapon = null;
+                _currentWeaponIndex = Mathf.Clamp(_currentWeaponIndex, 0, Weapons.Count - 1);
+                EquipWeapon(_currentWeaponIndex, false);
+                return;
+            }
+
+            _currentWeaponIndex = equippedIndex;
+            for (int i = 0; i < Weapons.Count; i++)
+            {
+                Weapons[i].SetActive(i == _currentWeaponIndex);
+            }
+
+            RegisterWeaponEnergySpend(_currentWeapon);
+            RegisterCurrentWeaponFiredEvent();
+            OnWeaponSwitched.Trigger(_currentWeapon.InGameData, _currentWeapon.gameObject);
+        }
+
         public Weapon GetCurrentWeapon()
         {
             return _currentWeapon;

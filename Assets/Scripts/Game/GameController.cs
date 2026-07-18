@@ -81,7 +81,8 @@ namespace SoulKnight3D
             yield return UIKit.OpenPanelAsync<UIGamePanel>();
             UIKit.GetPanel<UIGamePanel>().UpdateUiLevelTexts(Level);
 
-            PlayerController.Instance.PlayerAttack.SwitchWeapon();
+            PlayerAttack playerAttack = PlayerController.Instance.PlayerAttack;
+            playerAttack.Skill?.CancelForLevelTransition();
             PlayerController.Instance.gameObject.Hide();
             StartCoroutine(PreparePlayerAfterMapReady());
             
@@ -112,6 +113,7 @@ namespace SoulKnight3D
 
             PlayerController.Instance.transform.position = _playerSpawnPoint;
             PlayerController.Instance.gameObject.Show();
+            PlayerController.Instance.PlayerAttack.RestoreWeaponState();
             UIMinimapUpdater.Instance?.UpdateMap();
         }
 

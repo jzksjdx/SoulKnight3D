@@ -21,6 +21,8 @@ namespace SoulKnight3D
         protected override void Start()
         {
             base.Start();
+            StopSkillEffect();
+
             // Left hand Attack
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
             {
@@ -49,9 +51,13 @@ namespace SoulKnight3D
         protected override void HandleSkillEnd()
         {
             base.HandleSkillEnd();
-            SkillEffect.Stop();
+            StopSkillEffect();
 
             Weapon currentWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+            if (currentWeapon == null)
+            {
+                return;
+            }
 
             if (currentWeapon.InGameData.Animation == WeaponData.WeaponAnimation.Bow)
             {
@@ -74,6 +80,13 @@ namespace SoulKnight3D
                     ChangePlayerAnimation(_rightHandWeapon.InGameData.Animation);
                 }
             }
+        }
+
+        public override void CancelForLevelTransition()
+        {
+            base.CancelForLevelTransition();
+            _isAttacking = false;
+            StopSkillEffect();
         }
 
         public override bool UseSkill()
@@ -124,6 +137,17 @@ namespace SoulKnight3D
             SkillEffect.Play();
             AudioKit.PlaySound("fx_skill_c1");
             return true;
+        }
+
+        private void StopSkillEffect()
+        {
+            if (SkillEffect == null)
+            {
+                return;
+            }
+
+            SkillEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            SkillEffect.gameObject.SetActive(false);
         }
 
         private void AddNewWeaponToLeftHand()

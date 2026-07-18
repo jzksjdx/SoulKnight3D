@@ -158,12 +158,8 @@ namespace SoulKnight3D
 		{
 		}
 		
-		protected override void OnShow()
+        protected override void OnShow()
 		{
-            if (PlayerController.Instance.PlayerAttack.Weapons.Count == 1)
-            {
-                PlayerController.Instance.PlayerAttack.SwitchWeapon();
-            }
 		}
 		
 		protected override void OnHide()

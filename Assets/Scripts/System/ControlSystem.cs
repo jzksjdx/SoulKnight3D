@@ -8,7 +8,7 @@ namespace SoulKnight3D
     public class ControlSystem : AbstractSystem
     {
         public bool IsMobile = false;
-        public BindableProperty<float> Sensitivity = new BindableProperty<float>(1);
+        public BindableProperty<float> Sensitivity = new BindableProperty<float>(0.5f);
 
         private SaveSystem _saveSystem;
 
@@ -19,7 +19,7 @@ namespace SoulKnight3D
 
             // configure sensitivity
             _saveSystem = this.GetSystem<SaveSystem>();
-            Sensitivity.Value = _saveSystem.LoadFloat("Sensitivity", 1f);
+            Sensitivity.Value = _saveSystem.LoadFloat("Sensitivity", 0.5f);
         }
 
         public void ToggleCursor(bool isCursorShown)

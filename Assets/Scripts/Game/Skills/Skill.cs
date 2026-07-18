@@ -70,6 +70,14 @@ namespace SoulKnight3D
             IsUsingSkill = true;
             return true;
         }
+
+        public virtual void CancelForLevelTransition()
+        {
+            if (IsUsingSkill)
+            {
+                HandleSkillEnd();
+            }
+        }
     }
 
 }
