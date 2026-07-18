@@ -13,13 +13,19 @@ MonoBehaviour:
   m_Name: 1- Forest
   m_EditorClassIdentifier: 
   GameLevels:
-  - LevelWaves:
+  - EnemySpawnProfile: {fileID: 11400000, guid: 5ce1a85bd4b1b264a8fda5a85285439b,
+      type: 2}
+    LevelWaves:
     - {fileID: 11400000, guid: 8fd87b304f4fe4a789d4cfb7eee9faa8, type: 2}
     - {fileID: 11400000, guid: eb968a440046c482caa83c4cf217b77e, type: 2}
-  - LevelWaves:
+  - EnemySpawnProfile: {fileID: 11400000, guid: 5ce1a85bd4b1b264a8fda5a85285439b,
+      type: 2}
+    LevelWaves:
     - {fileID: 11400000, guid: 86755e64ec17049ef98b3c8702abeebc, type: 2}
     - {fileID: 11400000, guid: 4be6f717d3cc94e4a9f645b56d976e3e, type: 2}
-  - LevelWaves:
+  - EnemySpawnProfile: {fileID: 11400000, guid: 5ce1a85bd4b1b264a8fda5a85285439b,
+      type: 2}
+    LevelWaves:
     - {fileID: 11400000, guid: 86755e64ec17049ef98b3c8702abeebc, type: 2}
     - {fileID: 11400000, guid: 4be6f717d3cc94e4a9f645b56d976e3e, type: 2}
   BossPrefabs:

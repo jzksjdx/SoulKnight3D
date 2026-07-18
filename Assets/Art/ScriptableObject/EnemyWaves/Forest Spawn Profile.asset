@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3250bf7cef9e0914e8507b31ad45b434, type: 3}
+  m_Name: Forest Spawn Profile
+  m_EditorClassIdentifier: 
+  SeedSalt: 1103
+  EliteChance: 0.08
+  MaxEnemiesPerWave: 14
+  LevelSettings:
+  - Level: 1
+    MinTotalPoints: 12
+    MaxTotalPoints: 12
+    WaveCapacity: 8
+  - Level: 2
+    MinTotalPoints: 14
+    MaxTotalPoints: 14
+    WaveCapacity: 11
+  - Level: 3
+    MinTotalPoints: 16
+    MaxTotalPoints: 16
+    WaveCapacity: 14
+  Enemies:
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: b1a359556de6d434d968a9c60f54fb61,
+      type: 3}
+    ElitePrefab: {fileID: 8500170153172678778, guid: e6e03c6e4040841cfa8b1cb1f0d8ffbc,
+      type: 3}
+    PointCost: 1
+    WaveSize: 2
+    Weight: 3
+    MinLevel: 1
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: 3841669252bb646878ad5d61a7296b8a,
+      type: 3}
+    ElitePrefab: {fileID: 8500170153172678778, guid: 13c53d716468e4049bbb4d39e3d638ff,
+      type: 3}
+    PointCost: 1
+    WaveSize: 2
+    Weight: 3
+    MinLevel: 1
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: 68dff69e0ff2541c5be3d03cdb5980c9,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 1
+    WaveSize: 2
+    Weight: 3
+    MinLevel: 1
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 7433689300688254763, guid: 4d86b52c78d9048429cbdea1d2ec9766,
+      type: 3}
+    ElitePrefab: {fileID: 7433689300688254763, guid: cc2c97942086442e3b3a1422e725d876,
+      type: 3}
+    PointCost: 1
+    WaveSize: 1
+    Weight: 2
+    MinLevel: 1
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: af88adfd321a54c75bbb762d7f9b32bb,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 2
+    WaveSize: 2
+    Weight: 1
+    MinLevel: 2
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: 8da4c3bdbf3e34ab4a75b62ee716258d,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 2
+    WaveSize: 2
+    Weight: 1
+    MinLevel: 2
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 8500170153172678778, guid: 02ea13f1587ff407db8b8b5619da161d,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 2
+    WaveSize: 2
+    Weight: 1
+    MinLevel: 2
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 7433689300688254763, guid: 52a5a4e66e4d04358ab9ea96e012c1a5,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 1
+    WaveSize: 2
+    Weight: 2
+    MinLevel: 2
+    MaxLevel: 0
+    MaxCountPerWave: 0
+    EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 3627116852169866597, guid: f76233141f1bd124dbc372c1447bb9ce,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 4
+    WaveSize: 4
+    Weight: 1
+    MinLevel: 3
+    MaxLevel: 0
+    MaxCountPerWave: 1
+    EliteChanceMultiplier: 1

@@ -10,6 +10,9 @@ namespace SoulKnight3D
 {
 	public partial class MapGenerator : ViewController
 	{
+        public EnemySpawnProfileSO EnemySpawnProfile;
+        public int EnemySpawnLevel = 1;
+        public int EnemySpawnSeed;
         public List<EnemyWaveSO> EnemyWaveSOs = new List<EnemyWaveSO>();
         public GameObject BossPrefab;
 
@@ -318,14 +321,38 @@ namespace SoulKnight3D
             newRoom
                 .SetDimension(_roomDataDict[roomKey].position, mapScale / 4)
                 .SetGates(_roomDataDict[roomKey].gates)
-                .SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)])
                 .SetBossPrefab(BossPrefab)
                 .SetKey(roomKey)
                 .SetRoomType(_roomDataDict[roomKey].type)
-                .SetRoomStatus(_roomDataDict[roomKey].status)
-                .CompleteSetup();
+                .SetRoomStatus(_roomDataDict[roomKey].status);
+
+            if (_roomDataDict[roomKey].type == RoomManager.RoomType.Battle)
+            {
+                ConfigureBattleWaves(newRoom, roomKey);
+            }
+
+            newRoom.CompleteSetup();
             _generatedRooms.Add(roomKey, newRoom);
-            
+        }
+
+        private void ConfigureBattleWaves(RoomManager room, int roomKey)
+        {
+            if (EnemySpawnProfile != null)
+            {
+                int seed = EnemyWavePlanner.CombineSeed(EnemySpawnSeed, roomKey,
+                    EnemySpawnProfile.SeedSalt);
+                room.SetEnemyWavePlan(EnemyWavePlanner.Generate(EnemySpawnProfile,
+                    EnemySpawnLevel, seed));
+                return;
+            }
+
+            if (EnemyWaveSOs.Count > 0)
+            {
+                room.SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)]);
+                return;
+            }
+
+            Debug.LogError($"No enemy spawn profile or fixed waves are configured for room {roomKey}.");
         }
 
     }

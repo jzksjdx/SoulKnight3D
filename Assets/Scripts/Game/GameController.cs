@@ -46,7 +46,11 @@ namespace SoulKnight3D
 
             Level = Mathf.Clamp(this.GetSystem<SaveSystem>().LoadInt("Level", 1), 1, GameFloor.GameLevels.Count);
             IsFinalLevel = Level == 3;
-            MapGenerator.EnemyWaveSOs = GameFloor.GameLevels[Level - 1].LevelWaves;
+            GameLevel currentLevel = GameFloor.GameLevels[Level - 1];
+            MapGenerator.EnemySpawnProfile = currentLevel.EnemySpawnProfile;
+            MapGenerator.EnemySpawnLevel = Level;
+            MapGenerator.EnemySpawnSeed = Random.Range(1, int.MaxValue);
+            MapGenerator.EnemyWaveSOs = currentLevel.LevelWaves;
             MapGenerator.BossPrefab = GameFloor.BossPrefabs[Random.Range(0, GameFloor.BossPrefabs.Count)];
         }
 

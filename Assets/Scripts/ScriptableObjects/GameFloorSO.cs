@@ -15,6 +15,7 @@ namespace SoulKnight3D
     [Serializable]
     public class GameLevel
     {
+        public EnemySpawnProfileSO EnemySpawnProfile;
         public List<EnemyWaveSO> LevelWaves = new List<EnemyWaveSO>();
     }
 }

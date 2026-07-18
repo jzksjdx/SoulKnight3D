@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace SoulKnight3D
 {
@@ -10,7 +12,7 @@ namespace SoulKnight3D
         [SerializeField] private List<GameObject> _roomItemPresets;
         [SerializeField] private LayerMask _itemLayerMask;
         private List<RoomGate> _gates;
-        private EnemyWaveSO _enemyWaves;
+        private IReadOnlyList<EnemyWaveGroup> _enemyWaveGroups = Array.Empty<EnemyWaveGroup>();
         private GameObject _bossPrefab;
         private GameObject _generatedPortal;
 
@@ -43,7 +45,7 @@ namespace SoulKnight3D
         // room objects references
         private List<GameObject> _enemies = new List<GameObject>();
         private SpikeTilesController _spikeTilesController;
-        private static readonly WaitForSeconds EnemyWavePollDelay = new WaitForSeconds(1f);
+        private static readonly WaitForSeconds EnemyWavePollDelay = new WaitForSeconds(0.8f);
         private const int SpawnPositionMaxAttempts = 32;
 
         public enum RoomType
@@ -96,7 +98,15 @@ namespace SoulKnight3D
 
         public RoomManager SetEnemyWaves(EnemyWaveSO waves)
         {
-            _enemyWaves = waves;
+            _enemyWaveGroups = waves != null
+                ? waves.EnemyWaveGroups
+                : Array.Empty<EnemyWaveGroup>();
+            return this;
+        }
+
+        public RoomManager SetEnemyWavePlan(EnemyWavePlan plan)
+        {
+            _enemyWaveGroups = plan?.WaveGroups ?? Array.Empty<EnemyWaveGroup>();
             return this;
         }
 
@@ -254,10 +264,25 @@ namespace SoulKnight3D
         private IEnumerator WaveWorkFlow()
         {
             float reducedRadius = _radius * 0.9f;
-            foreach (EnemyWaveGroup waveGroup in _enemyWaves.EnemyWaveGroups)
+            if (_enemyWaveGroups.Count == 0)
             {
+                Debug.LogError($"Battle room {_key} has no enemy waves. Clearing it to avoid trapping the player.");
+            }
+
+            foreach (EnemyWaveGroup waveGroup in _enemyWaveGroups)
+            {
+                if (waveGroup == null)
+                {
+                    continue;
+                }
+
                 foreach(EnemyWave enemyWave in waveGroup.Waves)
                 {
+                    if (enemyWave == null || enemyWave.EnemyPrefab == null || enemyWave.Count <= 0)
+                    {
+                        continue;
+                    }
+
                     for(int i = 1; i <= enemyWave.Count; i ++)
                     {
                         // ensure no room items around
@@ -266,9 +291,15 @@ namespace SoulKnight3D
                         // generate new enemy
                         GameObject newEnemy = Instantiate(enemyWave.EnemyPrefab, spawnPosition, Quaternion.identity);
                         newEnemy.transform.SetParent(transform);
-                        _enemies.Add(newEnemy);
-
                         Enemy enemy = newEnemy.GetComponent<Enemy>();
+                        if (enemy == null)
+                        {
+                            Debug.LogError($"Spawned prefab '{enemyWave.EnemyPrefab.name}' has no Enemy component.");
+                            Destroy(newEnemy);
+                            continue;
+                        }
+
+                        _enemies.Add(newEnemy);
                         enemy.OnDeath.Register(() =>
                         {
                             _enemies.Remove(newEnemy);
@@ -280,6 +311,7 @@ namespace SoulKnight3D
                 // wait for current wave
                 while (_enemies.Count > 0)
                 {
+                    _enemies.RemoveAll(enemy => enemy == null);
                     yield return EnemyWavePollDelay;
                 }
             }
