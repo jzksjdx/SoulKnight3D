@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Pioneer
+  m_EditorClassIdentifier: 
+  Name: Pioneer
+  NameCN: "\u5148\u9A71\u8005"
+  Sprite: {fileID: 21300000, guid: fc6785f7f9bb8d24cbb2852e38605bfc, type: 2}
+  Category: 0
+  Rarity: 0
+  Animation: 0
+  Damage: 4
+  EnergyCost: 1
+  CritChance: 15
+  Inaccuracy: 5
+  Price: 12
+  Cooldown: 0.33333334
+  DropLevel: 0
+  ExtraDropLevels: 02000000
+  WeaponPrefab: {fileID: 3521780838095452763, guid: 43f17f34bf514734c92d038baef2d1e8,
+    type: 3}
+  PickUpPrefab: {fileID: 2730141936825806487, guid: e73f9da59d4955a43914440288c170bb,
+    type: 3}

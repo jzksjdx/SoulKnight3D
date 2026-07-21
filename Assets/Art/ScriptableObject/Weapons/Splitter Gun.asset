@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Splitter Gun
+  m_EditorClassIdentifier: 
+  Name: Splitter Gun
+  NameCN: "\u5206\u88C2\u8005"
+  Sprite: {fileID: 21300000, guid: 66b3e1476d362164d8ee7705c9afad17, type: 2}
+  Category: 1
+  Rarity: 0
+  Animation: 1
+  Damage: 5
+  EnergyCost: 2
+  CritChance: 5
+  Inaccuracy: 0
+  Price: 20
+  Cooldown: 0.41666666
+  DropLevel: 1
+  ExtraDropLevels: 
+  WeaponPrefab: {fileID: 4178072327096962029, guid: da1ffa576802fa149b59fbef59b65d46,
+    type: 3}
+  PickUpPrefab: {fileID: 3704999071522849464, guid: f1ba6a1e839e3e743993fdb24c3286c8,
+    type: 3}

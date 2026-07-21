@@ -27,11 +27,19 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
+    - Weapon: {fileID: 11400000, guid: b652ba8758e083248a7b97bc072fbc29, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: 3b1fa776462cc457380c8362f6fcd668, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
     - Weapon: {fileID: 11400000, guid: af5ae985fdb5d409ebdc0fa9d23d71ff, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0ab61ead9119dc142b48d4038be73968, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
@@ -85,7 +93,15 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0ab61ead9119dc142b48d4038be73968, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 63806c04648890d41b5d2b62354a94c7, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
@@ -99,7 +115,15 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
+    - Weapon: {fileID: 11400000, guid: b652ba8758e083248a7b97bc072fbc29, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: eb3093520f1294413b14b5bf550b5583, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 96161e240be786b449c733d2073b6590, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1

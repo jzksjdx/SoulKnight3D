@@ -41,10 +41,14 @@ public static class WeaponRewardSystemBuilder
         { "Old Sniper Rifle", new[] { 1 } },
         { "P250 Pistol", new[] { 1 } },
         { "Pirate Saber", new[] { 2 } },
+        { "Pioneer", new[] { 0, 2 } },
         { "Revolver", new[] { 0, 1 } },
         { "Shotgun", new[] { 0, 1 } },
         { "Sniper Rifle", new[] { 3 } },
+        { "Snow Fox L", new[] { 0, 1 } },
         { "Snow Fox XL", new[] { 0, 1 } },
+        { "Splitter Cannon", new[] { 2 } },
+        { "Splitter Gun", new[] { 1 } },
         { "Strong Bow", new[] { 1 } },
         { "UZI", new[] { 2 } }
     };
@@ -161,10 +165,15 @@ public static class WeaponRewardSystemBuilder
                     $"Droppable weapon '{weapon.name}' has no pickup prefab.");
             }
 
-            weapon.DropLevel = levels[0];
-            weapon.ExtraDropLevels = levels.Skip(1).ToList();
-
-            EditorUtility.SetDirty(weapon);
+            int[] currentLevels = new[] { weapon.DropLevel }
+                .Concat(weapon.ExtraDropLevels)
+                .ToArray();
+            if (!currentLevels.SequenceEqual(levels))
+            {
+                weapon.DropLevel = levels[0];
+                weapon.ExtraDropLevels = levels.Skip(1).ToList();
+                EditorUtility.SetDirty(weapon);
+            }
         }
     }
 

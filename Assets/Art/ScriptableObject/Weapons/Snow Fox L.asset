@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Snow Fox L
+  m_EditorClassIdentifier: 
+  Name: Snow Fox L
+  NameCN: "\u96EA\u72D0"
+  Sprite: {fileID: 21300000, guid: c1837ee8d5060ff41842fafb0c1f6d09, type: 2}
+  Category: 1
+  Rarity: 0
+  Animation: 1
+  Damage: 2
+  EnergyCost: 0
+  CritChance: 5
+  Inaccuracy: 10
+  Price: 15
+  Cooldown: 0.16666667
+  DropLevel: 0
+  ExtraDropLevels: 01000000
+  WeaponPrefab: {fileID: 1614691337983263825, guid: 48d8b4de980308d48afe9b7bb5bb2c04,
+    type: 3}
+  PickUpPrefab: {fileID: 1375693856016482383, guid: 4715138650728b1498cf37d6fe33327b,
+    type: 3}

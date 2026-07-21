@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6860354487381052300
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1576325307537967649, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].time
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576325307537967649, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].value
+      value: 0.03450167
+      objectReference: {fileID: 0}
+    - target: {fileID: 2010865858490264874, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: TrailRenderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3274414806100878763, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_Name
+      value: Splitter Bullet
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 44.154926
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.1294
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 44.135506
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 1576325307537967649, guid: da7c15fe3049446838cf75af804e1e01, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3274414806100878763, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 79157593025642304}
+  m_SourcePrefab: {fileID: 100100000, guid: da7c15fe3049446838cf75af804e1e01, type: 3}
+--- !u!1 &8234250157163998759 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3274414806100878763, guid: da7c15fe3049446838cf75af804e1e01,
+    type: 3}
+  m_PrefabInstance: {fileID: 6860354487381052300}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &79157593025642304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8234250157163998759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b16812146df0d8941bc2ec5958dd67f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _splitBulletPrefab: {fileID: 6872737187107216966, guid: 9b9076c7319019d4194f4c5ba364187e,
+    type: 3}
+  _pattern: 0
+  _sphereBulletCount: 6
+  _splitBulletDamage: 2
+  _splitBulletSpeed: 12
+  _spawnOffset: 0.12
+  _splitBulletSize: 1
+  _sourceCollisionIgnoreTime: 0.08
