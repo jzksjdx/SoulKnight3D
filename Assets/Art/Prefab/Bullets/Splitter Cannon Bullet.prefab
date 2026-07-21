@@ -28,6 +28,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Splitter Cannon Bullet
       objectReference: {fileID: 0}
+    - target: {fileID: 4016966023363871157, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_Height
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -134,4 +139,5 @@ MonoBehaviour:
   _splitBulletSpeed: 12
   _spawnOffset: 0.12
   _splitBulletSize: 1
-  _sourceCollisionIgnoreTime: 0.08
+  _surfaceOffset: 0.2
+  _collisionSeparationPadding: 0.2

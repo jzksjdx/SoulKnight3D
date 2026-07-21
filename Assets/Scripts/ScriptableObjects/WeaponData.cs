@@ -52,7 +52,7 @@ namespace SoulKnight3D
 
         public enum WeaponAnimation
         {
-            Pistol, Rifle, DoubleGun, Melee, Bow, Launcher
+            Pistol, Rifle, DoubleGun, Melee, Bow, Launcher, MachineGun
         }
 
         public enum WeaponRarity

@@ -12,11 +12,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 3c160370e3849464196ce49b4617d651, type: 2}
+      objectReference: {fileID: 2100000, guid: b3eb3658fda68c541b83ba347a5626c1, type: 2}
     - target: {fileID: 4349397571448948893, guid: 1d66fc466d54b49d7827a87067a83e54,
         type: 3}
       propertyPath: m_Name
-      value: FX_Cyan_Bullet_Impact
+      value: FX_Pioneer_Bullet_Impact
       objectReference: {fileID: 0}
     - target: {fileID: 4964404512308803343, guid: 1d66fc466d54b49d7827a87067a83e54,
         type: 3}

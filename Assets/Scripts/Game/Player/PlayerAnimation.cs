@@ -44,6 +44,7 @@ namespace SoulKnight3D
         private int _animIdMeleeNextMove;
 
         private int _animIdLauncher;
+        private int _animIdMachineGun;
 
         private int _animIdBareHand;
 
@@ -55,6 +56,7 @@ namespace SoulKnight3D
         private Vector3 _spineAimBow = new Vector3(13f, 40f, 4f);
         private Vector3 _spineAimSword = new Vector3(13f, 46.7f, 5.56f);
         private Vector3 _spineAimLauncher = new Vector3(21.8f, 18f, -10f);
+        private Vector3 _spineAimMachineGun = new Vector3(12.6f,14.51f,-2.12f);
 
         private void Awake()
         {
@@ -81,6 +83,7 @@ namespace SoulKnight3D
             _animIdMeleeNextMove = Animator.StringToHash("Melee_NextMove");
             _animIdLauncher = Animator.StringToHash("Weapon_Launcher");
             _animIdBareHand = Animator.StringToHash("Weapon_BareHand");
+            _animIdMachineGun = Animator.StringToHash("Weapon_MachineGun");
         }
 
         void Start()
@@ -204,6 +207,10 @@ namespace SoulKnight3D
                 case WeaponData.WeaponAnimation.Launcher:
                     SelfAnimator.SetTrigger(_animIdLauncher);
                     SpineAim.data.offset = _spineAimLauncher;
+                    break;
+                case WeaponData.WeaponAnimation.MachineGun:
+                    SelfAnimator.SetTrigger(_animIdMachineGun);
+                    SpineAim.data.offset = _spineAimMachineGun;
                     break;
                 default:
                     SelfAnimator.SetTrigger(_animIdPistol);

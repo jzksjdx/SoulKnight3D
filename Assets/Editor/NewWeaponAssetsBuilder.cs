@@ -12,7 +12,7 @@ public static class NewWeaponAssetsBuilder
     private const string PickupTemplatePath = PickupPrefabFolder + "/Pickup AK-47.prefab";
     private const string SplitterBulletPath = "Assets/Art/Prefab/Bullets/Splitter Bullet.prefab";
     private const string SplitterCannonBulletPath = "Assets/Art/Prefab/Bullets/Splitter Cannon Bullet.prefab";
-    private const string SplitBulletPath = "Assets/Art/Prefab/Bullets/Splitted Bullet Variant.prefab";
+    private const string SplitBulletPath = "Assets/Art/Prefab/Bullets/Splitted Bullet.prefab";
 
     private static readonly WeaponDefinition[] Definitions =
     {

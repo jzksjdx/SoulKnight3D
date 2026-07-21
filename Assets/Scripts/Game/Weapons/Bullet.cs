@@ -21,8 +21,17 @@ namespace SoulKnight3D
         private Vector3 _originalScale = Vector3.one;
         private IBulletImpactBehavior _impactBehavior;
         private List<Collider> _ignoredColliders;
+        private Vector3 _preCollisionVelocity;
+        private Quaternion _preCollisionRotation;
+        private bool _hasPreCollisionPose;
 
         public string WeaponTag => _weaponTag;
+        public Vector3 PreCollisionVelocity => _hasPreCollisionPose
+            ? _preCollisionVelocity
+            : (SelfRigidbody != null ? SelfRigidbody.velocity : Vector3.zero);
+        public Quaternion PreCollisionRotation => _hasPreCollisionPose
+            ? _preCollisionRotation
+            : transform.rotation;
 
         public void InitializeBullet(string weaponTag, int damage, bool isCritHit, GameObject prefabRef, float bulletSize = 1f)
 		{
@@ -33,6 +42,8 @@ namespace SoulKnight3D
 
             _destroyTimeoutDelta = _destroyTimeout;
             _didHit = false;
+            _preCollisionVelocity = Vector3.zero;
+            _hasPreCollisionPose = false;
             RestoreIgnoredCollisions();
             if (TrailRenderer)
             {
@@ -53,6 +64,19 @@ namespace SoulKnight3D
                 _didHit = true;
                 OnBulletCollision(other);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private void FixedUpdate()
+        {
+            if (_didHit || SelfRigidbody == null ||
+                SelfRigidbody.velocity.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            _preCollisionVelocity = SelfRigidbody.velocity;
+            _preCollisionRotation = transform.rotation;
+            _hasPreCollisionPose = true;
         }
 
         protected virtual void OnBulletCollision(Collision other)
@@ -126,9 +150,9 @@ namespace SoulKnight3D
             }
         }
 
-        public void IgnoreCollisionTemporarily(Collider other, float duration)
+        public void IgnoreCollisionUntilSeparated(Collider other, float separationPadding)
         {
-            if (SelfCapsuleCollider == null || other == null || duration <= 0f)
+            if (SelfCapsuleCollider == null || other == null)
             {
                 return;
             }
@@ -142,18 +166,46 @@ namespace SoulKnight3D
             {
                 _ignoredColliders.Add(other);
                 Physics.IgnoreCollision(SelfCapsuleCollider, other, true);
-                StartCoroutine(RestoreCollisionAfterDelay(other, duration));
+                StartCoroutine(RestoreCollisionWhenSeparated(other,
+                    Mathf.Max(0f, separationPadding)));
             }
         }
 
-        private IEnumerator RestoreCollisionAfterDelay(Collider other, float duration)
+        private IEnumerator RestoreCollisionWhenSeparated(Collider other, float separationPadding)
         {
-            yield return new WaitForSeconds(duration);
+            WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
+            yield return waitForFixedUpdate;
+
+            while (other != null && other.enabled && other.gameObject.activeInHierarchy &&
+                !HasSeparatedFrom(other, separationPadding))
+            {
+                yield return waitForFixedUpdate;
+            }
+
             if (SelfCapsuleCollider != null && other != null)
             {
                 Physics.IgnoreCollision(SelfCapsuleCollider, other, false);
             }
             _ignoredColliders?.Remove(other);
+        }
+
+        private bool HasSeparatedFrom(Collider other, float separationPadding)
+        {
+            Vector3 bulletCenter = SelfCapsuleCollider.bounds.center;
+            Vector3 closestPoint = other.ClosestPoint(bulletCenter);
+            Vector3 towardCollider = closestPoint - bulletCenter;
+            float bulletExtent = SelfCapsuleCollider.bounds.extents.magnitude;
+            float requiredSeparation = bulletExtent + separationPadding;
+            if (towardCollider.sqrMagnitude < requiredSeparation * requiredSeparation)
+            {
+                return false;
+            }
+
+            Vector3 velocity = SelfRigidbody != null
+                ? SelfRigidbody.velocity
+                : Vector3.zero;
+            return velocity.sqrMagnitude <= 0.0001f ||
+                Vector3.Dot(velocity, towardCollider) <= 0f;
         }
 
         private void RestoreIgnoredCollisions()
@@ -180,6 +232,8 @@ namespace SoulKnight3D
             _destroyTimeoutDelta = _destroyTimeout;
             _isCritHit = false;
             _didHit = false;
+            _preCollisionVelocity = Vector3.zero;
+            _hasPreCollisionPose = false;
             if (SelfRigidbody != null)
             {
                 SelfRigidbody.velocity = Vector3.zero;

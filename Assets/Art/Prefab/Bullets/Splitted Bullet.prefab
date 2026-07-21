@@ -26,7 +26,12 @@ PrefabInstance:
     - target: {fileID: 3274414806100878763, guid: da7c15fe3049446838cf75af804e1e01,
         type: 3}
       propertyPath: m_Name
-      value: Splitted Bullet Variant
+      value: Splitted Bullet
+      objectReference: {fileID: 0}
+    - target: {fileID: 4016966023363871157, guid: da7c15fe3049446838cf75af804e1e01,
+        type: 3}
+      propertyPath: m_Height
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4814041444562935185, guid: da7c15fe3049446838cf75af804e1e01,
         type: 3}
