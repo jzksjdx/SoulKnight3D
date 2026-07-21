@@ -151,7 +151,10 @@ namespace SoulKnight3D
                 spawnPosition.y = _playerSpawnPoint.y - 0.05f;
             }
 
-            Quaternion rotation = Quaternion.LookRotation(-forward, Vector3.up);
+            Vector3 facingDirection = -forward;
+            float facingYaw = Mathf.Atan2(facingDirection.x, facingDirection.z) * Mathf.Rad2Deg;
+            float snappedYaw = Mathf.Round(facingYaw / 90f) * 90f;
+            Quaternion rotation = Quaternion.Euler(0f, snappedYaw, 0f);
             GameObject chest = Instantiate(_levelOneStarterChestPrefab, spawnPosition, rotation);
             SnapNonTriggerColliderToFloor(chest, spawnPosition.y);
         }

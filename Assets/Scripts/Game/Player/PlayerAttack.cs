@@ -168,6 +168,7 @@ namespace SoulKnight3D {
 
             RegisterWeaponEnergySpend(_currentWeapon);
             RegisterCurrentWeaponFiredEvent();
+            PlayerAnimation.SwitchWeaponAnimation(_currentWeapon.InGameData.Animation);
             OnWeaponSwitched.Trigger(_currentWeapon.InGameData, _currentWeapon.gameObject);
         }
 
