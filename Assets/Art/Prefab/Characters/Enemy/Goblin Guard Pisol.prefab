@@ -2316,8 +2316,12 @@ MonoBehaviour:
   Range: 5
   State: 0
   MinimapIcon: {fileID: 3460152917585980616}
+  _patrolTimeout: 2
+  _attackTimeout: 3
   _deathCleanupDelay: 3
   _deadFeedbacks: {fileID: 5405169005639268558}
+  _rewardRate: 20
+  _rewardValues: 00000000000000000100000001000000
   SelfRigidbody: {fileID: 7200409748102261847}
   SelfAnimator: {fileID: 9148996911604091027}
   SelfCollider: {fileID: 8679422746988958925}

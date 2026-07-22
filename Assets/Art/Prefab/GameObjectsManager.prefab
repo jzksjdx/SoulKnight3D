@@ -46,3 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnergyOrbPrefab: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
     type: 3}
+  CoinPrefabs:
+  - {fileID: 171814771111495643, guid: aaec2c1fbbb97b04c8c66edc9a590d1b, type: 3}
+  - {fileID: 23116946514372841, guid: f6aef1d1617bd0c40aacafd35ba8af54, type: 3}
+  - {fileID: 6431262936030494387, guid: b48dd7e33c483a24dba735df35a615e3, type: 3}

@@ -28,6 +28,10 @@ namespace SoulKnight3D
         [SerializeField] private MMF_Player _feedbackJump;
         [SerializeField] private MMF_Player _feedbackCall;
 
+        [Header("Death Rewards (Soul Knight 1.8.4)")]
+        [SerializeField, Range(0, 100)] private int _rewardRate = 100;
+        [SerializeField] private int[] _rewardValues = { 3, 3, 0, 10 };
+
         // call skill enemy prefabs
         [SerializeField] private List<GameObject> _minionPrefabs;
         [SerializeField] private LayerMask _itemLayerMask;
@@ -102,6 +106,7 @@ namespace SoulKnight3D
                 _minimapIcon.Hide();
                 AudioKit.PlaySound("fx_wolf_growl");
                 OnDeath.Trigger();
+                EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
 
                 // show portal
 

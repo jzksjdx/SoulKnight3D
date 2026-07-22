@@ -11,14 +11,23 @@ namespace SoulKnight3D
         [SerializeField] private int _recoverHealValue;
         [SerializeField] private int _recoverEnergyValue;
         [SerializeField] private GameObject _mesh;
+        [SerializeField, Min(1)] private int _basePrice = 25;
+        [SerializeField] private string _displayName = "Health Potion";
+        [SerializeField] private string _displayNameCN = "生命药水";
 
         private GameObject _particle;
+
+        public int BasePrice => _basePrice;
+        public string DisplayName => _displayName;
+        public string DisplayNameCN => _displayNameCN;
 
         protected override void Start()
         {
             base.Start();
-            Label.SetLabelText("药水", WeaponData.WeaponRarity.White);
-            //Outline.OutlineColor = GetRarityColor();
+            string labelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese
+                ? _displayNameCN
+                : _displayName;
+            Label.SetLabelText(labelText, WeaponData.WeaponRarity.White);
         }
 
         public override void Interact()
@@ -33,5 +42,14 @@ namespace SoulKnight3D
             _particle = Instantiate(_particlePrefab, PlayerController.Instance.transform);
             Destroy(gameObject);
         }
+
+#if UNITY_EDITOR
+        public void ConfigureMerchantData(string displayName, string displayNameCN, int basePrice)
+        {
+            _displayName = displayName;
+            _displayNameCN = displayNameCN;
+            _basePrice = Mathf.Max(1, basePrice);
+        }
+#endif
     }
 }

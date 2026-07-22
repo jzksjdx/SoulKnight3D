@@ -69,13 +69,16 @@ namespace SoulKnight3D
             switch(_selectedType)
             {
                 case ChestRewardData.ChestRewardType.EnergyAndCoin:
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 2; i++)
                     {
                         GameObject newOrb = GameObjectsManager.Instance.SpawnEnergyOrb(transform.position);
-                        Rigidbody rb = newOrb.GetComponent<Rigidbody>();
-                        float randomScale = 0.3f;
-                        Vector3 randomDirection = Vector3.up + new Vector3(Random.Range(-randomScale, randomScale), 0f, Random.Range(-randomScale, randomScale));
-                        rb.AddForce(randomDirection * 5, ForceMode.Impulse);
+                        LaunchReward(newOrb);
+                    }
+                    for (int i = 0; i < 2; i++)
+                    {
+                        GameObject coin = GameObjectsManager.Instance.SpawnCoin(transform.position,
+                            CoinPickup.CoinType.Copper);
+                        LaunchReward(coin);
                     }
                     break;
                 case ChestRewardData.ChestRewardType.Potion:
@@ -112,11 +115,58 @@ namespace SoulKnight3D
         {
             if (ChestReward == null || ChestReward.ChestRewards.Count == 0) { return; }
 
-            _rewardTypeIndex = SelectRewardCategoryIndex();
-            _selectedType = ChestReward.ChestRewards[_rewardTypeIndex].Type;
+            if (ChestReward.SelectionMode == ChestRewardData.RewardSelectionMode.OriginalRoomReward)
+            {
+                _selectedType = SelectOriginalRoomRewardType();
+                _rewardTypeIndex = ChestReward.ChestRewards.FindIndex(category =>
+                    category.Type == _selectedType);
+                if (_rewardTypeIndex < 0)
+                {
+                    Debug.LogWarning($"Chest reward '{ChestReward.name}' has no {_selectedType} category.");
+                    _rewardTypeIndex = 0;
+                    _selectedType = ChestReward.ChestRewards[0].Type;
+                }
+            }
+            else
+            {
+                _rewardTypeIndex = SelectRewardCategoryIndex();
+                _selectedType = ChestReward.ChestRewards[_rewardTypeIndex].Type;
+            }
 
             List<ChestRewardData.RewardItem> rewardItems = ChestReward.ChestRewards[_rewardTypeIndex].Items;
             _rewardItemIndex = rewardItems.Count == 0 ? 0 : SelectRewardItemIndex(rewardItems);
+        }
+
+        private ChestRewardData.ChestRewardType SelectOriginalRoomRewardType()
+        {
+            ChestRewardData.RoomRewardSettings settings = ChestReward.RoomReward;
+            int potionUpperBound = Mathf.Clamp(settings.PotionUpperBound, 0, 100);
+            int weaponUpperBound = Mathf.Clamp(settings.WeaponUpperBound,
+                potionUpperBound, 100);
+
+            GameController gameController = GameController.Instance;
+            if (gameController != null &&
+                gameController.RunsStarted > 0 &&
+                gameController.RunsStarted <= settings.BeginnerRunCount)
+            {
+                weaponUpperBound = Mathf.Clamp(settings.BeginnerWeaponUpperBound,
+                    potionUpperBound, 100);
+            }
+
+            int roll;
+            lock (RewardRandom)
+            {
+                roll = RewardRandom.Next(0, 100);
+            }
+
+            if (roll < potionUpperBound)
+            {
+                return ChestRewardData.ChestRewardType.Potion;
+            }
+
+            return roll < weaponUpperBound
+                ? ChestRewardData.ChestRewardType.Weapon
+                : ChestRewardData.ChestRewardType.EnergyAndCoin;
         }
 
         private int SelectRewardCategoryIndex()
@@ -214,6 +264,20 @@ namespace SoulKnight3D
             return Mathf.Clamp(baseLevel + category.WeaponPoolLevelOffset,
                 category.MinWeaponPoolLevel,
                 category.MaxWeaponPoolLevel);
+        }
+
+        private static void LaunchReward(GameObject reward)
+        {
+            if (reward == null || !reward.TryGetComponent(out Rigidbody rewardRigidbody))
+            {
+                return;
+            }
+
+            const float randomScale = 0.3f;
+            Vector3 randomDirection = Vector3.up + new Vector3(
+                Random.Range(-randomScale, randomScale), 0f,
+                Random.Range(-randomScale, randomScale));
+            rewardRigidbody.AddForce(randomDirection * 5f, ForceMode.Impulse);
         }
 
     }

@@ -70,6 +70,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8512163217269498465, guid: 282363899df60435abf1d757bdc7d245,
         type: 3}
+      propertyPath: _basePrice
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8512163217269498465, guid: 282363899df60435abf1d757bdc7d245,
+        type: 3}
+      propertyPath: _displayName
+      value: Energy Potion
+      objectReference: {fileID: 0}
+    - target: {fileID: 8512163217269498465, guid: 282363899df60435abf1d757bdc7d245,
+        type: 3}
+      propertyPath: _displayNameCN
+      value: "\u80FD\u91CF\u836F\u6C34"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8512163217269498465, guid: 282363899df60435abf1d757bdc7d245,
+        type: 3}
       propertyPath: _particlePrefab
       value: 
       objectReference: {fileID: 5328539413332536257, guid: e07616e3c43cd4a11903b5226ce24ce1,

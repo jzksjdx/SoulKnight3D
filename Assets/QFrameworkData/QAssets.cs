@@ -14,6 +14,7 @@ namespace QAssetBundle
     public class Audio
     {
         public const string BundleName = "audio";
+        public const string FX_ATK_HUMMER = "fx_atk_hummer";
         public const string FX_BLOWPIPE = "fx_blowpipe";
         public const string FX_BOSS1_ATK3 = "fx_boss1_atk3";
         public const string FX_BOW_DRAW = "fx_bow_draw";
@@ -25,6 +26,8 @@ namespace QAssetBundle
         public const string FX_BUY = "fx_buy";
         public const string FX_CHEST_OPEN = "fx_chest_open";
         public const string FX_COIN = "fx_coin";
+        public const string FX_DEAD4 = "fx_dead4";
+        public const string FX_DEAD6 = "fx_dead6";
         public const string FX_DOOR = "fx_door";
         public const string FX_ENERGY = "fx_energy";
         public const string FX_EXPLODE_BIG = "fx_explode_big";
@@ -42,6 +45,7 @@ namespace QAssetBundle
         public const string FX_HIT = "fx_hit";
         public const string FX_HIT_P1 = "fx_hit_p1";
         public const string FX_SHOOT_E1 = "fx_shoot_e1";
+        public const string FX_SHOOT_FLOWER = "fx_shoot_flower";
         public const string FX_SHORT_FART = "fx_short_fart";
         public const string FX_SHOW_UP = "fx_show_up";
         public const string FX_SKILL_C1 = "fx_skill_c1";

@@ -1607,6 +1607,8 @@ MonoBehaviour:
   _feedbackAtk: {fileID: 3353328269672649703}
   _feedbackJump: {fileID: 3215380761752959165}
   _feedbackCall: {fileID: 9152952830358980345}
+  _rewardRate: 100
+  _rewardValues: 0300000003000000000000000a000000
   _minionPrefabs:
   - {fileID: 7433689300688254763, guid: 4d86b52c78d9048429cbdea1d2ec9766, type: 3}
   - {fileID: 7433689300688254763, guid: cc2c97942086442e3b3a1422e725d876, type: 3}

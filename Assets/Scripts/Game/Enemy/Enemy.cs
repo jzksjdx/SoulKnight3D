@@ -27,6 +27,10 @@ namespace SoulKnight3D
          [SerializeField] protected float _attackTimeout = 3f;
         [SerializeField, Min(0f)] private float _deathCleanupDelay = 3f;
         [SerializeField] private MMF_Player _deadFeedbacks;
+
+        [Header("Death Rewards (Soul Knight 1.8.4)")]
+        [SerializeField, Range(0, 100)] private int _rewardRate = 20;
+        [SerializeField] private int[] _rewardValues = { 0, 0, 1, 1 };
         private float _dissolveTimeoutDelta;
         private float _dissolveTimeout = 3f;
 
@@ -171,15 +175,7 @@ namespace SoulKnight3D
                 MinimapIcon.Hide();
                 _deadFeedbacks?.PlayFeedbacks();
                 OnDeath.Trigger();
-                // spawn energy orb
-                if (0.2f >= Random.Range(0f, 1f))
-                {
-                    GameObject newOrb = GameObjectsManager.Instance.SpawnEnergyOrb(transform.position);
-                    Rigidbody rb = newOrb.GetComponent<Rigidbody>();
-                    float randomScale = 0.5f;
-                    Vector3 randomDirection = new Vector3(Random.Range(-randomScale, randomScale), 0.5f, Random.Range(-randomScale, randomScale));
-                    rb.AddForce(randomDirection * 5, ForceMode.Impulse);
-                }
+                EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
 
                 // recycle status if any
                 Status[] statuses = GetComponentsInChildren<Status>();

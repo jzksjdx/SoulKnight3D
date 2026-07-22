@@ -10,6 +10,8 @@ namespace SoulKnight3D
 {
 	public partial class GameController : ViewController, IController
 	{
+        private const string RunsStartedSaveKey = "RunsStarted";
+
         public static GameController Instance;
        
         [Header("Game Level")]
@@ -20,6 +22,7 @@ namespace SoulKnight3D
         //public int Floor = 1;
         public int Level = 1;
         public bool IsFinalLevel = false;
+        public int RunsStarted { get; private set; } = int.MaxValue;
 
         [Header("Level 1 Starter Chest")]
         [SerializeField] private GameObject _levelOneStarterChestPrefab;
@@ -48,7 +51,14 @@ namespace SoulKnight3D
                 Instantiate(PlayerPrefabs[characterIndex]);
             }
 
-            Level = Mathf.Clamp(this.GetSystem<SaveSystem>().LoadInt("Level", 1), 1, GameFloor.GameLevels.Count);
+            SaveSystem saveSystem = this.GetSystem<SaveSystem>();
+            Level = Mathf.Clamp(saveSystem.LoadInt("Level", 1), 1, GameFloor.GameLevels.Count);
+            RunsStarted = saveSystem.LoadInt(RunsStartedSaveKey);
+            if (Level == 1)
+            {
+                RunsStarted++;
+                saveSystem.SaveInt(RunsStartedSaveKey, RunsStarted);
+            }
             IsFinalLevel = Level == 3;
             GameLevel currentLevel = GameFloor.GameLevels[Level - 1];
             MapGenerator.EnemySpawnProfile = currentLevel.EnemySpawnProfile;

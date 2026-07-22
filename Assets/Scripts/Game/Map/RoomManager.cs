@@ -42,6 +42,12 @@ namespace SoulKnight3D
         public GameObject WhiteChest;
         public GameObject DungeonChest;
 
+        [Header("Merchant Room")]
+        [SerializeField] private GameObject _merchantRoomPrefab;
+        [SerializeField] private WeaponDropPoolSO _merchantWeaponPool;
+        [SerializeField] private List<GameObject> _merchantPotionPrefabs = new List<GameObject>();
+        [SerializeField, Min(0f)] private float _merchantPriceIncreasePerLevel = 0.15f;
+
         // room objects references
         private List<GameObject> _enemies = new List<GameObject>();
         private SpikeTilesController _spikeTilesController;
@@ -50,7 +56,7 @@ namespace SoulKnight3D
 
         public enum RoomType
         {
-            Home, Battle, Reward, Portal, Boss
+            Home, Battle, Reward, Portal, Boss, Merchant
         }
 
         public enum RoomStatus
@@ -138,6 +144,11 @@ namespace SoulKnight3D
                 newReward.transform.Translate(new Vector3(0, 0.043f, 0));
                 _roomIcon.sprite = IconChest;
             }
+            else if (type == RoomType.Merchant)
+            {
+                SpawnMerchantRoom();
+                _roomIcon.sprite = IconSpecial;
+            }
             else if (type == RoomType.Boss)
             {
                 _roomIcon.sprite = IconBoss;
@@ -151,6 +162,30 @@ namespace SoulKnight3D
                 _roomIcon.sprite = IconProtal;
             }
             return this;
+        }
+
+        private void SpawnMerchantRoom()
+        {
+            if (_merchantRoomPrefab == null)
+            {
+                Debug.LogWarning("Merchant room prefab is not configured. Falling back to a reward chest.");
+                GameObject fallbackReward = Instantiate(DungeonChest, transform.position,
+                    Quaternion.identity, transform);
+                fallbackReward.transform.Translate(new Vector3(0f, 0.043f, 0f));
+                return;
+            }
+
+            GameObject merchantObject = Instantiate(_merchantRoomPrefab, transform.position,
+                Quaternion.identity, transform);
+            MerchantRoom merchantRoom = merchantObject.GetComponent<MerchantRoom>();
+            if (merchantRoom == null)
+            {
+                merchantRoom = merchantObject.AddComponent<MerchantRoom>();
+            }
+
+            int level = GameController.Instance != null ? GameController.Instance.Level : 1;
+            merchantRoom.Configure(_merchantWeaponPool, _merchantPotionPrefabs, level,
+                _merchantPriceIncreasePerLevel);
         }
 
         public RoomManager SetRoomStatus(RoomStatus status)
@@ -348,7 +383,7 @@ namespace SoulKnight3D
 
         public void PlayerEntersRoom()
         {
-            if (Type == RoomType.Portal || Type == RoomType.Reward)
+            if (Type == RoomType.Portal || Type == RoomType.Reward || Type == RoomType.Merchant)
             {
                 Status = RoomStatus.Explored;
             }

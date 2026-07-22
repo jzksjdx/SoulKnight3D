@@ -12,19 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 478afb4c92a294630bc9681a472d035c, type: 3}
   m_Name: WhiteChestRewards
   m_EditorClassIdentifier: 
+  SelectionMode: 1
+  RoomReward:
+    PotionUpperBound: 10
+    WeaponUpperBound: 16
+    BeginnerWeaponUpperBound: 30
+    BeginnerRunCount: 8
   ChestRewards:
   - Type: 0
-    Rate: 1
+    Rate: 84
     Items:
     - Item: {fileID: 4531412225396487519, guid: 8f6c493b95a714e99a81184ebee14c54,
         type: 3}
       Rate: 1
   - Type: 2
-    Rate: 1
+    Rate: 10
     Items:
     - Item: {fileID: 1116304796272423276, guid: 282363899df60435abf1d757bdc7d245,
         type: 3}
-      Rate: 1
+      Rate: 40
     - Item: {fileID: 2566297622277629398, guid: c321da98143bb45dca9f09f08257bb50,
         type: 3}
-      Rate: 1
+      Rate: 60
+  - Type: 1
+    Rate: 6
+    Items: []
+    UseWeaponPool: 1
+    WeaponPool: {fileID: 11400000, guid: 54534e6228ac44e46bf9c2a4f2ac42e4, type: 2}
+    FixedWeaponPoolLevel: 1
+    WeaponPoolLevelOffset: 0
+    MinWeaponPoolLevel: 0
+    MaxWeaponPoolLevel: 6

@@ -36,6 +36,18 @@ namespace SoulKnight3D
                 EnergyText.text = energy + "/" + PlayerController.Instance.PlayerStats.MaxEnergy;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
+            if (CoinText == null)
+            {
+                Debug.LogError("UIGamePanel CoinText is not assigned. Rebuild the UI AssetBundle after updating the panel prefab.", this);
+            }
+            else
+            {
+                PlayerController.Instance.PlayerStats.Coins.RegisterWithInitValue((coins) =>
+                {
+                    CoinText.text = coins.ToString();
+                }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            }
+
             // Skill button
             PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.RegisterWithInitValue((amount) =>
 			{

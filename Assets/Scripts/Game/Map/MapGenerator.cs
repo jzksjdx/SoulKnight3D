@@ -19,6 +19,10 @@ namespace SoulKnight3D
         [SerializeField] private RoomManager RoomManagerPrefab;
         [SerializeField] private bool _shouldGenerateMap = true;
 
+        [Header("Merchant Rooms")]
+        [SerializeField, Range(0f, 1f)] private float _merchantRoomChance = 0.5f;
+        [SerializeField, Min(1)] private int _merchantMinimumLevel = 1;
+
         [Header("Room Objects")]
         [SerializeField] private GameObject PortalPrefab;
         [SerializeField] private GameObject roomGenPrefab;
@@ -251,7 +255,9 @@ namespace SoulKnight3D
             }
             else if (isReward && newRoomKey == deadEndKey)
             {
-                roomType = RoomManager.RoomType.Reward;
+                roomType = ShouldGenerateMerchantRoom()
+                    ? RoomManager.RoomType.Merchant
+                    : RoomManager.RoomType.Reward;
             }
 
             _roomDataDict.Add(newRoomKey, new RoomData(newRoomWorldPosition, new List<RoomGate> { newRoomGateComponent }, roomType));
@@ -284,6 +290,14 @@ namespace SoulKnight3D
             newRoom.transform.SetParent(_generatedRooms[newRoomKey].transform);
             oldRoomGate.transform.SetParent(_generatedRooms[oldRoomKey].transform);
             newRoomGate.transform.SetParent(_generatedRooms[newRoomKey].transform);
+        }
+
+        private bool ShouldGenerateMerchantRoom()
+        {
+            int level = GameController.Instance != null
+                ? GameController.Instance.Level
+                : EnemySpawnLevel;
+            return level >= _merchantMinimumLevel && Random.value < _merchantRoomChance;
         }
 
         private GameObject GenerateRoom(int roomKey, Vector3 roomWorldPosition)

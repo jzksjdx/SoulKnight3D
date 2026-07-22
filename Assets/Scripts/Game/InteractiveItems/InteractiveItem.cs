@@ -15,7 +15,7 @@ namespace SoulKnight3D
 
         public virtual void Interact() { }
 
-        protected void SetInteractable(bool isInteractable)
+        public void SetInteractable(bool isInteractable)
         {
             IsInteractable = isInteractable;
             if (InteractCollider != null)

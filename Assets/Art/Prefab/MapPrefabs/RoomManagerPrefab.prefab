@@ -73,6 +73,15 @@ MonoBehaviour:
     type: 3}
   DungeonChest: {fileID: 4505513835707202508, guid: c07211e8c797d4855bd041057385c0f5,
     type: 3}
+  _merchantRoomPrefab: {fileID: 5517572755892334116, guid: 9425f092c08e57e4184efcb727b87f25,
+    type: 3}
+  _merchantWeaponPool: {fileID: 11400000, guid: 54534e6228ac44e46bf9c2a4f2ac42e4,
+    type: 2}
+  _merchantPotionPrefabs:
+  - {fileID: 1116304796272423276, guid: 282363899df60435abf1d757bdc7d245, type: 3}
+  - {fileID: 2566297622277629398, guid: c321da98143bb45dca9f09f08257bb50, type: 3}
+  - {fileID: 2566297622277629398, guid: f8213b3b89b4c2f40891bee27487bd30, type: 3}
+  _merchantPriceIncreasePerLevel: 0.15
 --- !u!1 &5597688572168817023
 GameObject:
   m_ObjectHideFlags: 0

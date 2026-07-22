@@ -8,8 +8,13 @@ namespace SoulKnight3D {
         public static GameObjectsManager Instance;
 
         public GameObject EnergyOrbPrefab;
+        public List<GameObject> CoinPrefabs = new List<GameObject>();
 
         private SimpleObjectPool<EnergyOrb> _energyOrbPool;
+        private readonly Dictionary<CoinPickup.CoinType, SimpleObjectPool<CoinPickup>> _coinPools =
+            new Dictionary<CoinPickup.CoinType, SimpleObjectPool<CoinPickup>>();
+        private readonly HashSet<CoinPickup.CoinType> _missingCoinPoolWarnings =
+            new HashSet<CoinPickup.CoinType>();
 
         private readonly Dictionary<GameObject, SimpleObjectPool<Bullet>> _bulletPools = new Dictionary<GameObject, SimpleObjectPool<Bullet>>();
 
@@ -43,6 +48,38 @@ namespace SoulKnight3D {
                 energyOrb.Reset();
             });
 
+            InitializeCoinPools();
+
+        }
+
+        private void InitializeCoinPools()
+        {
+            foreach (GameObject coinPrefab in CoinPrefabs)
+            {
+                if (coinPrefab == null || !coinPrefab.TryGetComponent(out CoinPickup coinTemplate))
+                {
+                    continue;
+                }
+
+                CoinPickup.CoinType coinType = coinTemplate.Type;
+                if (_coinPools.ContainsKey(coinType))
+                {
+                    Debug.LogWarning($"Multiple coin prefabs are configured for {coinType}. Using the first one.");
+                    continue;
+                }
+
+                SimpleObjectPool<CoinPickup> pool = new SimpleObjectPool<CoinPickup>(factoryMethod: () =>
+                {
+                    GameObject coinObject = Instantiate(coinPrefab, transform).Hide();
+                    return coinObject.GetComponent<CoinPickup>();
+                }, initCount: 3,
+                resetMethod: coin =>
+                {
+                    coin.Reset();
+                });
+
+                _coinPools.Add(coinType, pool);
+            }
         }
 
         public GameObject SpawnEnergyOrb(Vector3 position)
@@ -62,6 +99,38 @@ namespace SoulKnight3D {
             else
             {
                 Destroy(gameObject);
+            }
+        }
+
+        public GameObject SpawnCoin(Vector3 position, CoinPickup.CoinType coinType)
+        {
+            if (!_coinPools.TryGetValue(coinType, out SimpleObjectPool<CoinPickup> coinPool))
+            {
+                if (_missingCoinPoolWarnings.Add(coinType))
+                {
+                    Debug.LogWarning($"No pooled coin prefab is configured for {coinType}.");
+                }
+                return null;
+            }
+
+            CoinPickup coin = coinPool.Allocate();
+            coin.transform.SetPositionAndRotation(position, Quaternion.identity);
+            coin.gameObject.Show();
+            return coin.gameObject;
+        }
+
+        public void DespawnCoin(CoinPickup coin)
+        {
+            if (coin != null && _coinPools.TryGetValue(coin.Type,
+                out SimpleObjectPool<CoinPickup> coinPool))
+            {
+                coinPool.Recycle(coin);
+                return;
+            }
+
+            if (coin != null)
+            {
+                Destroy(coin.gameObject);
             }
         }
 

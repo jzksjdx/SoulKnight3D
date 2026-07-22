@@ -55,6 +55,9 @@ MonoBehaviour:
   _recoverHealValue: 2
   _recoverEnergyValue: 0
   _mesh: {fileID: 2467834699838094697}
+  _basePrice: 25
+  _displayName: Health Potion
+  _displayNameCN: "\u751F\u547D\u836F\u6C34"
 --- !u!95 &1623157915488305398
 Animator:
   serializedVersion: 5

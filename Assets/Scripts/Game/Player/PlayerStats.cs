@@ -14,6 +14,9 @@ namespace SoulKnight3D
         public BindableProperty<int> Armor = new BindableProperty<int>(5);
         public BindableProperty<int> Energy = new BindableProperty<int>(200);
 
+        [Header("Run Currency")]
+        public BindableProperty<int> Coins = new BindableProperty<int>(0);
+
         public bool IsInvincible = false;
 
         private PlayerAnimation _playerAnimation;
@@ -131,6 +134,23 @@ namespace SoulKnight3D
             {
                 Energy.Value += amount;
             }
+        }
+
+        public void AddCoins(int amount)
+        {
+            if (amount <= 0) { return; }
+            Coins.Value += amount;
+        }
+
+        public bool TrySpendCoins(int amount)
+        {
+            if (amount < 0 || Coins.Value < amount)
+            {
+                return false;
+            }
+
+            Coins.Value -= amount;
+            return true;
         }
     }
 
