@@ -14,9 +14,7 @@ namespace SoulKnight3D
 
         [SerializeField] private CoinType _type = CoinType.Copper;
         [SerializeField, Min(1)] private int _value = 1;
-        [SerializeField] private Transform _visual;
-        [SerializeField, Min(0f)] private float _rotationSpeed = 150f;
-        [SerializeField, Min(0.1f)] private float _pickUpDistance = 6f;
+        [SerializeField, Min(0.1f)] private float _pickUpDistance = 2f;
         [SerializeField, Min(0.1f)] private float _speed = 20f;
         [SerializeField, Min(0f)] private float _pickUpDelay = 0.45f;
 
@@ -36,11 +34,6 @@ namespace SoulKnight3D
 
         private void Update()
         {
-            if (_visual != null)
-            {
-                _visual.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
-            }
-
             if (_pickUpDelayDelta > 0f)
             {
                 _pickUpDelayDelta -= Time.deltaTime;
@@ -95,11 +88,10 @@ namespace SoulKnight3D
         }
 
 #if UNITY_EDITOR
-        public void Configure(CoinType type, int value, Transform visual)
+        public void Configure(CoinType type, int value)
         {
             _type = type;
             _value = Mathf.Max(1, value);
-            _visual = visual;
         }
 #endif
     }

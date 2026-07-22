@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6844033546217016036}
   - component: {fileID: 3924148416363591205}
   - component: {fileID: 1878462212992041634}
+  - component: {fileID: 8383166358898839337}
   m_Layer: 0
   m_Name: CoinCopper
   m_TagString: Untagged
@@ -64,7 +65,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 171814771111495643}
   serializedVersion: 4
-  m_Mass: 0.05
+  m_Mass: 1
   m_Drag: 1
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -81,7 +82,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 2
 --- !u!114 &1878462212992041634
 MonoBehaviour:
@@ -97,11 +98,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 0
   _value: 1
-  _visual: {fileID: 2588583103281668051}
-  _rotationSpeed: 150
-  _pickUpDistance: 6
+  _pickUpDistance: 2
   _speed: 20
   _pickUpDelay: 0.45
+--- !u!95 &8383166358898839337
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171814771111495643}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7eec20b6760187c4c831f45ddb5d56ae, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4326580831011320237
 GameObject:
   m_ObjectHideFlags: 0
@@ -113,7 +133,7 @@ GameObject:
   - component: {fileID: 2588583103281668051}
   - component: {fileID: 8220167677505097157}
   - component: {fileID: 832693894456804362}
-  - component: {fileID: 321254965839404574}
+  - component: {fileID: 7356207267097695763}
   m_Layer: 6
   m_Name: Visual
   m_TagString: Untagged
@@ -186,8 +206,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &321254965839404574
-CapsuleCollider:
+--- !u!135 &7356207267097695763
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -204,8 +224,6 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Radius: 1.25
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+  m_Center: {x: 0, y: 0, z: 0}

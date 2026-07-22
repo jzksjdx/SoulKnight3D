@@ -142,7 +142,7 @@ namespace SoulKnight3D.Editor
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             CoinPickup coinPickup = root.AddComponent<CoinPickup>();
-            coinPickup.Configure(type, value, visual.transform);
+            coinPickup.Configure(type, value);
 
             string prefabPath = $"{CoinPrefabFolder}/{prefabName}.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);

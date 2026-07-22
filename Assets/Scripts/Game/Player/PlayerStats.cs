@@ -33,6 +33,10 @@ namespace SoulKnight3D
             base.Start();
             Armor.Value = MaxArmor;
             Energy.Value = MaxEnergy;
+            if (SceneManager.GetActiveScene().name == "TestScene")
+            {
+                Coins.Value = 100;
+            }
             _playerAnimation = GetComponent<PlayerAnimation>();
 
             _invincibleTimeoutDelta = _invincibleTimeout;

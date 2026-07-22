@@ -68,7 +68,15 @@ namespace SoulKnight3D
 
             _purchased = true;
             SetInteractable(false);
-            ReleaseProduct();
+            if (_productInteraction is Potion potion)
+            {
+                potion.SetInteractable(true);
+                potion.Interact();
+            }
+            else
+            {
+                ReleaseProduct();
+            }
             Purchased?.Invoke();
             AudioKit.PlaySound("fx_buy");
             Destroy(gameObject);
