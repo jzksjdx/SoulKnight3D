@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
 using MoreMountains.Feedbacks;
@@ -17,6 +19,10 @@ namespace SoulKnight3D
         public bool _didHit = false;
 
         private Vector3 _originalScale = Vector3.one;
+        private IBulletImpactBehavior _impactBehavior;
+        private List<Collider> _ignoredColliders;
+
+        public string WeaponTag => _weaponTag;
 
         public void InitializeBullet(string weaponTag, int damage, bool isCritHit, GameObject prefabRef, float bulletSize = 1f)
 		{
@@ -27,6 +33,7 @@ namespace SoulKnight3D
 
             _destroyTimeoutDelta = _destroyTimeout;
             _didHit = false;
+            RestoreIgnoredCollisions();
             if (TrailRenderer)
             {
                 TrailRenderer.emitting = false;
@@ -39,6 +46,7 @@ namespace SoulKnight3D
         protected virtual void Awake()
         {
             _originalScale = transform.localScale;
+            _impactBehavior = GetComponent<IBulletImpactBehavior>();
             SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
             {
                 if (_didHit) { return; }
@@ -50,6 +58,7 @@ namespace SoulKnight3D
         protected virtual void OnBulletCollision(Collision other)
         {
             HandleCollision(other);
+            _impactBehavior?.OnBulletImpact(this, other);
             PlayImpactFeedback();
             DestroyBullet();
         }
@@ -117,8 +126,57 @@ namespace SoulKnight3D
             }
         }
 
+        public void IgnoreCollisionTemporarily(Collider other, float duration)
+        {
+            if (SelfCapsuleCollider == null || other == null || duration <= 0f)
+            {
+                return;
+            }
+
+            if (_ignoredColliders == null)
+            {
+                _ignoredColliders = new List<Collider>();
+            }
+
+            if (!_ignoredColliders.Contains(other))
+            {
+                _ignoredColliders.Add(other);
+                Physics.IgnoreCollision(SelfCapsuleCollider, other, true);
+                StartCoroutine(RestoreCollisionAfterDelay(other, duration));
+            }
+        }
+
+        private IEnumerator RestoreCollisionAfterDelay(Collider other, float duration)
+        {
+            yield return new WaitForSeconds(duration);
+            if (SelfCapsuleCollider != null && other != null)
+            {
+                Physics.IgnoreCollision(SelfCapsuleCollider, other, false);
+            }
+            _ignoredColliders?.Remove(other);
+        }
+
+        private void RestoreIgnoredCollisions()
+        {
+            if (_ignoredColliders == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _ignoredColliders.Count; i++)
+            {
+                Collider other = _ignoredColliders[i];
+                if (SelfCapsuleCollider != null && other != null)
+                {
+                    Physics.IgnoreCollision(SelfCapsuleCollider, other, false);
+                }
+            }
+            _ignoredColliders.Clear();
+        }
+
         public void Reset()
         {
+            RestoreIgnoredCollisions();
             _destroyTimeoutDelta = _destroyTimeout;
             _isCritHit = false;
             _didHit = false;
