@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 407837585209799443}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.365, z: 0}
+  m_LocalPosition: {x: 0, y: 0.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -89,9 +89,12 @@ MonoBehaviour:
   - {fileID: 1116304796272423276, guid: 282363899df60435abf1d757bdc7d245, type: 3}
   - {fileID: 2566297622277629398, guid: c321da98143bb45dca9f09f08257bb50, type: 3}
   - {fileID: 2566297622277629398, guid: f8213b3b89b4c2f40891bee27487bd30, type: 3}
+  _priceLabelPrefab: {fileID: 8389503412826759230, guid: 0cba4d1550fdebf4b85d8e3784a24f2e,
+    type: 3}
+  _potionStockYOffset: 0.2
   _level: 1
   _priceIncreasePerLevel: 0.15
-  _twoPotionStockChance: 0.5
+  _twoPotionStockChance: 0.25
 --- !u!1 &7046835842177099597
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,7 +120,7 @@ Transform:
   m_GameObject: {fileID: 7046835842177099597}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.365, z: 0}
+  m_LocalPosition: {x: 0, y: 0.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -148,7 +151,7 @@ Transform:
   m_GameObject: {fileID: 9012129762919615214}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.365, z: 0}
+  m_LocalPosition: {x: 0, y: 0.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -215,7 +218,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: cd00bc0adff699e42aef42b9aad99ed7,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
-      value: 
+      value:
       objectReference: {fileID: 2100000, guid: 4f14ac18423eb984d9356890b18d64fd, type: 2}
     - target: {fileID: 919132149155446097, guid: cd00bc0adff699e42aef42b9aad99ed7,
         type: 3}
@@ -668,6 +671,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Merchant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 274dc8fe8d2371144996be2e1bb72f86,
+        type: 3}
+      propertyPath: m_Controller
+      value:
+      objectReference: {fileID: 9100000, guid: c5017b8db0b6f454b8c1d506bd78241c, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 274dc8fe8d2371144996be2e1bb72f86,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

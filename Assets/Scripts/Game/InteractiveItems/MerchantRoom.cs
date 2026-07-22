@@ -10,13 +10,34 @@ namespace SoulKnight3D
         [SerializeField] private List<Transform> _stockPoints = new List<Transform>();
         [SerializeField] private WeaponDropPoolSO _weaponPool;
         [SerializeField] private List<GameObject> _potionPrefabs = new List<GameObject>();
+        [SerializeField] private GameObject _priceLabelPrefab;
+        [SerializeField, Min(0f)] private float _potionStockYOffset = 0.2f;
         [SerializeField, Min(1)] private int _level = 1;
         [SerializeField, Min(0f)] private float _priceIncreasePerLevel = 0.15f;
         [SerializeField, Range(0f, 1f)] private float _twoPotionStockChance = 0.5f;
 
+        [Header("Merchant Animation")]
+        [SerializeField] private Animator _merchantAnimator;
+        [SerializeField, Min(0f)] private float _playerProximityDistance = 2.5f;
+        [SerializeField] private Vector2 _talkIntervalRange = new Vector2(4f, 9f);
+
         private static readonly System.Random StockRandom = new System.Random(
             unchecked(Environment.TickCount ^ (int)DateTime.UtcNow.Ticks));
+        private static readonly int IdleState = Animator.StringToHash("Idle");
+        private static readonly int TalkingState = Animator.StringToHash("Talking");
+        private static readonly int ThankfulState = Animator.StringToHash("Thankful");
+        private static readonly int HandGestureState = Animator.StringToHash("HandGesture");
+        private static readonly int TalkTrigger = Animator.StringToHash("Talk");
+        private static readonly int ThankfulTrigger = Animator.StringToHash("Thankful");
+        private static readonly int HandGestureTrigger = Animator.StringToHash("HandGesture");
+
         private bool _isPopulated;
+        private PlayerController _player;
+        private bool _playerNearby;
+        private bool _waitingForOneShot;
+        private bool _oneShotStarted;
+        private int _awaitedState;
+        private float _nextTalkTime;
 
         public List<Transform> StockPoints => _stockPoints;
         public WeaponDropPoolSO WeaponPool
@@ -25,6 +46,16 @@ namespace SoulKnight3D
             set => _weaponPool = value;
         }
         public List<GameObject> PotionPrefabs => _potionPrefabs;
+        public GameObject PriceLabelPrefab
+        {
+            get => _priceLabelPrefab;
+            set => _priceLabelPrefab = value;
+        }
+        public float PotionStockYOffset
+        {
+            get => _potionStockYOffset;
+            set => _potionStockYOffset = Mathf.Max(0f, value);
+        }
         public float PriceIncreasePerLevel
         {
             get => _priceIncreasePerLevel;
@@ -32,11 +63,14 @@ namespace SoulKnight3D
         }
 
         public void Configure(WeaponDropPoolSO weaponPool, IReadOnlyList<GameObject> potionPrefabs,
-            int level, float priceIncreasePerLevel)
+            int level, float priceIncreasePerLevel, GameObject priceLabelPrefab,
+            float potionStockYOffset)
         {
             _weaponPool = weaponPool;
             _level = Mathf.Max(1, level);
             _priceIncreasePerLevel = Mathf.Max(0f, priceIncreasePerLevel);
+            _priceLabelPrefab = priceLabelPrefab;
+            _potionStockYOffset = Mathf.Max(0f, potionStockYOffset);
             _potionPrefabs.Clear();
             if (potionPrefabs != null)
             {
@@ -52,7 +86,13 @@ namespace SoulKnight3D
 
         private void Start()
         {
+            InitializeAnimation();
             PopulateStock();
+        }
+
+        private void Update()
+        {
+            UpdateAnimation();
         }
 
         private void PopulateStock()
@@ -67,7 +107,9 @@ namespace SoulKnight3D
                 return;
             }
 
-            _stockPoints.Sort((left, right) => left.position.x.CompareTo(right.position.x));
+            _stockPoints.Sort((left, right) =>
+                transform.InverseTransformPoint(left.position).x.CompareTo(
+                    transform.InverseTransformPoint(right.position).x));
             GameObject previousWeapon = null;
             HashSet<GameObject> selectedPotions = new HashSet<GameObject>();
             HashSet<int> potionSlots = SelectPotionSlots();
@@ -94,8 +136,108 @@ namespace SoulKnight3D
 
                 int basePrice = GetBasePrice(itemPrefab);
                 int price = CalculatePrice(basePrice, _level, _priceIncreasePerLevel);
-                MerchantStockItem.Create(_stockPoints[i], itemPrefab, price);
+                MerchantStockItem stockItem = MerchantStockItem.Create(
+                    _stockPoints[i], itemPrefab, price, _priceLabelPrefab, _potionStockYOffset);
+                stockItem.Purchased += PlayPurchaseReaction;
             }
+        }
+
+        private void InitializeAnimation()
+        {
+            if (_merchantAnimator == null)
+            {
+                _merchantAnimator = GetComponentInChildren<Animator>(true);
+            }
+            if (_merchantAnimator == null || _merchantAnimator.runtimeAnimatorController == null)
+            {
+                return;
+            }
+
+            ScheduleNextTalk();
+        }
+
+        private void UpdateAnimation()
+        {
+            if (_merchantAnimator == null || _merchantAnimator.runtimeAnimatorController == null)
+            {
+                return;
+            }
+
+            if (_player == null)
+            {
+                _player = PlayerController.Instance;
+                if (_player == null) { return; }
+            }
+
+            Vector3 playerOffset = _player.transform.position - _merchantAnimator.transform.position;
+            playerOffset.y = 0f;
+            bool isNearby = playerOffset.sqrMagnitude <= _playerProximityDistance * _playerProximityDistance;
+
+            UpdateOneShotState();
+
+            if (!_waitingForOneShot && isNearby && !_playerNearby)
+            {
+                RequestOneShot(TalkTrigger, TalkingState);
+            }
+            else if (!_waitingForOneShot && isNearby && Time.time >= _nextTalkTime)
+            {
+                RequestOneShot(TalkTrigger, TalkingState);
+            }
+
+            _playerNearby = isNearby;
+        }
+
+        private void PlayPurchaseReaction()
+        {
+            bool isThankful = Random.value < 0.5f;
+            RequestOneShot(
+                isThankful ? ThankfulTrigger : HandGestureTrigger,
+                isThankful ? ThankfulState : HandGestureState);
+        }
+
+        private void RequestOneShot(int triggerHash, int stateHash)
+        {
+            ResetAnimationTriggers();
+            _merchantAnimator.SetTrigger(triggerHash);
+            _awaitedState = stateHash;
+            _waitingForOneShot = true;
+            _oneShotStarted = false;
+        }
+
+        private void UpdateOneShotState()
+        {
+            if (!_waitingForOneShot) { return; }
+
+            AnimatorStateInfo currentState = _merchantAnimator.GetCurrentAnimatorStateInfo(0);
+            AnimatorStateInfo nextState = _merchantAnimator.GetNextAnimatorStateInfo(0);
+            if (currentState.shortNameHash == _awaitedState
+                || (_merchantAnimator.IsInTransition(0) && nextState.shortNameHash == _awaitedState))
+            {
+                _oneShotStarted = true;
+            }
+
+            if (_oneShotStarted
+                && currentState.shortNameHash == IdleState
+                && !_merchantAnimator.IsInTransition(0))
+            {
+                _waitingForOneShot = false;
+                _oneShotStarted = false;
+                ScheduleNextTalk();
+            }
+        }
+
+        private void ResetAnimationTriggers()
+        {
+            _merchantAnimator.ResetTrigger(TalkTrigger);
+            _merchantAnimator.ResetTrigger(ThankfulTrigger);
+            _merchantAnimator.ResetTrigger(HandGestureTrigger);
+        }
+
+        private void ScheduleNextTalk()
+        {
+            float minimum = Mathf.Max(0f, _talkIntervalRange.x);
+            float maximum = Mathf.Max(minimum, _talkIntervalRange.y);
+            _nextTalkTime = Time.time + Random.Range(minimum, maximum);
         }
 
         private HashSet<int> SelectPotionSlots()

@@ -46,6 +46,8 @@ namespace SoulKnight3D
         [SerializeField] private GameObject _merchantRoomPrefab;
         [SerializeField] private WeaponDropPoolSO _merchantWeaponPool;
         [SerializeField] private List<GameObject> _merchantPotionPrefabs = new List<GameObject>();
+        [SerializeField] private GameObject _merchantPriceLabelPrefab;
+        [SerializeField, Min(0f)] private float _merchantPotionStockYOffset = 0.2f;
         [SerializeField, Min(0f)] private float _merchantPriceIncreasePerLevel = 0.15f;
 
         // room objects references
@@ -176,7 +178,7 @@ namespace SoulKnight3D
             }
 
             GameObject merchantObject = Instantiate(_merchantRoomPrefab, transform.position,
-                Quaternion.identity, transform);
+                GetMerchantRoomRotation(), transform);
             MerchantRoom merchantRoom = merchantObject.GetComponent<MerchantRoom>();
             if (merchantRoom == null)
             {
@@ -185,7 +187,30 @@ namespace SoulKnight3D
 
             int level = GameController.Instance != null ? GameController.Instance.Level : 1;
             merchantRoom.Configure(_merchantWeaponPool, _merchantPotionPrefabs, level,
-                _merchantPriceIncreasePerLevel);
+                _merchantPriceIncreasePerLevel, _merchantPriceLabelPrefab,
+                _merchantPotionStockYOffset);
+        }
+
+        private Quaternion GetMerchantRoomRotation()
+        {
+            if (_gates == null)
+            {
+                return Quaternion.identity;
+            }
+
+            for (int i = 0; i < _gates.Count; i++)
+            {
+                if (_gates[i] == null) { continue; }
+
+                Vector3 direction = _gates[i].transform.position - transform.position;
+                direction.y = 0f;
+                if (direction.sqrMagnitude > 0.001f)
+                {
+                    return Quaternion.LookRotation(direction.normalized, Vector3.up);
+                }
+            }
+
+            return Quaternion.identity;
         }
 
         public RoomManager SetRoomStatus(RoomStatus status)

@@ -15,6 +15,7 @@ namespace SoulKnight3D.Editor
         private const string GameObjectsManagerPath = "Assets/Art/Prefab/GameObjectsManager.prefab";
         private const string RoomManagerPath = "Assets/Art/Prefab/MapPrefabs/RoomManagerPrefab.prefab";
         private const string MerchantLayoutPath = "Assets/Art/Prefab/MapPrefabs/MerchantRoomLayout.prefab";
+        private const string PriceLabelPath = "Assets/Art/Prefab/InteractiveItems/PriceLabel.prefab";
         private const string WeaponPoolPath = "Assets/Art/ScriptableObject/ChestRewards/Dungeon Weapon Drop Pool.asset";
         private const string HealthPotionPath = "Assets/Art/Prefab/InteractiveItems/HealthPotion.prefab";
         private const string EnergyPotionPath = "Assets/Art/Prefab/InteractiveItems/EnergyPotion.prefab";
@@ -170,6 +171,7 @@ namespace SoulKnight3D.Editor
         {
             ConfigurePotion(HealthPotionPath, "Health Potion", "生命药水", 25);
             ConfigurePotion(EnergyPotionPath, "Energy Potion", "能量药水", 20);
+            ConfigurePotion(RestorationPotionPath, "Restoration Potion", "恢复药水", 30);
         }
 
         private static void ConfigurePotion(string path, string displayName, string displayNameCN,
@@ -216,6 +218,8 @@ namespace SoulKnight3D.Editor
                 merchantRoom.PotionPrefabs.Add(AssetDatabase.LoadAssetAtPath<GameObject>(HealthPotionPath));
                 merchantRoom.PotionPrefabs.Add(AssetDatabase.LoadAssetAtPath<GameObject>(EnergyPotionPath));
                 merchantRoom.PotionPrefabs.Add(AssetDatabase.LoadAssetAtPath<GameObject>(RestorationPotionPath));
+                merchantRoom.PriceLabelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PriceLabelPath);
+                merchantRoom.PotionStockYOffset = 0.2f;
                 merchantRoom.PriceIncreasePerLevel = 0.15f;
                 EditorUtility.SetDirty(merchantRoom);
                 PrefabUtility.SaveAsPrefabAsset(root, MerchantLayoutPath);
@@ -237,6 +241,9 @@ namespace SoulKnight3D.Editor
                     AssetDatabase.LoadAssetAtPath<GameObject>(MerchantLayoutPath);
                 serializedRoom.FindProperty("_merchantWeaponPool").objectReferenceValue =
                     AssetDatabase.LoadAssetAtPath<WeaponDropPoolSO>(WeaponPoolPath);
+                serializedRoom.FindProperty("_merchantPriceLabelPrefab").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<GameObject>(PriceLabelPath);
+                serializedRoom.FindProperty("_merchantPotionStockYOffset").floatValue = 0.2f;
 
                 SerializedProperty potions = serializedRoom.FindProperty("_merchantPotionPrefabs");
                 potions.arraySize = 3;

@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
@@ -7,6 +7,8 @@ namespace SoulKnight3D
 {
     public class MerchantStockItem : InteractiveItem
     {
+        public event Action Purchased;
+
         private struct ColliderState
         {
             public Collider Collider;
@@ -22,8 +24,10 @@ namespace SoulKnight3D
         private int _price;
         private bool _purchased;
         private MerchantPriceLabel _priceLabel;
+        private float _potionYOffset;
 
-        public static MerchantStockItem Create(Transform stockPoint, GameObject itemPrefab, int price)
+        public static MerchantStockItem Create(Transform stockPoint, GameObject itemPrefab, int price,
+            GameObject priceLabelPrefab, float potionYOffset)
         {
             GameObject container = new GameObject($"MerchantStock_{itemPrefab.name}");
             container.layer = itemPrefab.layer;
@@ -32,13 +36,14 @@ namespace SoulKnight3D
 
             BoxCollider interactionCollider = container.AddComponent<BoxCollider>();
             interactionCollider.isTrigger = true;
-            interactionCollider.center = new Vector3(0f, 0.0f, 0f);
+            interactionCollider.center = new Vector3(0f, 0f, 0f);
             interactionCollider.size = new Vector3(0.5f, 0.5f, 0.5f);
 
             MerchantStockItem stockItem = container.AddComponent<MerchantStockItem>();
             stockItem.InteractCollider = interactionCollider;
             stockItem._price = Mathf.Max(1, price);
-            stockItem.CreateLabels();
+            stockItem._potionYOffset = Mathf.Max(0f, potionYOffset);
+            stockItem.CreateLabel(priceLabelPrefab);
             stockItem.SetProduct(Instantiate(itemPrefab, container.transform));
             return stockItem;
         }
@@ -46,13 +51,7 @@ namespace SoulKnight3D
         protected override void Start()
         {
             base.Start();
-            if (Label != null)
-            {
-                string labelText = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese
-                    ? "购买"
-                    : "Buy";
-                Label.SetLabelText(labelText, WeaponData.WeaponRarity.White);
-            }
+            RefreshLabel();
         }
 
         public override void Interact()
@@ -70,6 +69,7 @@ namespace SoulKnight3D
             _purchased = true;
             SetInteractable(false);
             ReleaseProduct();
+            Purchased?.Invoke();
             AudioKit.PlaySound("fx_buy");
             Destroy(gameObject);
         }
@@ -81,7 +81,13 @@ namespace SoulKnight3D
             _product.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             _productInteraction = _product.GetComponent<InteractiveItem>();
-            _productInteraction?.SetInteractable(false);
+            if (_productInteraction is Potion)
+            {
+                _product.transform.localPosition = Vector3.up * _potionYOffset;
+            }
+
+            RefreshLabel();
+            SnapLabelToProductLabel();
 
             Collider[] colliders = _product.GetComponentsInChildren<Collider>(true);
             for (int i = 0; i < colliders.Length; i++)
@@ -93,6 +99,7 @@ namespace SoulKnight3D
                 });
                 colliders[i].enabled = false;
             }
+            _productInteraction?.SetInteractable(false);
 
             _productRigidbody = _product.GetComponent<Rigidbody>();
             if (_productRigidbody != null)
@@ -131,54 +138,94 @@ namespace SoulKnight3D
             }
         }
 
-        private void CreateLabels()
+        private void CreateLabel(GameObject priceLabelPrefab)
         {
-            GameObject priceObject = CreateTextObject("PriceLabel", _price.ToString(),
-                new Vector3(0f, 0.7f, 0f), 0.013f);
-            _priceLabel = priceObject.AddComponent<MerchantPriceLabel>();
-            _priceLabel.Initialize(priceObject.GetComponent<TextMesh>(), _price);
+            GameObject labelObject = priceLabelPrefab != null
+                ? Instantiate(priceLabelPrefab, transform)
+                : new GameObject("PriceLabel");
+            labelObject.name = "PriceLabel";
+            labelObject.layer = gameObject.layer;
+            labelObject.transform.SetParent(transform, false);
+            labelObject.transform.localPosition = new Vector3(0f, 0.3f, 0f);
 
-            GameObject promptObject = CreateTextObject("InteractLabel", "Buy",
-                new Vector3(0f, 0.94f, 0f), 0.011f);
-            InteractLabel prompt = promptObject.AddComponent<InteractLabel>();
-            prompt.LabelText = promptObject.GetComponent<TextMesh>();
-            Label = prompt;
-            promptObject.SetActive(false);
+            _priceLabel = labelObject.GetComponent<MerchantPriceLabel>();
+            if (_priceLabel == null)
+            {
+                _priceLabel = labelObject.AddComponent<MerchantPriceLabel>();
+            }
+
+            Label = _priceLabel;
+            RefreshLabel();
+            labelObject.SetActive(false);
         }
 
-        private GameObject CreateTextObject(string objectName, string text, Vector3 localPosition,
-            float characterSize)
+        private void RefreshLabel()
         {
-            GameObject textObject = new GameObject(objectName);
-            textObject.layer = gameObject.layer;
-            textObject.transform.SetParent(transform, false);
-            textObject.transform.localPosition = localPosition;
+            if (_priceLabel == null) { return; }
 
-            TextMesh textMesh = textObject.AddComponent<TextMesh>();
-            textMesh.text = text;
-            textMesh.anchor = TextAnchor.MiddleCenter;
-            textMesh.alignment = TextAlignment.Center;
-            textMesh.fontSize = 64;
-            textMesh.characterSize = characterSize;
-            textMesh.color = new Color(1f, 0.78f, 0.12f);
-            return textObject;
+            if (_languageSystem == null)
+            {
+                _languageSystem = this.GetSystem<LanguageSystem>();
+            }
+
+            string displayName = _product != null ? _product.name : string.Empty;
+            WeaponData.WeaponRarity rarity = WeaponData.WeaponRarity.White;
+            if (_productInteraction is PickupWeapon pickupWeapon
+                && pickupWeapon.WeaponData != null)
+            {
+                displayName = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese
+                    ? pickupWeapon.WeaponData.NameCN
+                    : pickupWeapon.WeaponData.Name;
+                rarity = pickupWeapon.WeaponData.Rarity;
+            }
+            else if (_productInteraction is Potion potion)
+            {
+                displayName = _languageSystem.CurrentLanguage == LanguageSystem.Languages.Chinese
+                    ? potion.DisplayNameCN
+                    : potion.DisplayName;
+            }
+
+            _priceLabel.Initialize(_price, displayName, rarity);
+        }
+
+        private void SnapLabelToProductLabel()
+        {
+            if (_priceLabel == null || _productInteraction == null || _productInteraction.Label == null)
+            {
+                return;
+            }
+
+            _priceLabel.transform.position = _productInteraction.Label.transform.position;
         }
     }
 
-    internal sealed class MerchantPriceLabel : MonoBehaviour
+    internal sealed class MerchantPriceLabel : InteractLabel
     {
         private static readonly Color AffordableColor = new Color(1f, 0.78f, 0.12f);
         private static readonly Color UnaffordableColor = new Color(1f, 0.3f, 0.24f);
 
-        private TextMesh _textMesh;
+        private TextMesh _priceText;
+        private TextMesh _nameText;
         private Camera _mainCamera;
         private int _price;
         private float _flashTimeout;
 
-        public void Initialize(TextMesh textMesh, int price)
+        public void Initialize(int price, string itemName, WeaponData.WeaponRarity rarity)
         {
-            _textMesh = textMesh;
             _price = price;
+            CacheTextMeshes();
+
+            if (_priceText != null)
+            {
+                _priceText.text = price.ToString();
+            }
+
+            if (_nameText != null)
+            {
+                _nameText.text = itemName;
+                _nameText.color = GetLabelColor(rarity);
+                LabelText = _nameText;
+            }
         }
 
         private void Update()
@@ -187,28 +234,82 @@ namespace SoulKnight3D
             {
                 _mainCamera = Camera.main;
             }
+
             if (_mainCamera != null)
             {
                 transform.LookAt(_mainCamera.transform);
                 transform.Rotate(0f, 180f, 0f);
             }
 
-            if (_textMesh == null) { return; }
+            if (_priceText == null)
+            {
+                CacheTextMeshes();
+            }
+            if (_priceText == null) { return; }
+
             if (_flashTimeout > 0f)
             {
                 _flashTimeout -= Time.deltaTime;
-                _textMesh.color = Color.white;
+                _priceText.color = Color.white;
                 return;
             }
 
             PlayerController player = PlayerController.Instance;
             bool canAfford = player != null && player.PlayerStats.Coins.Value >= _price;
-            _textMesh.color = canAfford ? AffordableColor : UnaffordableColor;
+            _priceText.color = canAfford ? AffordableColor : UnaffordableColor;
         }
 
         public void FlashInsufficientFunds()
         {
             _flashTimeout = 0.25f;
+        }
+
+        private void CacheTextMeshes()
+        {
+            TextMesh[] texts = GetComponentsInChildren<TextMesh>(true);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                if (texts[i].name == "PriceText")
+                {
+                    _priceText = texts[i];
+                }
+                else if (texts[i].name == "NameText")
+                {
+                    _nameText = texts[i];
+                }
+            }
+
+            if (_priceText == null && texts.Length > 0)
+            {
+                _priceText = texts[0];
+            }
+            if (_nameText == null && texts.Length > 1)
+            {
+                _nameText = texts[1];
+            }
+        }
+
+        private static Color GetLabelColor(WeaponData.WeaponRarity rarity)
+        {
+            switch (rarity)
+            {
+                case WeaponData.WeaponRarity.White:
+                    return Color.white;
+                case WeaponData.WeaponRarity.Green:
+                    return new Color(61f / 255, 226f / 255, 90f / 255);
+                case WeaponData.WeaponRarity.Blue:
+                    return new Color(21f / 255, 165f / 255, 251f / 255);
+                case WeaponData.WeaponRarity.Purple:
+                    return new Color(191f / 255, 62f / 255, 202f / 255);
+                case WeaponData.WeaponRarity.Orange:
+                    return new Color(248f / 255, 138f / 255, 29f / 255);
+                case WeaponData.WeaponRarity.Red:
+                    return new Color(226f / 255, 27f / 255, 27f / 255);
+                case WeaponData.WeaponRarity.Magenta:
+                    return new Color(255f / 255f, 67f / 255f, 214f / 255f);
+                default:
+                    return Color.white;
+            }
         }
     }
 }

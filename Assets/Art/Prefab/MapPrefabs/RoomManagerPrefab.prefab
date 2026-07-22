@@ -81,6 +81,8 @@ MonoBehaviour:
   - {fileID: 1116304796272423276, guid: 282363899df60435abf1d757bdc7d245, type: 3}
   - {fileID: 2566297622277629398, guid: c321da98143bb45dca9f09f08257bb50, type: 3}
   - {fileID: 2566297622277629398, guid: f8213b3b89b4c2f40891bee27487bd30, type: 3}
+  _merchantPriceLabelPrefab: {fileID: 8389503412826759230, guid: 0cba4d1550fdebf4b85d8e3784a24f2e, type: 3}
+  _merchantPotionStockYOffset: 0.2
   _merchantPriceIncreasePerLevel: 0.15
 --- !u!1 &5597688572168817023
 GameObject:
