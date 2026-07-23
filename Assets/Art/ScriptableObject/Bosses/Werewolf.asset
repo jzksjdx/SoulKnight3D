@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c631e0fd7f6e49f2973560e9851f69f5, type: 3}
+  m_Name: Werewolf
+  m_EditorClassIdentifier:
+  _bossPrefab: {fileID: 6988825691770962464, guid: fad9a2567bb5e4873bbe30b8f678d888, type: 3}
+  _bossSprite: {fileID: 21300000, guid: 147e414e78f674439a9305a9f6497a24, type: 3}
+  _displayName: "\u8680\u6708\u9B54\u72FC"
+  _introBackgroundColor: {r: 0, g: 0.6306982, b: 1, a: 1}

@@ -16,6 +16,7 @@ namespace SoulKnight3D
         private int _animIdOpen;
 
         [SerializeField] private Collider _touchOpenCollider;
+        [SerializeField, Min(0f)] private float _coinRewardPickupDelay = 1f;
 
         public ChestRewardData ChestReward;
 
@@ -78,6 +79,10 @@ namespace SoulKnight3D
                     {
                         GameObject coin = GameObjectsManager.Instance.SpawnCoin(transform.position,
                             CoinPickup.CoinType.Copper);
+                        if (coin != null && coin.TryGetComponent(out CoinPickup coinPickup))
+                        {
+                            coinPickup.HoldPickupFor(_coinRewardPickupDelay);
+                        }
                         LaunchReward(coin);
                     }
                     break;

@@ -65,7 +65,11 @@ namespace SoulKnight3D
             MapGenerator.EnemySpawnLevel = Level;
             MapGenerator.EnemySpawnSeed = Random.Range(1, int.MaxValue);
             MapGenerator.EnemyWaveSOs = currentLevel.LevelWaves;
-            MapGenerator.BossPrefab = GameFloor.BossPrefabs[Random.Range(0, GameFloor.BossPrefabs.Count)];
+            MapGenerator.BossEncounter = GameFloor.SelectBoss(Random.value);
+            if (MapGenerator.BossEncounter == null)
+            {
+                Debug.LogError($"Game floor '{GameFloor.name}' has no valid weighted boss encounter.");
+            }
         }
 
         private void OnDestroy()

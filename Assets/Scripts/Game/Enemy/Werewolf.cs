@@ -39,7 +39,6 @@ namespace SoulKnight3D
         // animation IDs
         protected int _animIdWalk;
         protected int _animIdAttack;
-        protected int _animIdDie;
         protected int _animIdSkillCall;
         protected int _animIdSkillJump;
 
@@ -56,10 +55,10 @@ namespace SoulKnight3D
             base.Start();
             _animIdWalk = Animator.StringToHash("Walk");
             _animIdAttack = Animator.StringToHash("Attack");
-            _animIdDie = Animator.StringToHash("Die");
             _animIdSkillCall = Animator.StringToHash("Call");
             _animIdSkillJump = Animator.StringToHash("Jump");
             _player = PlayerController.Instance;
+            ConfigureDeathReferences(SelfRigidbody, SelfCollider, SelfAnimator, _minimapIcon);
 
             FSM.AddState(State.Idle, new IdleState(FSM, this));
             FSM.AddState(State.Chase, new ChaseState(FSM, this));
@@ -72,11 +71,13 @@ namespace SoulKnight3D
 
         private void Update()
         {
+            if (IsDead) { return; }
             FSM.Update();
         }
 
         private void FixedUpdate()
         {
+            if (IsDead) { return; }
             FSM.FixedUpdate();
         }
 
@@ -89,33 +90,21 @@ namespace SoulKnight3D
         {
             if (IsDead) { return; }
             base.ApplyDamage(damage);
-            // update UI
-            UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = (float)Health.Value / MaxHealth;
-
-            if (IsDead)
+            UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
+            if (gamePanel != null && MaxHealth > 0)
             {
-                UIKit.GetPanel<UIGamePanel>().BossHealthRect.Hide();
-                FSM.Clear();
-                SelfAnimator.SetTrigger(_animIdDie);
-                SelfCollider.enabled = false;
-                SelfRigidbody.isKinematic = true;
-                SelfRigidbody.DestroySelf();
-                _minimapIcon.Hide();
-                AudioKit.PlaySound("fx_wolf_growl");
-                NotifyDeath();
-                EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
-
-                // show portal
-
-                // recycle status if any
-                Status[] statuses = GetComponentsInChildren<Status>();
-                foreach (Status status in statuses)
-                {
-                    GameObjectsManager.Instance.DespawnStatus(status);
-                }
-
-                Destroy(gameObject, 3);
+                gamePanel.BossHealthBar.fillAmount = (float)Health.Value / MaxHealth;
             }
+        }
+
+        protected override void OnDeathSequenceStarted()
+        {
+            UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
+            if (gamePanel != null) { gamePanel.BossHealthRect.Hide(); }
+
+            FSM.Clear();
+            AudioKit.PlaySound("fx_wolf_growl");
+            EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
         }
 
         protected override void OnBecameEnraged()

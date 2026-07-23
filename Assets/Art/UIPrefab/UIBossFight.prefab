@@ -374,6 +374,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66d73a4f7ada94102b587c7d98ed8b12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _background: {fileID: 6034934261742316413}
+  _bossSprite: {fileID: 5561625999412431981}
+  _bossText: {fileID: 6464287537239793133}
+  _animator: {fileID: 2144298389365636685}
 --- !u!95 &2144298389365636685
 Animator:
   serializedVersion: 5

@@ -26,6 +26,8 @@ namespace SoulKnight3D.Editor
             "Assets/Art/Materials/Enemy/Goblin Priest Projectiles";
         private const string ForestFloorPath =
             "Assets/Art/ScriptableObject/Game Floors/1- Forest.asset";
+        private const string BossEncounterPath =
+            "Assets/Art/ScriptableObject/Bosses/Goblin Priest.asset";
         private const string LegacyLinePrefabPath =
             ProjectileFolder + "/Priest Line Emitter.prefab";
         private const string LineBulletPrefabPath =
@@ -204,7 +206,10 @@ namespace SoulKnight3D.Editor
             ValidateAnimationEvent("StarFallAttack", "AnimationStarFallAttack");
 
             GameFloorSO forest = AssetDatabase.LoadAssetAtPath<GameFloorSO>(ForestFloorPath);
-            if (forest == null || !forest.BossPrefabs.Contains(boss))
+            BossEncounterDataSO encounter =
+                AssetDatabase.LoadAssetAtPath<BossEncounterDataSO>(BossEncounterPath);
+            if (forest == null || encounter == null ||
+                !forest.BossPool.Any(entry => entry != null && entry.Boss == encounter))
             {
                 throw new InvalidOperationException(
                     "Goblin Priest is not registered in the Forest boss pool.");
@@ -702,12 +707,17 @@ namespace SoulKnight3D.Editor
         private static void AddBossToForestPool()
         {
             GameFloorSO forest = AssetDatabase.LoadAssetAtPath<GameFloorSO>(ForestFloorPath);
-            GameObject bossPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BossPrefabPath);
-            if (forest == null || bossPrefab == null) { return; }
+            BossEncounterDataSO encounter =
+                AssetDatabase.LoadAssetAtPath<BossEncounterDataSO>(BossEncounterPath);
+            if (forest == null || encounter == null) { return; }
 
-            if (!forest.BossPrefabs.Contains(bossPrefab))
+            if (!forest.BossPool.Any(entry => entry != null && entry.Boss == encounter))
             {
-                forest.BossPrefabs.Add(bossPrefab);
+                forest.BossPool.Add(new WeightedBossEncounter
+                {
+                    Boss = encounter,
+                    Weight = 1f
+                });
                 EditorUtility.SetDirty(forest);
             }
         }

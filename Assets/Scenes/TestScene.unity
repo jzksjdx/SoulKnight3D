@@ -11900,7 +11900,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8fd87b304f4fe4a789d4cfb7eee9faa8, type: 2}
   - {fileID: 11400000, guid: 8fd87b304f4fe4a789d4cfb7eee9faa8, type: 2}
   - {fileID: 11400000, guid: 8fd87b304f4fe4a789d4cfb7eee9faa8, type: 2}
-  BossPrefab: {fileID: 0}
+  BossEncounter: {fileID: 0}
   RoomManagerPrefab: {fileID: 0}
   _shouldGenerateMap: 1
   _merchantRoomChance: 0.5

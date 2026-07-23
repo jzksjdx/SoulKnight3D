@@ -136,6 +136,7 @@ MonoBehaviour:
   InteractCollider: {fileID: 6095219560726355617}
   Label: {fileID: 1507682831692059557}
   _touchOpenCollider: {fileID: 7399272818621409042}
+  _coinRewardPickupDelay: 1
   ChestReward: {fileID: 11400000, guid: 7132b5c60dcc84bcba86f874600ca215, type: 2}
 --- !u!95 &1709326660904849564
 Animator:

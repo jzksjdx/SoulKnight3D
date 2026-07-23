@@ -579,7 +579,7 @@ MonoBehaviour:
         ForceSetActiveOnPlay: 1
         StopOnReset: 0
         DeclaredDuration: 0
-        PositionMode: 2
+        PositionMode: 0
         InstantiateParticlesPosition: {fileID: 0}
         TargetWorldPosition: {x: 0, y: 0, z: 0}
         Offset: {x: 0, y: 0, z: 0}

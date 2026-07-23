@@ -106,9 +106,6 @@ namespace SoulKnight3D
         [Header("Death Rewards")]
         [SerializeField, Range(0, 100)] private int _rewardRate = 100;
         [SerializeField] private int[] _rewardValues = { 3, 3, 0, 10 };
-        [FormerlySerializedAs("_deathCleanupDelay")]
-        [SerializeField, Min(0f)] private float _dissolveDelay = 3f;
-        [SerializeField, Min(0.1f)] private float _dissolveDuration = 3f;
 
         private static readonly int MoveX = Animator.StringToHash("MoveX");
         private static readonly int MoveY = Animator.StringToHash("MoveY");
@@ -117,7 +114,6 @@ namespace SoulKnight3D
         private static readonly int SplitTrigger = Animator.StringToHash("SplitBulletAttack");
         private static readonly int ProtectiveOrbTrigger = Animator.StringToHash("ProtectiveOrbAttack");
         private static readonly int StarFallTrigger = Animator.StringToHash("StarFallAttack");
-        private static readonly int DeathTrigger = Animator.StringToHash("Die");
         private static readonly int MoveState = Animator.StringToHash("Move");
         private static readonly int LavaState = Animator.StringToHash("LavaBulletAttack");
         private static readonly int SplitState = Animator.StringToHash("SplitBulletAttack");
@@ -148,14 +144,13 @@ namespace SoulKnight3D
         private MMF_MMSoundManagerSound _soundFeedbackSound;
         private readonly List<PriestOrbitalProjectile> _activeProtectiveOrbs =
             new List<PriestOrbitalProjectile>();
-        private readonly List<Material> _dissolveMaterials = new List<Material>();
 
         protected override void Start()
         {
             base.Start();
             CacheReferences();
+            ConfigureDeathReferences(_rigidbody, _collider, _animator, _minimapIcon);
             CacheSoundFeedback();
-            CacheDissolveMaterials();
             _player = PlayerController.Instance;
             ScheduleAttack();
             ChooseMovementDirection();
@@ -214,24 +209,19 @@ namespace SoulKnight3D
 
             base.ApplyDamage(damage);
             UpdateBossHealthUI();
-            if (!IsDead) { return; }
+        }
 
+        protected override void OnDeathSequenceStarted()
+        {
             StopAllCoroutines();
             StopMoving();
             ResetAttackTriggers();
-            _animator?.SetTrigger(DeathTrigger);
-            if (_collider != null) { _collider.enabled = false; }
-            if (_rigidbody != null) { _rigidbody.isKinematic = true; }
-            if (_minimapIcon != null) { _minimapIcon.gameObject.Hide(); }
             PlaySoundFeedback(_deathSound);
 
             UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
             if (gamePanel != null) { gamePanel.BossHealthRect.Hide(); }
 
-            NotifyDeath();
             EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
-            RecycleStatuses();
-            StartCoroutine(DissolveAndDestroy());
         }
 
         public void AnimationLavaBulletAttack()
@@ -867,51 +857,6 @@ namespace SoulKnight3D
             _soundFeedback.PlayFeedbacks();
         }
 
-        private void CacheDissolveMaterials()
-        {
-            _dissolveMaterials.Clear();
-            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Material[] materials = renderers[i].materials;
-                for (int j = 0; j < materials.Length; j++)
-                {
-                    if (materials[j] != null && materials[j].HasProperty("_Dissolve"))
-                    {
-                        materials[j].SetFloat("_Dissolve", 0f);
-                        _dissolveMaterials.Add(materials[j]);
-                    }
-                }
-            }
-        }
-
-        private IEnumerator DissolveAndDestroy()
-        {
-            if (_dissolveDelay > 0f)
-            {
-                yield return new WaitForSeconds(_dissolveDelay);
-            }
-
-            float elapsed = 0f;
-            while (elapsed < _dissolveDuration)
-            {
-                elapsed += Time.deltaTime;
-                SetDissolveValue(Mathf.Clamp01(elapsed / _dissolveDuration));
-                yield return null;
-            }
-
-            SetDissolveValue(1f);
-            Destroy(gameObject);
-        }
-
-        private void SetDissolveValue(float value)
-        {
-            for (int i = 0; i < _dissolveMaterials.Count; i++)
-            {
-                _dissolveMaterials[i].SetFloat("_Dissolve", value);
-            }
-        }
-
         private void UpdateBossHealthUI()
         {
             UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
@@ -921,13 +866,5 @@ namespace SoulKnight3D
             }
         }
 
-        private void RecycleStatuses()
-        {
-            Status[] statuses = GetComponentsInChildren<Status>();
-            for (int i = 0; i < statuses.Length; i++)
-            {
-                GameObjectsManager.Instance?.DespawnStatus(statuses[i]);
-            }
-        }
     }
 }

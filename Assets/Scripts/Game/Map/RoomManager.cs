@@ -13,7 +13,7 @@ namespace SoulKnight3D
         [SerializeField] private LayerMask _itemLayerMask;
         private List<RoomGate> _gates;
         private IReadOnlyList<EnemyWaveGroup> _enemyWaveGroups = Array.Empty<EnemyWaveGroup>();
-        private GameObject _bossPrefab;
+        private BossEncounterDataSO _bossEncounter;
         private GameObject _generatedPortal;
 
         [Header("Minimap")]
@@ -118,9 +118,9 @@ namespace SoulKnight3D
             return this;
         }
 
-        public RoomManager SetBossPrefab(GameObject bossPrefab)
+        public RoomManager SetBossEncounter(BossEncounterDataSO bossEncounter)
         {
-            _bossPrefab = bossPrefab;
+            _bossEncounter = bossEncounter;
             return this;
         }
 
@@ -297,25 +297,7 @@ namespace SoulKnight3D
 
                     if (Type == RoomType.Boss)
                     {
-                        GameObject generatedBoss = Instantiate(_bossPrefab, transform.position + Vector3.up * 0.05f, Quaternion.identity);
-                        generatedBoss.transform.SetParent(transform);
-                        AudioKit.PlaySound("fx_show_up");
-                        AudioKit.PlayMusic("bgm_boss");
-                        UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = 1;
-                        UIKit.GetPanel<UIGamePanel>().BossHealthRect.Show();
-                        StartCoroutine(UIKit.OpenPanelAsync<UIBossFight>());
-                        BossEnemy boss = generatedBoss.GetComponent<BossEnemy>();
-                        if (boss == null)
-                        {
-                            Debug.LogError($"Boss prefab '{_bossPrefab.name}' has no BossEnemy component.");
-                            return;
-                        }
-                        boss.OnDeath.Register(() =>
-                        {
-                            _generatedPortal.Show();
-                            AudioKit.StopMusic();
-                            _roomIcon.Show();
-                        }).UnRegisterWhenGameObjectDestroyed(generatedBoss);
+                        StartCoroutine(BossFightWorkFlow());
                     }
                     else if (Type == RoomType.Battle)
                     {
@@ -323,6 +305,71 @@ namespace SoulKnight3D
                     }
                     
                 }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            }
+        }
+
+        private IEnumerator BossFightWorkFlow()
+        {
+            if (_bossEncounter == null || !_bossEncounter.IsValid)
+            {
+                Debug.LogError($"Boss room {_key} has no valid boss encounter.");
+                CompleteBossRoomWithoutBoss();
+                yield break;
+            }
+
+            bool introFinished = false;
+            UIBossFightData introData = new UIBossFightData(
+                _bossEncounter,
+                () => introFinished = true);
+            yield return UIKit.OpenPanelAsync<UIBossFight>(UILevel.PopUI, introData);
+            AudioKit.PlayMusic("bgm_boss");
+
+            while (!introFinished)
+            {
+                yield return null;
+            }
+
+            GameObject generatedBoss = Instantiate(
+                _bossEncounter.BossPrefab,
+                transform.position + Vector3.up * 0.05f,
+                Quaternion.identity,
+                transform);
+            BossEnemy boss = generatedBoss.GetComponent<BossEnemy>();
+            if (boss == null)
+            {
+                Debug.LogError(
+                    $"Boss prefab '{_bossEncounter.BossPrefab.name}' has no BossEnemy component.");
+                Destroy(generatedBoss);
+                CompleteBossRoomWithoutBoss();
+                yield break;
+            }
+
+            AudioKit.PlaySound("fx_show_up");
+
+            UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
+            if (gamePanel != null)
+            {
+                gamePanel.BossHealthBar.fillAmount = 1f;
+                gamePanel.BossHealthRect.Show();
+            }
+
+            boss.OnDeath.Register(() =>
+            {
+                if (_generatedPortal != null) { _generatedPortal.Show(); }
+                AudioKit.StopMusic();
+                _roomIcon.Show();
+            }).UnRegisterWhenGameObjectDestroyed(generatedBoss);
+        }
+
+        private void CompleteBossRoomWithoutBoss()
+        {
+            Status = RoomStatus.Explored;
+            if (_generatedPortal != null) { _generatedPortal.Show(); }
+            _roomIcon.Show();
+
+            foreach (RoomGate gate in _gates)
+            {
+                gate.ToggleGate();
             }
         }
 

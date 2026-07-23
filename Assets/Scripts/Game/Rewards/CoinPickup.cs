@@ -64,7 +64,17 @@ namespace SoulKnight3D
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag("Player")) { return; }
+            TryCollect(other);
+        }
+
+        private void OnTriggerStay(Collider other)
+        {
+            TryCollect(other);
+        }
+
+        private void TryCollect(Collider other)
+        {
+            if (_pickUpDelayDelta > 0f || !other.CompareTag("Player")) { return; }
 
             PlayerController player = PlayerController.Instance;
             if (player == null) { return; }
@@ -72,6 +82,12 @@ namespace SoulKnight3D
             player.PlayerStats.AddCoins(_value);
             AudioKit.PlaySound("fx_coin");
             GameObjectsManager.Instance?.DespawnCoin(this);
+        }
+
+        public void HoldPickupFor(float duration)
+        {
+            _pickUpDelayDelta = Mathf.Max(_pickUpDelayDelta, duration);
+            _isPickingUp = false;
         }
 
         public void Reset()

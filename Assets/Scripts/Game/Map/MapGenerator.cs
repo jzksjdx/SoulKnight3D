@@ -14,7 +14,7 @@ namespace SoulKnight3D
         public int EnemySpawnLevel = 1;
         public int EnemySpawnSeed;
         public List<EnemyWaveSO> EnemyWaveSOs = new List<EnemyWaveSO>();
-        public GameObject BossPrefab;
+        public BossEncounterDataSO BossEncounter;
 
         [SerializeField] private RoomManager RoomManagerPrefab;
         [SerializeField] private bool _shouldGenerateMap = true;
@@ -335,7 +335,7 @@ namespace SoulKnight3D
             newRoom
                 .SetDimension(_roomDataDict[roomKey].position, mapScale / 4)
                 .SetGates(_roomDataDict[roomKey].gates)
-                .SetBossPrefab(BossPrefab)
+                .SetBossEncounter(BossEncounter)
                 .SetKey(roomKey)
                 .SetRoomType(_roomDataDict[roomKey].type)
                 .SetRoomStatus(_roomDataDict[roomKey].status);
