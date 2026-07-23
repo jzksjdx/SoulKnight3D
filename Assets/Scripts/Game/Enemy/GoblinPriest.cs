@@ -14,6 +14,14 @@ namespace SoulKnight3D
             StarFall
         }
 
+        private enum MovementPattern
+        {
+            Orbit,
+            CloseIn,
+            FallBack,
+            Reposition
+        }
+
         [Header("References")]
         [SerializeField] private Rigidbody _rigidbody;
         [SerializeField] private CapsuleCollider _collider;
@@ -26,6 +34,15 @@ namespace SoulKnight3D
         [SerializeField, Min(0f)] private float _preferredMinDistance = 3.5f;
         [SerializeField, Min(0f)] private float _preferredMaxDistance = 5.5f;
         [SerializeField] private Vector2 _directionChangeInterval = new Vector2(1.2f, 2.4f);
+        [SerializeField] private Vector2 _moveSpeedMultiplierRange = new Vector2(0.75f, 1f);
+        [SerializeField, Min(0f)] private float _movementAcceleration = 4.5f;
+        [SerializeField, Min(0f)] private float _turnSpeed = 540f;
+        [SerializeField, Range(0f, 1f)] private float _plannedRadialStrength = 0.4f;
+        [SerializeField] private Vector2 _orbitWeightRange = new Vector2(0.55f, 1.1f);
+
+        [Header("Movement Animation")]
+        [SerializeField, Range(0f, 0.25f)] private float _animationInputDeadZone = 0.04f;
+        [SerializeField, Min(0.01f)] private float _animationInputResponse = 8f;
 
         [Header("Attack Timing")]
         [SerializeField] private Vector2 _attackInterval = new Vector2(2.2f, 3.4f);
@@ -86,6 +103,14 @@ namespace SoulKnight3D
         private float _attackTimer;
         private float _directionTimer;
         private float _strafeDirection = 1f;
+        private float _desiredDistance;
+        private float _radialPlanBias;
+        private float _orbitWeight = 1f;
+        private float _moveSpeedMultiplier = 1f;
+        private Vector3 _planarVelocity;
+        private Vector2 _animationInput;
+        private float _animationSpeed;
+        private MovementPattern _movementPattern;
         private bool _isAttacking;
         private bool _attackStateStarted;
         private int _activeAttackState;
@@ -130,7 +155,7 @@ namespace SoulKnight3D
 
         private void FixedUpdate()
         {
-            if (IsDead && _rigidbody != null)
+            if (IsDead && _rigidbody != null && !_rigidbody.isKinematic)
             {
                 _rigidbody.velocity = Vector3.zero;
                 _rigidbody.angularVelocity = Vector3.zero;
@@ -325,36 +350,41 @@ namespace SoulKnight3D
 
         private void MoveAroundPlayer()
         {
-            Vector3 toPlayer = _player.transform.position - transform.position;
-            toPlayer.y = 0f;
-            float distance = toPlayer.magnitude;
-            Vector3 radial = distance > 0.001f ? toPlayer / distance : transform.forward;
-            Vector3 tangent = Vector3.Cross(Vector3.up, radial) * _strafeDirection;
-            Vector3 direction;
-            if (distance > _preferredMaxDistance)
-            {
-                direction = (radial + tangent * 0.35f).normalized;
-            }
-            else if (distance < _preferredMinDistance)
-            {
-                direction = (-radial + tangent * 0.35f).normalized;
-            }
-            else
-            {
-                direction = tangent;
-            }
-
             _directionTimer -= Time.deltaTime;
             if (_directionTimer <= 0f)
             {
                 ChooseMovementDirection();
             }
 
-            Vector3 velocity = direction * _moveSpeed;
-            velocity.y = _rigidbody != null ? _rigidbody.velocity.y : 0f;
-            if (_rigidbody != null) { _rigidbody.velocity = velocity; }
+            Vector3 toPlayer = _player.transform.position - transform.position;
+            toPlayer.y = 0f;
+            float distance = toPlayer.magnitude;
+            Vector3 radial = distance > 0.001f ? toPlayer / distance : transform.forward;
+            Vector3 tangent = Vector3.Cross(Vector3.up, radial) * _strafeDirection;
+
+            float distanceRange = Mathf.Max(
+                0.5f, Mathf.Abs(_preferredMaxDistance - _preferredMinDistance));
+            float radialCorrection = Mathf.Clamp(
+                (distance - _desiredDistance) / distanceRange, -1f, 1f);
+            float radialIntent = Mathf.Clamp(
+                radialCorrection + _radialPlanBias, -1f, 1f);
+            Vector3 direction = radial * radialIntent + tangent * _orbitWeight;
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                direction = tangent.sqrMagnitude > 0.0001f ? tangent : transform.forward;
+            }
+            direction.Normalize();
+
+            Vector3 desiredVelocity = direction * (_moveSpeed * _moveSpeedMultiplier);
+            _planarVelocity = Vector3.MoveTowards(
+                _planarVelocity, desiredVelocity, _movementAcceleration * Time.deltaTime);
+            if (_rigidbody != null)
+            {
+                _rigidbody.velocity = new Vector3(
+                    _planarVelocity.x, _rigidbody.velocity.y, _planarVelocity.z);
+            }
             FacePlayer();
-            UpdateMoveAnimation(velocity);
+            UpdateMoveAnimation(_planarVelocity);
         }
 
         private void FacePlayer()
@@ -362,7 +392,9 @@ namespace SoulKnight3D
             Vector3 direction = DirectionToPlayer();
             if (direction.sqrMagnitude > 0.0001f)
             {
-                transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+                Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation, targetRotation, _turnSpeed * Time.deltaTime);
             }
         }
 
@@ -377,24 +409,87 @@ namespace SoulKnight3D
 
         private void StopMoving()
         {
+            _planarVelocity = Vector3.zero;
             if (_rigidbody != null)
             {
                 _rigidbody.velocity = new Vector3(0f, _rigidbody.velocity.y, 0f);
                 _rigidbody.angularVelocity = Vector3.zero;
             }
-            UpdateMoveAnimation(Vector3.zero);
+            SetMoveAnimationImmediate(Vector2.zero, 0f);
         }
 
         private void UpdateMoveAnimation(Vector3 worldVelocity)
         {
             if (_animator == null) { return; }
 
-            Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
-            float speed = new Vector2(worldVelocity.x, worldVelocity.z).magnitude;
-            float normalizedSpeed = _moveSpeed > 0.001f ? Mathf.Clamp01(speed / _moveSpeed) : 0f;
-            _animator.SetFloat(MoveX, localVelocity.x);
-            _animator.SetFloat(MoveY, localVelocity.z);
-            _animator.SetFloat(SpeedParameter, normalizedSpeed);
+            Vector3 planarVelocity = new Vector3(worldVelocity.x, 0f, worldVelocity.z);
+            float speed = planarVelocity.magnitude;
+            float targetSpeed = _moveSpeed > 0.001f
+                ? Mathf.Clamp01(speed / _moveSpeed)
+                : 0f;
+            Vector2 targetInput = Vector2.zero;
+            if (targetSpeed <= _animationInputDeadZone)
+            {
+                targetSpeed = 0f;
+            }
+            else
+            {
+                Vector3 localDirection = transform.InverseTransformDirection(
+                    planarVelocity / speed);
+                targetInput = Vector2.ClampMagnitude(
+                    new Vector2(localDirection.x, localDirection.z), 1f);
+                targetInput.x = StabilizeAnimationComponent(targetInput.x);
+                targetInput.y = StabilizeAnimationComponent(targetInput.y);
+            }
+
+            float maximumDelta = _animationInputResponse * Time.deltaTime;
+            _animationInput = Vector2.MoveTowards(
+                _animationInput, targetInput, maximumDelta);
+            _animationInput = Vector2.ClampMagnitude(_animationInput, 1f);
+            _animationInput.x = SnapAnimationComponentWhenSettled(
+                _animationInput.x, targetInput.x);
+            _animationInput.y = SnapAnimationComponentWhenSettled(
+                _animationInput.y, targetInput.y);
+            _animationSpeed = Mathf.MoveTowards(
+                _animationSpeed, targetSpeed, maximumDelta);
+            if (targetSpeed == 0f && _animationSpeed < _animationInputDeadZone)
+            {
+                _animationSpeed = 0f;
+            }
+
+            float displayedSpeed = _animationInput.sqrMagnitude > 0.000001f
+                ? Mathf.Clamp01(_animationSpeed)
+                : 0f;
+            _animator.SetFloat(MoveX, _animationInput.x);
+            _animator.SetFloat(MoveY, _animationInput.y);
+            _animator.SetFloat(SpeedParameter, displayedSpeed);
+        }
+
+        private float StabilizeAnimationComponent(float value)
+        {
+            return Mathf.Abs(value) < _animationInputDeadZone
+                ? 0f
+                : Mathf.Clamp(value, -1f, 1f);
+        }
+
+        private float SnapAnimationComponentWhenSettled(float value, float target)
+        {
+            if (target == 0f && Mathf.Abs(value) < _animationInputDeadZone)
+            {
+                return 0f;
+            }
+            return Mathf.Clamp(value, -1f, 1f);
+        }
+
+        private void SetMoveAnimationImmediate(Vector2 input, float speed)
+        {
+            _animationInput = Vector2.ClampMagnitude(input, 1f);
+            _animationSpeed = Mathf.Clamp01(speed);
+            if (_animator == null) { return; }
+
+            _animator.SetFloat(MoveX, _animationInput.x);
+            _animator.SetFloat(MoveY, _animationInput.y);
+            _animator.SetFloat(SpeedParameter, _animationSpeed);
         }
 
         private void SpawnPooledBullet(GameObject prefab, Vector3 direction, float speed,
@@ -428,7 +523,50 @@ namespace SoulKnight3D
 
         private void ChooseMovementDirection()
         {
-            _strafeDirection = Random.value < 0.5f ? -1f : 1f;
+            if (_directionTimer <= 0f && Random.value < 0.55f)
+            {
+                _strafeDirection *= -1f;
+            }
+
+            _movementPattern = (MovementPattern)Random.Range(0, 4);
+            _desiredDistance = Random.Range(
+                Mathf.Min(_preferredMinDistance, _preferredMaxDistance),
+                Mathf.Max(_preferredMinDistance, _preferredMaxDistance));
+            float plannedStrength = Mathf.Clamp01(_plannedRadialStrength);
+            switch (_movementPattern)
+            {
+                case MovementPattern.CloseIn:
+                    _radialPlanBias = plannedStrength;
+                    break;
+                case MovementPattern.FallBack:
+                    _radialPlanBias = -plannedStrength;
+                    break;
+                case MovementPattern.Reposition:
+                    _radialPlanBias = Random.Range(
+                        -plannedStrength * 0.5f, plannedStrength * 0.5f);
+                    break;
+                default:
+                    _radialPlanBias = 0f;
+                    break;
+            }
+
+            float minimumOrbitWeight = Mathf.Max(
+                0.05f, Mathf.Min(_orbitWeightRange.x, _orbitWeightRange.y));
+            float maximumOrbitWeight = Mathf.Max(
+                minimumOrbitWeight, Mathf.Max(_orbitWeightRange.x, _orbitWeightRange.y));
+            _orbitWeight = Random.Range(minimumOrbitWeight, maximumOrbitWeight);
+            if (_movementPattern == MovementPattern.Reposition)
+            {
+                _orbitWeight *= 0.6f;
+            }
+
+            float minimumSpeed = Mathf.Clamp01(
+                Mathf.Min(_moveSpeedMultiplierRange.x, _moveSpeedMultiplierRange.y));
+            float maximumSpeed = Mathf.Clamp(
+                Mathf.Max(_moveSpeedMultiplierRange.x, _moveSpeedMultiplierRange.y),
+                minimumSpeed, 1f);
+            _moveSpeedMultiplier = Random.Range(minimumSpeed, maximumSpeed);
+
             float minimum = Mathf.Max(0.1f,
                 Mathf.Min(_directionChangeInterval.x, _directionChangeInterval.y));
             float maximum = Mathf.Max(minimum,

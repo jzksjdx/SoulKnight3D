@@ -5852,6 +5852,74 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 361322870}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &373542422
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 44.815678
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.389
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 42.9249
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8573186230173253722, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+        type: 3}
+      propertyPath: m_Name
+      value: Priest Line Emitter
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 28d20ec4bee0f70489bbfb8cedc00f40, type: 3}
 --- !u!1001 &378475520
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30875,7 +30943,7 @@ PrefabInstance:
     - target: {fileID: 5517572755892334116, guid: 9425f092c08e57e4184efcb727b87f25,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -32423,3 +32491,4 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 1843390139255203213}
   - {fileID: 6886772275202306290}
+  - {fileID: 373542422}
