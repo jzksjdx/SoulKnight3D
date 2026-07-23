@@ -4,43 +4,56 @@ namespace SoulKnight3D
 {
     public sealed class PriestOrbitalProjectile : MonoBehaviour
     {
+        [SerializeField] private float _rotationSpeed = 85f;
+
         private BossEnemy _owner;
+        private PooledGameObject _pooledObject;
         private float _angle;
         private float _radius;
-        private float _degreesPerSecond;
         private float _remainingLifetime;
         private int _damage;
         private bool _consumed;
+        private bool _initialized;
+
+        public bool IsActive =>
+            _initialized && !_consumed && gameObject.activeInHierarchy;
 
         public void Initialize(BossEnemy owner, float startingAngle, float radius,
-            float degreesPerSecond, float lifetime, int damage)
+            float rotationSpeed, float lifetime, int damage)
         {
+            if (_pooledObject == null)
+            {
+                _pooledObject = GetComponent<PooledGameObject>();
+            }
             _owner = owner;
             _angle = startingAngle;
             _radius = Mathf.Max(0f, radius);
-            _degreesPerSecond = degreesPerSecond;
+            _rotationSpeed = rotationSpeed;
             _remainingLifetime = Mathf.Max(0f, lifetime);
             _damage = Mathf.Max(0, damage);
             _consumed = false;
+            _initialized = true;
             UpdatePosition();
         }
 
         private void Update()
         {
+            if (!_initialized) { return; }
+
             if (_owner == null || _owner.IsDead)
             {
-                Destroy(gameObject);
+                Release();
                 return;
             }
 
             _remainingLifetime -= Time.deltaTime;
             if (_remainingLifetime <= 0f)
             {
-                Destroy(gameObject);
+                Release();
                 return;
             }
 
-            _angle += _degreesPerSecond * Time.deltaTime;
+            _angle += _rotationSpeed * Time.deltaTime;
             UpdatePosition();
         }
 
@@ -53,7 +66,7 @@ namespace SoulKnight3D
 
             _consumed = true;
             player.PlayerStats.ApplyDamage(_damage);
-            Destroy(gameObject);
+            Release();
         }
 
         private void UpdatePosition()
@@ -62,7 +75,31 @@ namespace SoulKnight3D
             Vector3 offset = new Vector3(Mathf.Sin(radians), 0.65f, Mathf.Cos(radians)) * _radius;
             offset.y = 0.65f;
             transform.position = _owner.transform.position + offset;
-            transform.Rotate(Vector3.up, _degreesPerSecond * Time.deltaTime, Space.World);
+            transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
+        }
+
+        private void OnDisable()
+        {
+            _initialized = false;
+            _owner = null;
+        }
+
+        private void Release()
+        {
+            _initialized = false;
+            if (_pooledObject == null)
+            {
+                _pooledObject = GetComponent<PooledGameObject>();
+            }
+
+            if (_pooledObject != null)
+            {
+                _pooledObject.ReleaseToPool();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

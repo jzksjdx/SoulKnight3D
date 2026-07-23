@@ -17,6 +17,9 @@ namespace SoulKnight3D {
             new HashSet<CoinPickup.CoinType>();
 
         private readonly Dictionary<GameObject, SimpleObjectPool<Bullet>> _bulletPools = new Dictionary<GameObject, SimpleObjectPool<Bullet>>();
+        private readonly Dictionary<GameObject, SimpleObjectPool<PooledGameObject>>
+            _reusableObjectPools =
+                new Dictionary<GameObject, SimpleObjectPool<PooledGameObject>>();
 
         private readonly Dictionary<GameObject, SimpleObjectPool<StatusZone>> _statusZonePools = new Dictionary<GameObject, SimpleObjectPool<StatusZone>>();
 
@@ -165,6 +168,54 @@ namespace SoulKnight3D {
             else
             {
                 Destroy(bullet.gameObject);
+            }
+        }
+
+        // Reusable hazards and effects that do not use the Bullet component.
+        public PooledGameObject SpawnPooledObject(GameObject prefab, Vector3 position,
+            Quaternion rotation)
+        {
+            if (prefab == null) { return null; }
+
+            if (!_reusableObjectPools.TryGetValue(
+                prefab, out SimpleObjectPool<PooledGameObject> pool))
+            {
+                pool = new SimpleObjectPool<PooledGameObject>(factoryMethod: () =>
+                {
+                    GameObject instance = Instantiate(prefab, transform).Hide();
+                    PooledGameObject pooledObject =
+                        instance.GetComponent<PooledGameObject>() ??
+                        instance.AddComponent<PooledGameObject>();
+                    pooledObject.Configure(prefab);
+                    return pooledObject;
+                }, initCount: 3,
+                resetMethod: pooledObject =>
+                {
+                    pooledObject.Reset();
+                });
+                _reusableObjectPools.Add(prefab, pool);
+            }
+
+            PooledGameObject result = pool.Allocate();
+            result.Configure(prefab);
+            result.MarkAllocated();
+            result.transform.SetPositionAndRotation(position, rotation);
+            return result;
+        }
+
+        public void DespawnPooledObject(PooledGameObject pooledObject)
+        {
+            if (pooledObject != null && pooledObject.PrefabRef != null &&
+                _reusableObjectPools.TryGetValue(
+                    pooledObject.PrefabRef, out SimpleObjectPool<PooledGameObject> pool))
+            {
+                pool.Recycle(pooledObject);
+                return;
+            }
+
+            if (pooledObject != null)
+            {
+                Destroy(pooledObject.gameObject);
             }
         }
 

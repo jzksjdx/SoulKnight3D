@@ -95,9 +95,8 @@ GameObject:
   - component: {fileID: 3105828744398177150}
   - component: {fileID: 8664218546079926822}
   - component: {fileID: 3235179199706192454}
-  - component: {fileID: 8426254561740850787}
   m_Layer: 10
-  m_Name: Priest Line Emitter
+  m_Name: Priest Line Bullet
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -182,7 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Namespace: QFramework.Example
-  ScriptName: Priest Line Emitter
+  ScriptName: Priest Line Bullet
   ScriptsFolder: Assets\Scripts\Game\Weapons
   GeneratePrefab: 0
   PrefabFolder: Assets/Art/Prefab
@@ -194,22 +193,3 @@ MonoBehaviour:
   PrefabRef: {fileID: 0}
   TrailRenderer: {fileID: 0}
   ImpactFeedback: {fileID: 0}
---- !u!114 &8426254561740850787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8573186230173253722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ba703c906d78c94ba2539aecd46d103, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _emittedBulletPrefab: {fileID: 6808033331017834139, guid: 703c9d9272ca0df448bc8f888741b91e,
-    type: 3}
-  _travelTime: 0.45
-  _burstCount: 5
-  _burstInterval: 0.18
-  _emittedBulletSpeed: 7
-  _emittedBulletDamage: 2

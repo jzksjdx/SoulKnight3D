@@ -22,6 +22,14 @@ namespace SoulKnight3D.Editor
             "Assets/Art/Materials/Enemy/Goblin Priest Projectiles";
         private const string ForestFloorPath =
             "Assets/Art/ScriptableObject/Game Floors/1- Forest.asset";
+        private const string LegacyLinePrefabPath =
+            ProjectileFolder + "/Priest Line Emitter.prefab";
+        private const string LineBulletPrefabPath =
+            ProjectileFolder + "/Priest Line Bullet.prefab";
+        private const string SplitterClonePrefabPath =
+            ProjectileFolder + "/Priest Splitter Swirl Clone.prefab";
+        private const string SplitterParentPrefabPath =
+            ProjectileFolder + "/Priest Splitter Parent Swirl Bullet.prefab";
 
         [MenuItem("SoulKnight3D/Build Goblin Priest Boss")]
         public static void Build()
@@ -35,8 +43,11 @@ namespace SoulKnight3D.Editor
             Material swirlMaterial = GetOrCreateMaterial(
                 $"{MaterialFolder}/Priest Swirl Bullet.mat",
                 new Color(0.72f, 0.08f, 1f), true);
-            Material emitterMaterial = GetOrCreateMaterial(
+            MigrateAsset(
                 $"{MaterialFolder}/Priest Line Emitter.mat",
+                $"{MaterialFolder}/Priest Line Bullet.mat");
+            Material lineBulletMaterial = GetOrCreateMaterial(
+                $"{MaterialFolder}/Priest Line Bullet.mat",
                 new Color(0.1f, 0.85f, 1f), true);
             Material orbMaterial = GetOrCreateMaterial(
                 $"{MaterialFolder}/Priest Protective Orb.mat",
@@ -60,13 +71,18 @@ namespace SoulKnight3D.Editor
                     PriestSwirlBullet behavior = root.AddComponent<PriestSwirlBullet>();
                     behavior.Configure(smallBullet, 0.75f, 3, 28f, 7f, 2, 95f);
                 });
-            GameObject lineEmitter = CreateBulletPrefab(
-                "Priest Line Emitter", PrimitiveType.Cube,
-                new Vector3(0.18f, 0.18f, 0.18f), emitterMaterial,
+            MigrateAsset(LegacyLinePrefabPath, LineBulletPrefabPath);
+            GameObject lineBullet = ConfigureLineBulletPrefab(lineBulletMaterial);
+            GameObject splitterClone =
+                CreateSplitterClonePrefab(swirlMaterial, lineBullet);
+            GameObject splitterParent = CreateBulletPrefab(
+                "Priest Splitter Parent Swirl Bullet", PrimitiveType.Cylinder,
+                new Vector3(0.12f, 0.18f, 0.12f), swirlMaterial,
                 root =>
                 {
-                    PriestLineEmitter behavior = root.AddComponent<PriestLineEmitter>();
-                    behavior.Configure(smallBullet, 0.45f, 5, 0.18f, 7f, 2);
+                    PriestSplitterParentBullet behavior =
+                        root.AddComponent<PriestSplitterParentBullet>();
+                    behavior.Configure(splitterClone, 0.5f, 5f);
                 });
             GameObject protectiveOrb = CreateProtectiveOrbPrefab(orbMaterial);
             GameObject warning = CreateWarningPrefab(warningMaterial);
@@ -74,7 +90,7 @@ namespace SoulKnight3D.Editor
 
             ConfigureController();
             ConfigureAnimationEvents();
-            ConfigureBossPrefab(swirlBullet, lineEmitter, protectiveOrb, meteor,
+            ConfigureBossPrefab(swirlBullet, splitterParent, protectiveOrb, meteor,
                 warning, minimapMaterial);
             AddBossToForestPool();
 
@@ -114,7 +130,7 @@ namespace SoulKnight3D.Editor
                 "_attackOrigin",
                 "_minimapIcon",
                 "_swirlBulletPrefab",
-                "_lineEmitterPrefab",
+                "_splitterParentBulletPrefab",
                 "_protectiveOrbPrefab",
                 "_meteorPrefab",
                 "_meteorWarningPrefab"
@@ -164,7 +180,8 @@ namespace SoulKnight3D.Editor
             Debug.Log("Goblin Priest validation passed.");
         }
 
-        private static void ConfigureBossPrefab(GameObject swirlBullet, GameObject lineEmitter,
+        private static void ConfigureBossPrefab(GameObject swirlBullet,
+            GameObject splitterParent,
             GameObject protectiveOrb, GameObject meteor, GameObject warning,
             Material minimapMaterial)
         {
@@ -211,7 +228,7 @@ namespace SoulKnight3D.Editor
                 priest.MaxHealth = 450;
                 priest.Speed = 1.2f;
                 priest.ConfigureReferences(body, capsule, animator, attackOrigin, minimapIcon,
-                    swirlBullet, lineEmitter, protectiveOrb, meteor, warning);
+                    swirlBullet, splitterParent, protectiveOrb, meteor, warning);
 
                 EditorUtility.SetDirty(priest);
                 PrefabUtility.SaveAsPrefabAsset(root, BossPrefabPath);
@@ -355,6 +372,82 @@ namespace SoulKnight3D.Editor
             configure?.Invoke(root);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+            Object.DestroyImmediate(root);
+            return prefab;
+        }
+
+        private static GameObject ConfigureLineBulletPrefab(Material material)
+        {
+            GameObject prefab =
+                AssetDatabase.LoadAssetAtPath<GameObject>(LineBulletPrefabPath);
+            if (prefab == null)
+            {
+                return CreateBulletPrefab("Priest Line Bullet", PrimitiveType.Cube,
+                    new Vector3(0.18f, 0.18f, 0.18f), material);
+            }
+
+            GameObject root = PrefabUtility.LoadPrefabContents(LineBulletPrefabPath);
+            try
+            {
+                root.name = "Priest Line Bullet";
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(root);
+
+                Bullet bullet = root.GetComponent<Bullet>();
+                if (bullet != null)
+                {
+                    SerializedObject serializedBullet = new SerializedObject(bullet);
+                    SerializedProperty scriptName =
+                        serializedBullet.FindProperty("ScriptName");
+                    if (scriptName != null)
+                    {
+                        scriptName.stringValue = "Priest Line Bullet";
+                        serializedBullet.ApplyModifiedPropertiesWithoutUndo();
+                    }
+                }
+
+                Renderer renderer = root.GetComponentInChildren<Renderer>(true);
+                if (renderer != null)
+                {
+                    renderer.sharedMaterial = material;
+                }
+                PrefabUtility.SaveAsPrefabAsset(root, LineBulletPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+            return AssetDatabase.LoadAssetAtPath<GameObject>(LineBulletPrefabPath);
+        }
+
+        private static GameObject CreateSplitterClonePrefab(Material material,
+            GameObject lineBulletPrefab)
+        {
+            GameObject existing =
+                AssetDatabase.LoadAssetAtPath<GameObject>(SplitterClonePrefabPath);
+            if (existing != null) { return existing; }
+
+            GameObject root = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            root.name = "Priest Splitter Swirl Clone";
+            root.layer = LayerMask.NameToLayer("EnemyBullet");
+            root.tag = "Enemy";
+            root.transform.localScale = new Vector3(0.12f, 0.18f, 0.12f);
+
+            Renderer renderer = root.GetComponent<Renderer>();
+            if (renderer != null) { renderer.sharedMaterial = material; }
+            Collider collider = root.GetComponent<Collider>();
+            collider.isTrigger = false;
+
+            Rigidbody body = root.AddComponent<Rigidbody>();
+            body.useGravity = false;
+            body.isKinematic = true;
+            body.constraints = RigidbodyConstraints.FreezeAll;
+
+            root.AddComponent<PooledGameObject>();
+            PriestSplitterClone clone = root.AddComponent<PriestSplitterClone>();
+            clone.Configure(lineBulletPrefab, 0.3f, 7f, 2, 5f);
+
+            GameObject prefab =
+                PrefabUtility.SaveAsPrefabAsset(root, SplitterClonePrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
         }
@@ -613,6 +706,22 @@ namespace SoulKnight3D.Editor
                     AssetDatabase.CreateFolder(current, parts[i]);
                 }
                 current = next;
+            }
+        }
+
+        private static void MigrateAsset(string oldPath, string newPath)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Object>(newPath) != null ||
+                AssetDatabase.LoadAssetAtPath<Object>(oldPath) == null)
+            {
+                return;
+            }
+
+            string error = AssetDatabase.MoveAsset(oldPath, newPath);
+            if (!string.IsNullOrEmpty(error))
+            {
+                throw new InvalidOperationException(
+                    $"Could not rename '{oldPath}' to '{newPath}': {error}");
             }
         }
     }

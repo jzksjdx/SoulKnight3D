@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SoulKnight3D
 {
@@ -52,21 +54,30 @@ namespace SoulKnight3D
         [SerializeField, Min(1)] private int _swirlBulletCount = 6;
         [SerializeField, Min(0f)] private float _swirlBulletSpeed = 4.5f;
         [SerializeField, Min(0)] private int _swirlBulletDamage = 3;
+        [SerializeField, Range(0f, 1f)] private float _lavaRepeatChance = 0.5f;
+        [SerializeField] private float _lavaRepeatRotationOffset = 30f;
 
-        [Header("Split Line Emitters")]
-        [SerializeField] private GameObject _lineEmitterPrefab;
-        [SerializeField, Min(1)] private int _lineEmitterCount = 4;
-        [SerializeField, Min(0f)] private float _lineEmitterSpeed = 5f;
-        [SerializeField, Min(0)] private int _lineEmitterDamage = 2;
-        [SerializeField, Range(0f, 90f)] private float _lineEmitterArc = 36f;
+        [Header("Splitter Mother Bullet")]
+        [FormerlySerializedAs("_lineEmitterPrefab")]
+        [SerializeField] private GameObject _splitterParentBulletPrefab;
+        [SerializeField, Min(0f)] private float _splitterParentSpeed = 4.5f;
+        [SerializeField, Min(0)] private int _splitterParentDamage = 3;
+        [SerializeField, Range(0f, 1f)] private float _splitterRepeatChance = 0.5f;
+
+        [Header("Ground Projectile Placement")]
+        [SerializeField, Min(0f)] private float _groundProjectileHeight = 0.35f;
 
         [Header("Protective Orbs")]
         [SerializeField] private GameObject _protectiveOrbPrefab;
         [SerializeField, Min(1)] private int _protectiveOrbCount = 2;
         [SerializeField, Min(0f)] private float _protectiveOrbRadius = 1.15f;
-        [SerializeField] private float _protectiveOrbDegreesPerSecond = 85f;
+        [FormerlySerializedAs("_protectiveOrbDegreesPerSecond")]
+        [SerializeField] private float _protectiveOrbRotationSpeed = 85f;
         [SerializeField, Min(0f)] private float _protectiveOrbLifetime = 8f;
         [SerializeField, Min(0)] private int _protectiveOrbDamage = 4;
+        [SerializeField, Min(0.1f)] private float _protectiveOrbChaseTimeout = 3.5f;
+        [SerializeField, Min(0f)] private float _protectiveOrbChaseSpeedMultiplier = 1.35f;
+        [SerializeField, Min(0f)] private float _protectiveOrbContactPadding = 0.2f;
 
         [Header("Star Fall")]
         [SerializeField] private GameObject _meteorPrefab;
@@ -79,6 +90,9 @@ namespace SoulKnight3D
         [SerializeField, Min(0.05f)] private float _meteorFallDuration = 1.05f;
         [SerializeField, Min(0.05f)] private float _meteorRadius = 0.85f;
         [SerializeField, Min(0)] private int _meteorDamage = 5;
+        [SerializeField] private LayerMask _meteorFloorLayers = 1;
+        [SerializeField, Min(0.1f)] private float _meteorFloorProbeHeight = 8f;
+        [SerializeField, Min(0.1f)] private float _meteorFloorProbeDistance = 20f;
 
         [Header("Death Rewards")]
         [SerializeField, Range(0, 100)] private int _rewardRate = 100;
@@ -113,8 +127,15 @@ namespace SoulKnight3D
         private MovementPattern _movementPattern;
         private bool _isAttacking;
         private bool _attackStateStarted;
+        private bool _isRepeatAttack;
+        private bool _isProtectiveOrbChasing;
         private int _activeAttackState;
+        private float _lavaPatternPhase;
+        private float _protectiveOrbChaseTimer;
+        private AttackType _activeAttackType;
         private AttackType _lastAttack = (AttackType)(-1);
+        private readonly List<PriestOrbitalProjectile> _activeProtectiveOrbs =
+            new List<PriestOrbitalProjectile>();
 
         protected override void Start()
         {
@@ -140,6 +161,12 @@ namespace SoulKnight3D
                 StopMoving();
                 FacePlayer();
                 UpdateAttackAnimation();
+                return;
+            }
+
+            if (_isProtectiveOrbChasing)
+            {
+                UpdateProtectiveOrbChase();
                 return;
             }
 
@@ -192,30 +219,20 @@ namespace SoulKnight3D
             if (_swirlBulletPrefab == null) { return; }
 
             int count = Mathf.Max(1, _swirlBulletCount);
-            float phase = Random.Range(0f, 360f);
+            float phase = _lavaPatternPhase +
+                (_isRepeatAttack ? _lavaRepeatRotationOffset : 0f);
             for (int i = 0; i < count; i++)
             {
                 float angle = phase + i * 360f / count;
                 Vector3 direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
                 SpawnPooledBullet(_swirlBulletPrefab, direction, _swirlBulletSpeed,
-                    _swirlBulletDamage, 1f);
+                    _swirlBulletDamage, 1f, GroundProjectileOrigin());
             }
         }
 
         public void AnimationSplitBulletAttack()
         {
-            if (_lineEmitterPrefab == null) { return; }
-
-            Vector3 aimDirection = DirectionToPlayer();
-            int count = Mathf.Max(1, _lineEmitterCount);
-            for (int i = 0; i < count; i++)
-            {
-                float t = count == 1 ? 0.5f : i / (float)(count - 1);
-                float angle = Mathf.Lerp(-_lineEmitterArc * 0.5f, _lineEmitterArc * 0.5f, t);
-                Vector3 direction = Quaternion.Euler(0f, angle, 0f) * aimDirection;
-                SpawnPooledBullet(_lineEmitterPrefab, direction, _lineEmitterSpeed,
-                    _lineEmitterDamage, 1f);
-            }
+            SpawnSplitterParent(DirectionToPlayer());
         }
 
         public void AnimationProtectiveOrbAttack()
@@ -225,14 +242,21 @@ namespace SoulKnight3D
             int count = Mathf.Max(1, _protectiveOrbCount);
             for (int i = 0; i < count; i++)
             {
-                GameObject orbObject = Instantiate(_protectiveOrbPrefab, transform.position,
-                    Quaternion.identity);
-                if (orbObject.TryGetComponent(out PriestOrbitalProjectile orb))
+                PooledGameObject pooledOrb =
+                    GameObjectsManager.Instance?.SpawnPooledObject(
+                        _protectiveOrbPrefab, transform.position, Quaternion.identity);
+                if (pooledOrb == null) { continue; }
+                if (!pooledOrb.TryGetComponent(out PriestOrbitalProjectile orb))
                 {
-                    orb.Initialize(this, i * 360f / count, _protectiveOrbRadius,
-                        _protectiveOrbDegreesPerSecond, _protectiveOrbLifetime,
-                        _protectiveOrbDamage);
+                    pooledOrb.ReleaseToPool();
+                    continue;
                 }
+
+                orb.Initialize(this, i * 360f / count, _protectiveOrbRadius,
+                    _protectiveOrbRotationSpeed, _protectiveOrbLifetime,
+                    _protectiveOrbDamage);
+                _activeProtectiveOrbs.Add(orb);
+                pooledOrb.ShowFromPool();
             }
         }
 
@@ -243,8 +267,8 @@ namespace SoulKnight3D
 
         public void ConfigureReferences(Rigidbody body, CapsuleCollider capsule, Animator animator,
             Transform attackOrigin, Transform minimapIcon, GameObject swirlBulletPrefab,
-            GameObject lineEmitterPrefab, GameObject protectiveOrbPrefab, GameObject meteorPrefab,
-            GameObject meteorWarningPrefab)
+            GameObject splitterParentBulletPrefab, GameObject protectiveOrbPrefab,
+            GameObject meteorPrefab, GameObject meteorWarningPrefab)
         {
             _rigidbody = body;
             _collider = capsule;
@@ -252,7 +276,7 @@ namespace SoulKnight3D
             _attackOrigin = attackOrigin;
             _minimapIcon = minimapIcon;
             _swirlBulletPrefab = swirlBulletPrefab;
-            _lineEmitterPrefab = lineEmitterPrefab;
+            _splitterParentBulletPrefab = splitterParentBulletPrefab;
             _protectiveOrbPrefab = protectiveOrbPrefab;
             _meteorPrefab = meteorPrefab;
             _meteorWarningPrefab = meteorWarningPrefab;
@@ -278,13 +302,24 @@ namespace SoulKnight3D
                     Vector2 offset = Random.insideUnitCircle * _meteorTargetSpread;
                     target += new Vector3(offset.x, 0f, offset.y);
                 }
+                target = ResolveFloorPosition(target);
 
-                GameObject meteorObject = Instantiate(_meteorPrefab,
+                PooledGameObject pooledMeteor =
+                    GameObjectsManager.Instance?.SpawnPooledObject(_meteorPrefab,
                     target + Vector3.up * _meteorHeight, Quaternion.identity);
-                if (meteorObject.TryGetComponent(out PriestMeteorProjectile meteor))
+                if (pooledMeteor != null)
                 {
-                    meteor.Initialize(target, _meteorHeight, _meteorFallDuration,
-                        _meteorRadius, _meteorDamage, _meteorWarningPrefab);
+                    if (pooledMeteor.TryGetComponent(
+                        out PriestMeteorProjectile meteor))
+                    {
+                        meteor.Initialize(target, _meteorHeight, _meteorFallDuration,
+                            _meteorRadius, _meteorDamage, _meteorWarningPrefab);
+                        pooledMeteor.ShowFromPool();
+                    }
+                    else
+                    {
+                        pooledMeteor.ReleaseToPool();
+                    }
                 }
 
                 yield return new WaitForSeconds(_meteorSpawnInterval);
@@ -299,13 +334,21 @@ namespace SoulKnight3D
                 nextAttack = (AttackType)(((int)nextAttack + Random.Range(1, 4)) % 4);
             }
             _lastAttack = nextAttack;
+            StartAttack(nextAttack, false);
+        }
 
+        private void StartAttack(AttackType attackType, bool isRepeat)
+        {
             int trigger;
-            switch (nextAttack)
+            switch (attackType)
             {
                 case AttackType.Lava:
                     trigger = LavaTrigger;
                     _activeAttackState = LavaState;
+                    if (!isRepeat)
+                    {
+                        _lavaPatternPhase = Random.Range(0f, 360f);
+                    }
                     break;
                 case AttackType.Split:
                     trigger = SplitTrigger;
@@ -321,6 +364,9 @@ namespace SoulKnight3D
                     break;
             }
 
+            _activeAttackType = attackType;
+            _isRepeatAttack = isRepeat;
+            _isProtectiveOrbChasing = false;
             FacePlayer();
             StopMoving();
             ResetAttackTriggers();
@@ -344,8 +390,100 @@ namespace SoulKnight3D
             {
                 _isAttacking = false;
                 _attackStateStarted = false;
+                if (TryStartImmediateRepeat()) { return; }
+
+                _isRepeatAttack = false;
+                if (_activeAttackType == AttackType.ProtectiveOrb &&
+                    HasActiveProtectiveOrbs())
+                {
+                    BeginProtectiveOrbChase();
+                    return;
+                }
                 ScheduleAttack();
             }
+        }
+
+        private bool TryStartImmediateRepeat()
+        {
+            if (_isRepeatAttack) { return false; }
+
+            float repeatChance;
+            switch (_activeAttackType)
+            {
+                case AttackType.Lava:
+                    repeatChance = _lavaRepeatChance;
+                    break;
+                case AttackType.Split:
+                    repeatChance = _splitterRepeatChance;
+                    break;
+                default:
+                    return false;
+            }
+
+            if (Random.value > Mathf.Clamp01(repeatChance)) { return false; }
+
+            StartAttack(_activeAttackType, true);
+            return true;
+        }
+
+        private void BeginProtectiveOrbChase()
+        {
+            _isProtectiveOrbChasing = true;
+            _protectiveOrbChaseTimer = Mathf.Max(0.1f, _protectiveOrbChaseTimeout);
+        }
+
+        private void UpdateProtectiveOrbChase()
+        {
+            if (!HasActiveProtectiveOrbs())
+            {
+                EndProtectiveOrbChase();
+                return;
+            }
+
+            Vector3 toPlayer = _player.transform.position - transform.position;
+            toPlayer.y = 0f;
+            float contactDistance =
+                Mathf.Max(0f, _protectiveOrbRadius + _protectiveOrbContactPadding);
+            _protectiveOrbChaseTimer -= Time.deltaTime;
+            if (toPlayer.sqrMagnitude <= contactDistance * contactDistance ||
+                _protectiveOrbChaseTimer <= 0f)
+            {
+                EndProtectiveOrbChase();
+                return;
+            }
+
+            Vector3 direction = toPlayer.normalized;
+            Vector3 desiredVelocity = direction *
+                (_moveSpeed * Mathf.Max(0f, _protectiveOrbChaseSpeedMultiplier));
+            _planarVelocity = Vector3.MoveTowards(
+                _planarVelocity, desiredVelocity, _movementAcceleration * Time.deltaTime);
+            if (_rigidbody != null)
+            {
+                _rigidbody.velocity = new Vector3(
+                    _planarVelocity.x, _rigidbody.velocity.y, _planarVelocity.z);
+            }
+            FacePlayer();
+            UpdateMoveAnimation(_planarVelocity);
+        }
+
+        private bool HasActiveProtectiveOrbs()
+        {
+            for (int i = _activeProtectiveOrbs.Count - 1; i >= 0; i--)
+            {
+                PriestOrbitalProjectile orb = _activeProtectiveOrbs[i];
+                if (orb == null || !orb.IsActive)
+                {
+                    _activeProtectiveOrbs.RemoveAt(i);
+                }
+            }
+            return _activeProtectiveOrbs.Count > 0;
+        }
+
+        private void EndProtectiveOrbChase()
+        {
+            _isProtectiveOrbChasing = false;
+            ChooseMovementDirection();
+            ScheduleAttack();
         }
 
         private void MoveAroundPlayer()
@@ -493,7 +631,7 @@ namespace SoulKnight3D
         }
 
         private void SpawnPooledBullet(GameObject prefab, Vector3 direction, float speed,
-            int damage, float size)
+            int damage, float size, Vector3 spawnPosition)
         {
             if (GameObjectsManager.Instance == null || prefab == null) { return; }
 
@@ -503,7 +641,7 @@ namespace SoulKnight3D
             direction.y = 0f;
             direction.Normalize();
             bulletObject.transform.SetPositionAndRotation(
-                _attackOrigin != null ? _attackOrigin.position : transform.position + Vector3.up,
+                spawnPosition,
                 Quaternion.LookRotation(direction, Vector3.up));
             bullet.InitializeBullet("Enemy", damage, false, prefab, size);
             bullet.SelfRigidbody.velocity = direction * speed;
@@ -512,6 +650,76 @@ namespace SoulKnight3D
             {
                 bullet.IgnoreCollisionUntilSeparated(_collider, 0.05f);
             }
+        }
+
+        private void SpawnSplitterParent(Vector3 direction)
+        {
+            if (_splitterParentBulletPrefab == null ||
+                GameObjectsManager.Instance == null)
+            {
+                return;
+            }
+
+            GameObject bulletObject =
+                GameObjectsManager.Instance.SpawnBullet(_splitterParentBulletPrefab);
+            if (bulletObject == null) { return; }
+
+            Bullet bullet = bulletObject.GetComponent<Bullet>();
+            PriestSplitterParentBullet splitterParent =
+                bulletObject.GetComponent<PriestSplitterParentBullet>();
+            if (bullet == null || splitterParent == null)
+            {
+                if (bullet != null)
+                {
+                    GameObjectsManager.Instance.DespawnBullet(bullet);
+                }
+                return;
+            }
+
+            direction.y = 0f;
+            direction = direction.sqrMagnitude > 0.0001f
+                ? direction.normalized
+                : transform.forward;
+            bulletObject.transform.SetPositionAndRotation(
+                GroundProjectileOrigin(),
+                Quaternion.LookRotation(direction, Vector3.up));
+            bullet.InitializeBullet("Enemy", _splitterParentDamage, false,
+                _splitterParentBulletPrefab);
+            splitterParent.Arm(direction);
+            bullet.SelfRigidbody.velocity = direction * _splitterParentSpeed;
+            bullet.ShowFromPool();
+            if (_collider != null)
+            {
+                bullet.IgnoreCollisionUntilSeparated(_collider, 0.05f);
+            }
+        }
+
+        private Vector3 GroundProjectileOrigin()
+        {
+            Vector3 origin = _attackOrigin != null
+                ? _attackOrigin.position
+                : transform.position;
+            origin.y = transform.position.y + Mathf.Max(0f, _groundProjectileHeight);
+            return origin;
+        }
+
+        private Vector3 ResolveFloorPosition(Vector3 target)
+        {
+            float fallbackFloorY = transform.position.y;
+            float rayStartY = Mathf.Max(target.y, fallbackFloorY) +
+                Mathf.Max(0.1f, _meteorFloorProbeHeight);
+            Vector3 rayOrigin = new Vector3(target.x, rayStartY, target.z);
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit,
+                Mathf.Max(0.1f, _meteorFloorProbeDistance), _meteorFloorLayers,
+                QueryTriggerInteraction.Ignore))
+            {
+                target.y = hit.point.y;
+            }
+            else
+            {
+                target.y = fallbackFloorY;
+            }
+            return target;
         }
 
         private void ScheduleAttack()

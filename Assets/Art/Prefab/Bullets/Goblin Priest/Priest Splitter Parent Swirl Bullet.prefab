@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8685314509826460154
+--- !u!1 &6367932571730332461
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,27 +8,27 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 758281125859189001}
-  - component: {fileID: 7952475776844928214}
-  - component: {fileID: 7493363783472006328}
-  - component: {fileID: 6773555195280663741}
-  - component: {fileID: 8680112917940861575}
-  - component: {fileID: 746483858388834474}
-  - component: {fileID: 4891938752715589566}
+  - component: {fileID: 1835923071131467771}
+  - component: {fileID: 2569937179008352766}
+  - component: {fileID: 4803122674811069037}
+  - component: {fileID: 2154669495276932366}
+  - component: {fileID: 8107808900736123595}
+  - component: {fileID: 1380326813463728259}
+  - component: {fileID: 5449903456647508878}
   m_Layer: 10
-  m_Name: Priest Swirl Bullet
+  m_Name: Priest Splitter Parent Swirl Bullet
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &758281125859189001
+--- !u!4 &1835923071131467771
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -37,13 +37,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &7952475776844928214
+--- !u!136 &2569937179008352766
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -57,16 +57,16 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 0.5
+  m_Height: 1
   m_Direction: 2
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!54 &7493363783472006328
+--- !u!54 &4803122674811069037
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   serializedVersion: 4
   m_Mass: 0.1
   m_Drag: 0
@@ -87,59 +87,55 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 2
---- !u!114 &6773555195280663741
+--- !u!114 &2154669495276932366
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04bcf5b6f26ee45bda51510da38989fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Namespace: QFramework.Example
-  ScriptName: Priest Swirl Bullet
+  ScriptName: Priest Splitter Parent Swirl Bullet
   ScriptsFolder: Assets\Scripts\Game\Weapons
   GeneratePrefab: 0
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
   ViewControllerFullTypeName: 
   _didHit: 0
-  SelfRigidbody: {fileID: 7493363783472006328}
-  SelfCapsuleCollider: {fileID: 7952475776844928214}
+  SelfRigidbody: {fileID: 4803122674811069037}
+  SelfCapsuleCollider: {fileID: 2569937179008352766}
   PrefabRef: {fileID: 0}
   TrailRenderer: {fileID: 0}
   ImpactFeedback: {fileID: 0}
---- !u!114 &8680112917940861575
+--- !u!114 &8107808900736123595
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d58a6a1f203f52408617b52f0a6e336, type: 3}
+  m_Script: {fileID: 11500000, guid: dced55f3f948bb640a4f251fb3ab9b67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _splitBulletPrefab: {fileID: 6808033331017834139, guid: 703c9d9272ca0df448bc8f888741b91e,
+  _swirlClonePrefab: {fileID: 3672672285689792868, guid: f1069983c71eb8441b38a1699a4a9e14,
     type: 3}
-  _splitDelay: 0.5
-  _splitCount: 3
-  _splitArc: 28
-  _splitSpeed: 7
-  _splitDamage: 2
-  _turnDegreesPerSecond: 95
---- !u!199 &746483858388834474
+  _cloneInterval: 0.75
+  _lifetime: 5
+--- !u!199 &1380326813463728259
 ParticleSystemRenderer:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -206,13 +202,13 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!198 &4891938752715589566
+--- !u!198 &5449903456647508878
 ParticleSystem:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8685314509826460154}
+  m_GameObject: {fileID: 6367932571730332461}
   serializedVersion: 8
   lengthInSec: 0.4
   simulationSpeed: 1

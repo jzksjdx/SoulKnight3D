@@ -278,7 +278,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxHealth: 450
-  Speed: 1.2
+  Speed: 2
   Statuses: 
   _enrageHealthFraction: 0.5
   _enrageEnergyOrbCount: 3
@@ -305,19 +305,24 @@ MonoBehaviour:
   _swirlBulletCount: 6
   _swirlBulletSpeed: 4.5
   _swirlBulletDamage: 3
-  _lineEmitterPrefab: {fileID: 8573186230173253722, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
+  _lavaRepeatChance: 0.5
+  _lavaRepeatRotationOffset: 30
+  _splitterParentBulletPrefab: {fileID: 6367932571730332461, guid: 4c24247977585f14bbe118f32b897e82,
     type: 3}
-  _lineEmitterCount: 4
-  _lineEmitterSpeed: 5
-  _lineEmitterDamage: 2
-  _lineEmitterArc: 36
+  _splitterParentSpeed: 3
+  _splitterParentDamage: 3
+  _splitterRepeatChance: 0.5
+  _groundProjectileHeight: 0.5
   _protectiveOrbPrefab: {fileID: 3648660428720780076, guid: f5645dc70d0b85c49bddbd3a86048764,
     type: 3}
   _protectiveOrbCount: 2
   _protectiveOrbRadius: 1.15
-  _protectiveOrbDegreesPerSecond: 85
+  _protectiveOrbRotationSpeed: 85
   _protectiveOrbLifetime: 8
   _protectiveOrbDamage: 4
+  _protectiveOrbChaseTimeout: 3.5
+  _protectiveOrbChaseSpeedMultiplier: 1.35
+  _protectiveOrbContactPadding: 0.2
   _meteorPrefab: {fileID: 9164889664342892140, guid: 0aee4fa183f0431488b065885bbd2c4c,
     type: 3}
   _meteorWarningPrefab: {fileID: 5476330107234046758, guid: f9bc0a9d43469da4c9e9b39f0148040f,
@@ -325,11 +330,16 @@ MonoBehaviour:
   _normalMeteorCount: 3
   _enragedMeteorCount: 5
   _meteorSpawnInterval: 0.22
-  _meteorTargetSpread: 1.6
-  _meteorHeight: 6
-  _meteorFallDuration: 1.05
+  _meteorTargetSpread: 1.5
+  _meteorHeight: 9
+  _meteorFallDuration: 1.5
   _meteorRadius: 0.85
   _meteorDamage: 5
+  _meteorFloorLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  _meteorFloorProbeHeight: 8
+  _meteorFloorProbeDistance: 20
   _rewardRate: 100
   _rewardValues: 0300000003000000000000000a000000
   _deathCleanupDelay: 4

@@ -54,16 +54,43 @@ namespace SoulKnight3D
             transform.localScale = _originalScale * bulletSize;
         }
 
+        public void SetRemainingLifetime(float lifetime)
+        {
+            _destroyTimeoutDelta = Mathf.Max(0.05f, lifetime);
+        }
+
         protected virtual void Awake()
         {
             _originalScale = transform.localScale;
             _impactBehavior = GetComponent<IBulletImpactBehavior>();
             SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
             {
-                if (_didHit) { return; }
+                if (_didHit || PassThroughFriendlyCollision(other)) { return; }
                 _didHit = true;
                 OnBulletCollision(other);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private bool PassThroughFriendlyCollision(Collision other)
+        {
+            if (string.IsNullOrEmpty(_weaponTag) || other.collider == null)
+            {
+                return false;
+            }
+
+            TargetableObject target =
+                other.collider.GetComponentInParent<TargetableObject>();
+            bool isFriendly = other.collider.CompareTag(_weaponTag) ||
+                (target != null && target.CompareTag(_weaponTag));
+            if (!isFriendly) { return false; }
+
+            IgnoreCollisionUntilSeparated(other.collider, 0.02f);
+            if (SelfRigidbody != null && _hasPreCollisionPose)
+            {
+                SelfRigidbody.velocity = _preCollisionVelocity;
+                transform.rotation = _preCollisionRotation;
+            }
+            return true;
         }
 
         private void FixedUpdate()

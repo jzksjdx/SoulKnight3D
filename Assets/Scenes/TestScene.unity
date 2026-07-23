@@ -5205,9 +5205,9 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.7
+  near clip plane: 0.5
   far clip plane: 15
-  field of view: 40
+  field of view: 59
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -5852,74 +5852,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 361322870}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &373542422
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 44.815678
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.389
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 42.9249
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8482750781857195030, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8573186230173253722, guid: 28d20ec4bee0f70489bbfb8cedc00f40,
-        type: 3}
-      propertyPath: m_Name
-      value: Priest Line Emitter
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 28d20ec4bee0f70489bbfb8cedc00f40, type: 3}
 --- !u!1001 &378475520
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13177,7 +13109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_NoiseProfile: {fileID: 11400000, guid: 46965f9cbaf525742a6da4c2172a99cd, type: 2}
   m_PivotOffset: {x: 0, y: 0, z: 1}
-  m_AmplitudeGain: 0.5
+  m_AmplitudeGain: 0.8
   m_FrequencyGain: 0.3
   mNoiseOffsets: {x: -451.37964, y: 684.7062, z: 648.0488}
 --- !u!114 &928548620
@@ -13204,18 +13136,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6043bde05a7fc4cba197d06915c1e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damping: {x: 0.1, y: 0.5, z: 0.3}
-  ShoulderOffset: {x: 0.5, y: -0.4, z: 0}
-  VerticalArmLength: 0.72
-  CameraSide: 0.877
-  CameraDistance: 2
+  Damping: {x: 0.1, y: 0.25, z: 0.3}
+  ShoulderOffset: {x: 2, y: 0.3, z: 0}
+  VerticalArmLength: 0
+  CameraSide: 0.6
+  CameraDistance: 2.5
   CameraCollisionFilter:
     serializedVersion: 2
     m_Bits: 1
   IgnoreTag: Player
-  CameraRadius: 0.054
+  CameraRadius: 0.15
   DampingIntoCollision: 0
-  DampingFromCollision: 2
+  DampingFromCollision: 0
 --- !u!1001 &943294286
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24723,9 +24655,9 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 59
     OrthographicSize: 10
-    NearClipPlane: 0.7
+    NearClipPlane: 0.5
     FarClipPlane: 15
     Dutch: 0
     ModeOverride: 0
@@ -31961,6 +31893,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7401538235757359201, guid: 89401ffbdce562a478091beae4e04429,
+        type: 3}
+      propertyPath: _groundProjectileHeight
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -32491,4 +32428,3 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 1843390139255203213}
   - {fileID: 6886772275202306290}
-  - {fileID: 373542422}

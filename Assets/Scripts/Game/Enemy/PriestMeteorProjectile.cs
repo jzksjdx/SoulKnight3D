@@ -11,9 +11,15 @@ namespace SoulKnight3D
         private float _radius;
         private int _damage;
         private GameObject _warningPrefab;
-        private GameObject _warning;
+        private PooledGameObject _pooledObject;
+        private PooledGameObject _warning;
         private Renderer _warningRenderer;
-        private Material _warningMaterial;
+        private MaterialPropertyBlock _warningProperties;
+        private Color _warningColor = new Color(1f, 0f, 0f, 0.48f);
+        private bool _initialized;
+
+        private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
+        private static readonly int ColorProperty = Shader.PropertyToID("_Color");
 
         public void Initialize(Vector3 targetPosition, float height, float fallDuration,
             float radius, int damage, GameObject warningPrefab)
@@ -26,7 +32,22 @@ namespace SoulKnight3D
             _radius = Mathf.Max(0.05f, radius);
             _damage = Mathf.Max(0, damage);
             _warningPrefab = warningPrefab;
-            StartCoroutine(FallRoutine());
+            _initialized = true;
+        }
+
+        private void OnEnable()
+        {
+            if (_initialized)
+            {
+                StartCoroutine(FallRoutine());
+            }
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            ReleaseWarning();
+            _initialized = false;
         }
 
         private IEnumerator FallRoutine()
@@ -44,26 +65,42 @@ namespace SoulKnight3D
 
             DamagePlayer();
             yield return FadeWarning();
-            Destroy(gameObject);
+            Release();
         }
 
         private void CreateWarning()
         {
-            if (_warningPrefab == null) { return; }
+            if (_warningPrefab == null || GameObjectsManager.Instance == null) { return; }
 
-            _warning = Instantiate(_warningPrefab,
+            _warning = GameObjectsManager.Instance.SpawnPooledObject(_warningPrefab,
                 _targetPosition + Vector3.up * 0.02f, Quaternion.identity);
+            if (_warning == null) { return; }
+
             _warningRenderer = _warning.GetComponentInChildren<Renderer>();
             if (_warningRenderer != null)
             {
-                _warningMaterial = _warningRenderer.material;
+                _warningProperties ??= new MaterialPropertyBlock();
+                Material material = _warningRenderer.sharedMaterial;
+                if (material != null)
+                {
+                    if (material.HasProperty(BaseColor))
+                    {
+                        _warningColor = material.GetColor(BaseColor);
+                    }
+                    else if (material.HasProperty(ColorProperty))
+                    {
+                        _warningColor = material.GetColor(ColorProperty);
+                    }
+                }
+                SetWarningAlpha(_warningColor.a);
             }
             UpdateWarning(0f);
+            _warning.ShowFromPool();
         }
 
         private void UpdateWarning(float progress)
         {
-            if (_warning == null) { return; }
+            if (_warning == null || _warning.IsReleased) { return; }
 
             float diameter = _radius * 2f;
             float scale = Mathf.Lerp(diameter * 0.08f, diameter, progress);
@@ -72,29 +109,19 @@ namespace SoulKnight3D
 
         private IEnumerator FadeWarning()
         {
-            if (_warning == null) { yield break; }
+            if (_warning == null || _warning.IsReleased) { yield break; }
 
             const float fadeDuration = 0.18f;
             float elapsed = 0f;
-            Color startingColor = _warningMaterial != null
-                ? _warningMaterial.color
-                : Color.red;
             while (elapsed < fadeDuration)
             {
                 elapsed += Time.deltaTime;
-                if (_warningMaterial != null)
-                {
-                    Color color = startingColor;
-                    color.a = Mathf.Lerp(startingColor.a, 0f, elapsed / fadeDuration);
-                    _warningMaterial.color = color;
-                }
+                SetWarningAlpha(Mathf.Lerp(
+                    _warningColor.a, 0f, elapsed / fadeDuration));
                 yield return null;
             }
 
-            if (_warningMaterial != null) { Destroy(_warningMaterial); }
-            Destroy(_warning);
-            _warningMaterial = null;
-            _warning = null;
+            ReleaseWarning();
         }
 
         private void DamagePlayer()
@@ -110,12 +137,51 @@ namespace SoulKnight3D
             }
         }
 
-        private void OnDestroy()
+        private void SetWarningAlpha(float alpha)
         {
-            if (_warning != null) { Destroy(_warning); }
-            if (_warningMaterial != null) { Destroy(_warningMaterial); }
+            if (_warningRenderer == null) { return; }
+
+            _warningProperties ??= new MaterialPropertyBlock();
+            _warningRenderer.GetPropertyBlock(_warningProperties);
+            Color color = _warningColor;
+            color.a = alpha;
+            _warningProperties.SetColor(BaseColor, color);
+            _warningProperties.SetColor(ColorProperty, color);
+            _warningRenderer.SetPropertyBlock(_warningProperties);
+        }
+
+        private void ReleaseWarning()
+        {
+            if (_warningRenderer != null)
+            {
+                _warningRenderer.SetPropertyBlock(null);
+            }
+            if (_warning != null && !_warning.IsReleased)
+            {
+                _warning.ReleaseToPool();
+            }
+
             _warning = null;
-            _warningMaterial = null;
+            _warningRenderer = null;
+        }
+
+        private void Release()
+        {
+            _initialized = false;
+            ReleaseWarning();
+            if (_pooledObject == null)
+            {
+                _pooledObject = GetComponent<PooledGameObject>();
+            }
+
+            if (_pooledObject != null)
+            {
+                _pooledObject.ReleaseToPool();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
