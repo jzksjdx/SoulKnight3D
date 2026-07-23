@@ -1,7 +1,9 @@
-using UnityEngine;
-using QFramework;
+using System.Collections;
 using System.Collections.Generic;
 using MoreMountains.Feedbacks;
+using QFramework;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SoulKnight3D
 {
@@ -25,14 +27,15 @@ namespace SoulKnight3D
         [SerializeField] protected float _patrolTimeout = 2f;
         protected float _attackTimeoutDelta;
          [SerializeField] protected float _attackTimeout = 3f;
-        [SerializeField, Min(0f)] private float _deathCleanupDelay = 3f;
+        [Header("Death")]
+        [FormerlySerializedAs("_deathCleanupDelay")]
+        [SerializeField, Min(0f)] private float _dissolveDelay = 3f;
+        [SerializeField, Min(0.1f)] private float _dissolveDuration = 3f;
         [SerializeField] private MMF_Player _deadFeedbacks;
 
         [Header("Death Rewards (Soul Knight 1.8.4)")]
         [SerializeField, Range(0, 100)] private int _rewardRate = 20;
         [SerializeField] private int[] _rewardValues = { 0, 0, 1, 1 };
-        private float _dissolveTimeoutDelta;
-        private float _dissolveTimeout = 3f;
 
         // animation IDs
         protected int _animIdMove;
@@ -40,7 +43,7 @@ namespace SoulKnight3D
         protected int _animIdDie;
 
         protected Vector3 _patrolDirection;
-        private List<Material> _dissolveMaterials = new List<Material>();
+        private readonly List<Material> _dissolveMaterials = new List<Material>();
 
         protected Vector3 _moveDirection;
         private PlayerController _player;
@@ -55,13 +58,18 @@ namespace SoulKnight3D
             SelfAnimator.SetTrigger(_animIdMove);
             _player = PlayerController.Instance;
 
-            // set time out delta
-            _dissolveTimeoutDelta = 0f;
-            // set dissolve materials
-            var renders = GetComponentsInChildren<Renderer>();
+            Renderer[] renders = GetComponentsInChildren<Renderer>();
             for (int i = 0; i < renders.Length; i++)
             {
-                _dissolveMaterials.AddRange(renders[i].materials);
+                Material[] materials = renders[i].materials;
+                for (int j = 0; j < materials.Length; j++)
+                {
+                    if (materials[j] != null && materials[j].HasProperty("_Dissolve"))
+                    {
+                        materials[j].SetFloat("_Dissolve", 0f);
+                        _dissolveMaterials.Add(materials[j]);
+                    }
+                }
             }
         }
 
@@ -71,11 +79,6 @@ namespace SoulKnight3D
         {
             if (IsDead)
             {
-                _dissolveTimeoutDelta += Time.deltaTime;
-                var value = Mathf.Lerp(0f, 1f, _dissolveTimeoutDelta / _dissolveTimeout);
-                SetDissolveValue(value);
-                //SelfRigidbody.isKinematic = true;
-                //SelfCollider.enabled = false;
                 transform.rotation = _currRotation;
                 return;
             }
@@ -184,7 +187,7 @@ namespace SoulKnight3D
                     GameObjectsManager.Instance.DespawnStatus(status);
                 }
 
-                Destroy(gameObject, _deathCleanupDelay);
+                StartCoroutine(DissolveAndDestroy());
             }
         }
 
@@ -204,6 +207,25 @@ namespace SoulKnight3D
             {
                 _dissolveMaterials[i].SetFloat("_Dissolve", value);
             }
+        }
+
+        private IEnumerator DissolveAndDestroy()
+        {
+            if (_dissolveDelay > 0f)
+            {
+                yield return new WaitForSeconds(_dissolveDelay);
+            }
+
+            float elapsed = 0f;
+            while (elapsed < _dissolveDuration)
+            {
+                elapsed += Time.deltaTime;
+                SetDissolveValue(Mathf.Clamp01(elapsed / _dissolveDuration));
+                yield return null;
+            }
+
+            SetDissolveValue(1f);
+            Destroy(gameObject);
         }
 
         protected PlayerController Player

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MoreMountains.Feedbacks;
 using QFramework;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -30,6 +31,14 @@ namespace SoulKnight3D
         [SerializeField] private Animator _animator;
         [SerializeField] private Transform _attackOrigin;
         [SerializeField] private Transform _minimapIcon;
+
+        [Header("Sound Feedbacks")]
+        [SerializeField] private MMF_Player _soundFeedback;
+        [SerializeField] private AudioClip _splitterAttackSound;
+        [SerializeField] private AudioClip _lavaAttackSound;
+        [SerializeField] private AudioClip _starFallAndProtectiveOrbSound;
+        [SerializeField] private AudioClip _enragedSound;
+        [SerializeField] private AudioClip _deathSound;
 
         [Header("Movement")]
         [SerializeField, Min(0f)] private float _moveSpeed = 1.2f;
@@ -97,7 +106,9 @@ namespace SoulKnight3D
         [Header("Death Rewards")]
         [SerializeField, Range(0, 100)] private int _rewardRate = 100;
         [SerializeField] private int[] _rewardValues = { 3, 3, 0, 10 };
-        [SerializeField, Min(0f)] private float _deathCleanupDelay = 4f;
+        [FormerlySerializedAs("_deathCleanupDelay")]
+        [SerializeField, Min(0f)] private float _dissolveDelay = 3f;
+        [SerializeField, Min(0.1f)] private float _dissolveDuration = 3f;
 
         private static readonly int MoveX = Animator.StringToHash("MoveX");
         private static readonly int MoveY = Animator.StringToHash("MoveY");
@@ -134,13 +145,17 @@ namespace SoulKnight3D
         private float _protectiveOrbChaseTimer;
         private AttackType _activeAttackType;
         private AttackType _lastAttack = (AttackType)(-1);
+        private MMF_MMSoundManagerSound _soundFeedbackSound;
         private readonly List<PriestOrbitalProjectile> _activeProtectiveOrbs =
             new List<PriestOrbitalProjectile>();
+        private readonly List<Material> _dissolveMaterials = new List<Material>();
 
         protected override void Start()
         {
             base.Start();
             CacheReferences();
+            CacheSoundFeedback();
+            CacheDissolveMaterials();
             _player = PlayerController.Instance;
             ScheduleAttack();
             ChooseMovementDirection();
@@ -148,7 +163,11 @@ namespace SoulKnight3D
 
         private void Update()
         {
-            if (IsDead || _animator == null) { return; }
+            if (IsDead)
+            {
+                return;
+            }
+            if (_animator == null) { return; }
 
             if (_player == null)
             {
@@ -204,6 +223,7 @@ namespace SoulKnight3D
             if (_collider != null) { _collider.enabled = false; }
             if (_rigidbody != null) { _rigidbody.isKinematic = true; }
             if (_minimapIcon != null) { _minimapIcon.gameObject.Hide(); }
+            PlaySoundFeedback(_deathSound);
 
             UIGamePanel gamePanel = UIKit.GetPanel<UIGamePanel>();
             if (gamePanel != null) { gamePanel.BossHealthRect.Hide(); }
@@ -211,11 +231,12 @@ namespace SoulKnight3D
             NotifyDeath();
             EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
             RecycleStatuses();
-            Destroy(gameObject, _deathCleanupDelay);
+            StartCoroutine(DissolveAndDestroy());
         }
 
         public void AnimationLavaBulletAttack()
         {
+            PlaySoundFeedback(_lavaAttackSound);
             if (_swirlBulletPrefab == null) { return; }
 
             int count = Mathf.Max(1, _swirlBulletCount);
@@ -232,11 +253,13 @@ namespace SoulKnight3D
 
         public void AnimationSplitBulletAttack()
         {
+            PlaySoundFeedback(_splitterAttackSound);
             SpawnSplitterParent(DirectionToPlayer());
         }
 
         public void AnimationProtectiveOrbAttack()
         {
+            PlaySoundFeedback(_starFallAndProtectiveOrbSound);
             if (_protectiveOrbPrefab == null) { return; }
 
             int count = Mathf.Max(1, _protectiveOrbCount);
@@ -262,6 +285,7 @@ namespace SoulKnight3D
 
         public void AnimationStarFallAttack()
         {
+            PlaySoundFeedback(_starFallAndProtectiveOrbSound);
             StartCoroutine(SpawnMeteorVolley());
         }
 
@@ -282,8 +306,22 @@ namespace SoulKnight3D
             _meteorWarningPrefab = meteorWarningPrefab;
         }
 
+        public void ConfigureSoundFeedback(MMF_Player soundFeedback,
+            AudioClip splitterAttackSound, AudioClip lavaAttackSound,
+            AudioClip starFallAndProtectiveOrbSound, AudioClip enragedSound,
+            AudioClip deathSound)
+        {
+            _soundFeedback = soundFeedback;
+            _splitterAttackSound = splitterAttackSound;
+            _lavaAttackSound = lavaAttackSound;
+            _starFallAndProtectiveOrbSound = starFallAndProtectiveOrbSound;
+            _enragedSound = enragedSound;
+            _deathSound = deathSound;
+        }
+
         protected override void OnBecameEnraged()
         {
+            PlaySoundFeedback(_enragedSound);
             ScheduleAttack();
         }
 
@@ -797,6 +835,81 @@ namespace SoulKnight3D
             if (_collider == null) { _collider = GetComponent<CapsuleCollider>(); }
             if (_animator == null) { _animator = GetComponentInChildren<Animator>(); }
             if (_attackOrigin == null) { _attackOrigin = transform; }
+            if (_minimapIcon == null)
+            {
+                Transform[] children = GetComponentsInChildren<Transform>(true);
+                for (int i = 0; i < children.Length; i++)
+                {
+                    if (children[i].name == "EnemyMinimapIcon" ||
+                        children[i].name == "MinimapIcon")
+                    {
+                        _minimapIcon = children[i];
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void CacheSoundFeedback()
+        {
+            _soundFeedbackSound = _soundFeedback != null
+                ? _soundFeedback.GetFeedbackOfType<MMF_MMSoundManagerSound>()
+                : null;
+        }
+
+        private void PlaySoundFeedback(AudioClip clip)
+        {
+            if (clip == null || _soundFeedback == null) { return; }
+            if (_soundFeedbackSound == null) { CacheSoundFeedback(); }
+            if (_soundFeedbackSound == null) { return; }
+
+            _soundFeedbackSound.Sfx = clip;
+            _soundFeedback.PlayFeedbacks();
+        }
+
+        private void CacheDissolveMaterials()
+        {
+            _dissolveMaterials.Clear();
+            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Material[] materials = renderers[i].materials;
+                for (int j = 0; j < materials.Length; j++)
+                {
+                    if (materials[j] != null && materials[j].HasProperty("_Dissolve"))
+                    {
+                        materials[j].SetFloat("_Dissolve", 0f);
+                        _dissolveMaterials.Add(materials[j]);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator DissolveAndDestroy()
+        {
+            if (_dissolveDelay > 0f)
+            {
+                yield return new WaitForSeconds(_dissolveDelay);
+            }
+
+            float elapsed = 0f;
+            while (elapsed < _dissolveDuration)
+            {
+                elapsed += Time.deltaTime;
+                SetDissolveValue(Mathf.Clamp01(elapsed / _dissolveDuration));
+                yield return null;
+            }
+
+            SetDissolveValue(1f);
+            Destroy(gameObject);
+        }
+
+        private void SetDissolveValue(float value)
+        {
+            for (int i = 0; i < _dissolveMaterials.Count; i++)
+            {
+                _dissolveMaterials[i].SetFloat("_Dissolve", value);
+            }
         }
 
         private void UpdateBossHealthUI()

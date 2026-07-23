@@ -1,6 +1,10 @@
 #if UNITY_EDITOR
 using System;
+using System.IO;
 using System.Linq;
+using MoreMountains.Feedbacks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -30,6 +34,15 @@ namespace SoulKnight3D.Editor
             ProjectileFolder + "/Priest Splitter Swirl Clone.prefab";
         private const string SplitterParentPrefabPath =
             ProjectileFolder + "/Priest Splitter Parent Swirl Bullet.prefab";
+        private const string AudioFolder = "Assets/Art/Audio";
+        private const string DissolveShaderTemplatePath =
+            "Assets/Plugins/ShaderGraph_Dissolve/URP/ShaderGraph/Dissolve_Metallic.shadergraph";
+        private const string DissolveShaderPath =
+            "Assets/Art/Shaders/Goblin Priest Dissolve.shadergraph";
+        private const string PbrSubGraphPath =
+            "Assets/Plugins/ShaderGraph_Dissolve/Utility/SubGraph/PBR_Metallic Sub Graph.shadersubgraph";
+        private const string PriestMaterialPath =
+            "Assets/Art/Materials/Enemy/Goblin Priest.mat";
 
         [MenuItem("SoulKnight3D/Build Goblin Priest Boss")]
         public static void Build()
@@ -90,14 +103,28 @@ namespace SoulKnight3D.Editor
 
             ConfigureController();
             ConfigureAnimationEvents();
+            EnsureDissolveShaderEmission();
+            ConfigurePriestDissolveMaterial();
             ConfigureBossPrefab(swirlBullet, splitterParent, protectiveOrb, meteor,
                 warning, minimapMaterial);
+            ConfigureSoundFeedback();
             AddBossToForestPool();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Validate();
             Debug.Log("Goblin Priest boss, attacks, projectiles, Animator, and Forest boss pool configured.");
+        }
+
+        [MenuItem("SoulKnight3D/Configure Goblin Priest Feedback And Dissolve")]
+        public static void ConfigureFeedbackAndDissolve()
+        {
+            EnsureDissolveShaderEmission();
+            ConfigurePriestDissolveMaterial();
+            ConfigureSoundFeedback();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("Goblin Priest feedback and dissolve configured.");
         }
 
         [MenuItem("SoulKnight3D/Validate Goblin Priest Boss")]
@@ -133,7 +160,13 @@ namespace SoulKnight3D.Editor
                 "_splitterParentBulletPrefab",
                 "_protectiveOrbPrefab",
                 "_meteorPrefab",
-                "_meteorWarningPrefab"
+                "_meteorWarningPrefab",
+                "_soundFeedback",
+                "_splitterAttackSound",
+                "_lavaAttackSound",
+                "_starFallAndProtectiveOrbSound",
+                "_enragedSound",
+                "_deathSound"
             };
             for (int i = 0; i < referenceProperties.Length; i++)
             {
@@ -237,6 +270,347 @@ namespace SoulKnight3D.Editor
             {
                 PrefabUtility.UnloadPrefabContents(root);
             }
+        }
+
+        private static void ConfigureSoundFeedback()
+        {
+            GameObject root = PrefabUtility.LoadPrefabContents(BossPrefabPath);
+            try
+            {
+                GoblinPriest priest = root.GetComponent<GoblinPriest>();
+                Transform templateTransform = root.transform.Find("SoundFeedbacks");
+                MMF_Player template = templateTransform != null
+                    ? templateTransform.GetComponent<MMF_Player>()
+                    : null;
+                if (priest == null || template == null)
+                {
+                    throw new InvalidOperationException(
+                        "Goblin Priest requires its gameplay component and the SoundFeedbacks template.");
+                }
+
+                string[] obsoleteFeedbackObjects =
+                {
+                    "LavaSoundFeedbacks",
+                    "StarFallSoundFeedbacks",
+                    "EnragedSoundFeedbacks",
+                    "DeathSoundFeedbacks"
+                };
+                for (int i = 0; i < obsoleteFeedbackObjects.Length; i++)
+                {
+                    Transform obsolete = root.transform.Find(obsoleteFeedbackObjects[i]);
+                    if (obsolete != null) { Object.DestroyImmediate(obsolete.gameObject); }
+                }
+
+                AudioClip splitter = LoadAudioClip("fx_boss8_atk1");
+                AudioClip lava = LoadAudioClip("fx_boss8_atk2");
+                AudioClip starFall = LoadAudioClip("fx_boss8_atk3");
+                AudioClip enraged = LoadAudioClip("fx_boss8_angry");
+                AudioClip death = LoadAudioClip("fx_boss8_dead");
+                MMF_MMSoundManagerSound sound = template.FeedbacksList?
+                    .OfType<MMF_MMSoundManagerSound>().FirstOrDefault();
+                if (sound == null)
+                {
+                    throw new InvalidOperationException(
+                        "SoundFeedbacks requires an MMSoundManager sound feedback.");
+                }
+                sound.Owner = template;
+                sound.Sfx = splitter;
+
+                priest.ConfigureSoundFeedback(template, splitter, lava, starFall,
+                    enraged, death);
+                SerializedObject serializedPriest = new SerializedObject(priest);
+                serializedPriest.FindProperty("_enrageEnergyOrbCount").intValue = 10;
+                serializedPriest.FindProperty("_dissolveDelay").floatValue = 3f;
+                serializedPriest.FindProperty("_dissolveDuration").floatValue = 3f;
+                SerializedProperty minimapIconProperty =
+                    serializedPriest.FindProperty("_minimapIcon");
+                if (minimapIconProperty.objectReferenceValue == null)
+                {
+                    Transform minimapIcon = root.GetComponentsInChildren<Transform>(true)
+                        .FirstOrDefault(candidate =>
+                            candidate.name == "EnemyMinimapIcon" ||
+                            candidate.name == "MinimapIcon");
+                    minimapIconProperty.objectReferenceValue = minimapIcon;
+                }
+                serializedPriest.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(priest);
+                PrefabUtility.SaveAsPrefabAsset(root, BossPrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        private static AudioClip LoadAudioClip(string clipName)
+        {
+            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(
+                $"{AudioFolder}/{clipName}.wav");
+            if (clip == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not load Goblin Priest audio clip '{clipName}'.");
+            }
+            return clip;
+        }
+
+        private static void EnsureDissolveShaderEmission()
+        {
+            EnsureFolder("Assets/Art/Shaders");
+            if (!File.Exists(Path.GetFullPath(DissolveShaderPath)) &&
+                !AssetDatabase.CopyAsset(DissolveShaderTemplatePath, DissolveShaderPath))
+            {
+                throw new InvalidOperationException(
+                    "Could not create the Goblin Priest dissolve shader variant.");
+            }
+
+            string fullPath = Path.GetFullPath(DissolveShaderPath);
+            JObject graph = JObject.Parse(File.ReadAllText(fullPath));
+            JArray properties = (JArray)graph["m_SerializedProperties"];
+            if (properties.Any(entry =>
+                ParseJsonData(entry)["m_OverrideReferenceName"]?.Value<string>() ==
+                "_EmissionMap"))
+            {
+                return;
+            }
+
+            const string emissionMapPropertyGuid =
+                "dbd7886a-c003-4747-a69d-fcdb36a7e64f";
+            const string emissionColorPropertyGuid =
+                "ef8d7caf-1140-4e96-8f51-96db7a595932";
+            const string emissionMapNodeGuid =
+                "a05510d6-8b30-45dc-a1c0-195f1304d6f3";
+            const string emissionColorNodeGuid =
+                "ad46648c-a0a9-4ea9-bd4b-cf927d14a035";
+            const string sampleNodeGuid =
+                "84043c2b-374e-4db6-aa48-b92712f22c20";
+            const string multiplyNodeGuid =
+                "81950d84-b956-4340-82dd-c6a98443e822";
+            const string addNodeGuid =
+                "8eab5ff7-3b9c-484e-ab31-d89375ac06f8";
+            const string masterNodeGuid =
+                "0a6384c8-e81f-40ce-926b-1c013e55e9f1";
+            const string dissolveNodeGuid =
+                "c99e03f6-7e17-4faf-ada1-f2e6f24302f7";
+
+            properties.Add(CreateTextureProperty(emissionMapPropertyGuid,
+                "EmissionMap", "_EmissionMap"));
+            properties.Add(CreateColorProperty(emissionColorPropertyGuid,
+                "EmissionColor", "_EmissionColor"));
+
+            JArray nodes = (JArray)graph["m_SerializableNodes"];
+            JObject baseMapPropertyNode = FindNode(nodes,
+                "a24f45e1-72c8-4172-9c12-d6c6f6e72a8d");
+            JObject edgeColorPropertyNode = FindNode(nodes,
+                "4f6ea8f4-8277-4d00-b5f8-04dfcf9d5540");
+            nodes.Add(ClonePropertyNode(baseMapPropertyNode, emissionMapNodeGuid,
+                emissionMapPropertyGuid, "EmissionMap", -400f, 780f));
+            nodes.Add(ClonePropertyNode(edgeColorPropertyNode, emissionColorNodeGuid,
+                emissionColorPropertyGuid, "EmissionColor", -400f, 900f));
+
+            JObject pbrSubGraph = JObject.Parse(
+                File.ReadAllText(Path.GetFullPath(PbrSubGraphPath)));
+            JArray templateNodes = (JArray)pbrSubGraph["m_SerializableNodes"];
+            JObject sampleTemplate = templateNodes.Children<JObject>().First(entry =>
+                entry["typeInfo"]?["fullName"]?.Value<string>() ==
+                "UnityEditor.ShaderGraph.SampleTexture2DNode" &&
+                ParseJsonData(entry)["m_TextureType"]?.Value<int>() == 0);
+            JObject multiplyTemplate = templateNodes.Children<JObject>().First(entry =>
+                entry["typeInfo"]?["fullName"]?.Value<string>() ==
+                "UnityEditor.ShaderGraph.MultiplyNode");
+            JObject addTemplate = templateNodes.Children<JObject>().First(entry =>
+                entry["typeInfo"]?["fullName"]?.Value<string>() ==
+                "UnityEditor.ShaderGraph.AddNode");
+            nodes.Add(CloneNode(sampleTemplate, sampleNodeGuid, -180f, 720f));
+            nodes.Add(CloneNode(multiplyTemplate, multiplyNodeGuid, 40f, 760f));
+            nodes.Add(CloneNode(addTemplate, addNodeGuid, 260f, 400f));
+
+            JArray edges = (JArray)graph["m_SerializableEdges"];
+            JObject directEmissionEdge = edges.Children<JObject>().First(entry =>
+            {
+                JObject data = ParseJsonData(entry);
+                return NodeGuid(data["m_OutputSlot"]) == dissolveNodeGuid &&
+                    data["m_OutputSlot"]?["m_SlotId"]?.Value<int>() == 1 &&
+                    NodeGuid(data["m_InputSlot"]) == masterNodeGuid &&
+                    data["m_InputSlot"]?["m_SlotId"]?.Value<int>() == 4;
+            });
+            edges.Remove(directEmissionEdge);
+            JObject edgeTemplate = (JObject)edges[0];
+            edges.Add(CreateEdge(edgeTemplate, emissionMapNodeGuid, 0,
+                sampleNodeGuid, 1));
+            edges.Add(CreateEdge(edgeTemplate, sampleNodeGuid, 0,
+                multiplyNodeGuid, 0));
+            edges.Add(CreateEdge(edgeTemplate, emissionColorNodeGuid, 0,
+                multiplyNodeGuid, 1));
+            edges.Add(CreateEdge(edgeTemplate, dissolveNodeGuid, 1,
+                addNodeGuid, 0));
+            edges.Add(CreateEdge(edgeTemplate, multiplyNodeGuid, 2,
+                addNodeGuid, 1));
+            edges.Add(CreateEdge(edgeTemplate, addNodeGuid, 2,
+                masterNodeGuid, 4));
+
+            File.WriteAllText(fullPath, graph.ToString(Formatting.Indented));
+            AssetDatabase.ImportAsset(DissolveShaderPath,
+                ImportAssetOptions.ForceSynchronousImport |
+                ImportAssetOptions.ForceUpdate);
+        }
+
+        private static void ConfigurePriestDissolveMaterial()
+        {
+            Material material =
+                AssetDatabase.LoadAssetAtPath<Material>(PriestMaterialPath);
+            Shader dissolveShader =
+                AssetDatabase.LoadAssetAtPath<Shader>(DissolveShaderPath);
+            if (material == null || dissolveShader == null)
+            {
+                throw new InvalidOperationException(
+                    "Goblin Priest material or dissolve shader is missing.");
+            }
+
+            Texture baseMap = material.GetTexture("_BaseMap");
+            Vector2 baseScale = material.GetTextureScale("_BaseMap");
+            Vector2 baseOffset = material.GetTextureOffset("_BaseMap");
+            Texture emissionMap = material.GetTexture("_EmissionMap");
+            Vector2 emissionScale = material.GetTextureScale("_EmissionMap");
+            Vector2 emissionOffset = material.GetTextureOffset("_EmissionMap");
+            Color baseColor = material.GetColor("_BaseColor");
+            Color emissionColor = material.GetColor("_EmissionColor");
+            float metallic = material.GetFloat("_Metallic");
+            float smoothness = material.GetFloat("_Smoothness");
+
+            material.shader = dissolveShader;
+            material.SetTexture("_BaseMap", baseMap);
+            material.SetTextureScale("_BaseMap", baseScale);
+            material.SetTextureOffset("_BaseMap", baseOffset);
+            material.SetTexture("_EmissionMap", emissionMap);
+            material.SetTextureScale("_EmissionMap", emissionScale);
+            material.SetTextureOffset("_EmissionMap", emissionOffset);
+            material.SetColor("_BaseColor", baseColor);
+            material.SetColor("_EmissionColor", emissionColor);
+            material.SetFloat("_Metallic", metallic);
+            material.SetFloat("_Smoothness", smoothness);
+            material.SetFloat("_Dissolve", 0f);
+            material.SetFloat("_NoiseScale", 50f);
+            material.SetFloat("_EdgeWidth", 0.05f);
+            material.SetColor("_EdgeColor", new Color(4f, 0.25f, 0f, 1f));
+            material.SetFloat("_EdgeColorIntensity", 1f);
+            material.DisableKeyword("_EMISSION");
+            EditorUtility.SetDirty(material);
+        }
+
+        private static JObject CreateTextureProperty(string guid, string name,
+            string referenceName)
+        {
+            JObject data = new JObject
+            {
+                ["m_Guid"] = new JObject { ["m_GuidSerialized"] = guid },
+                ["m_Name"] = name,
+                ["m_DefaultReferenceName"] = $"Texture2D_{guid.Substring(0, 8)}",
+                ["m_OverrideReferenceName"] = referenceName,
+                ["m_GeneratePropertyBlock"] = true,
+                ["m_Precision"] = 0,
+                ["m_GPUInstanced"] = false,
+                ["m_Hidden"] = false,
+                ["m_Value"] = new JObject
+                {
+                    ["m_SerializedTexture"] = "{\"texture\":{\"instanceID\":0}}",
+                    ["m_Guid"] = string.Empty
+                },
+                ["m_Modifiable"] = true,
+                ["m_DefaultType"] = 1
+            };
+            return WrapJsonData(
+                "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty", data);
+        }
+
+        private static JObject CreateColorProperty(string guid, string name,
+            string referenceName)
+        {
+            JObject data = new JObject
+            {
+                ["m_Guid"] = new JObject { ["m_GuidSerialized"] = guid },
+                ["m_Name"] = name,
+                ["m_DefaultReferenceName"] = $"Color_{guid.Substring(0, 8)}",
+                ["m_OverrideReferenceName"] = referenceName,
+                ["m_GeneratePropertyBlock"] = true,
+                ["m_Precision"] = 0,
+                ["m_GPUInstanced"] = false,
+                ["m_Hidden"] = false,
+                ["m_Value"] = new JObject
+                {
+                    ["r"] = 0f,
+                    ["g"] = 0f,
+                    ["b"] = 0f,
+                    ["a"] = 1f
+                },
+                ["m_ColorMode"] = 1
+            };
+            return WrapJsonData(
+                "UnityEditor.ShaderGraph.Internal.ColorShaderProperty", data);
+        }
+
+        private static JObject ClonePropertyNode(JObject template, string nodeGuid,
+            string propertyGuid, string displayName, float x, float y)
+        {
+            JObject clone = CloneNode(template, nodeGuid, x, y);
+            JObject data = ParseJsonData(clone);
+            data["m_PropertyGuidSerialized"] = propertyGuid;
+            JObject slot = ParseJsonData(data["m_SerializableSlots"][0]);
+            slot["m_DisplayName"] = displayName;
+            data["m_SerializableSlots"][0]["JSONnodeData"] =
+                slot.ToString(Formatting.Indented);
+            clone["JSONnodeData"] = data.ToString(Formatting.Indented);
+            return clone;
+        }
+
+        private static JObject CloneNode(JObject template, string nodeGuid,
+            float x, float y)
+        {
+            JObject clone = (JObject)template.DeepClone();
+            JObject data = ParseJsonData(clone);
+            data["m_GuidSerialized"] = nodeGuid;
+            data["m_DrawState"]["m_Position"]["x"] = x;
+            data["m_DrawState"]["m_Position"]["y"] = y;
+            clone["JSONnodeData"] = data.ToString(Formatting.Indented);
+            return clone;
+        }
+
+        private static JObject CreateEdge(JObject template, string outputNode,
+            int outputSlot, string inputNode, int inputSlot)
+        {
+            JObject edge = (JObject)template.DeepClone();
+            JObject data = ParseJsonData(edge);
+            data["m_OutputSlot"]["m_NodeGUIDSerialized"] = outputNode;
+            data["m_OutputSlot"]["m_SlotId"] = outputSlot;
+            data["m_InputSlot"]["m_NodeGUIDSerialized"] = inputNode;
+            data["m_InputSlot"]["m_SlotId"] = inputSlot;
+            edge["JSONnodeData"] = data.ToString(Formatting.Indented);
+            return edge;
+        }
+
+        private static JObject FindNode(JArray nodes, string nodeGuid)
+        {
+            return nodes.Children<JObject>().First(entry =>
+                ParseJsonData(entry)["m_GuidSerialized"]?.Value<string>() == nodeGuid);
+        }
+
+        private static string NodeGuid(JToken slot)
+        {
+            return slot?["m_NodeGUIDSerialized"]?.Value<string>();
+        }
+
+        private static JObject ParseJsonData(JToken wrapper)
+        {
+            return JObject.Parse(wrapper["JSONnodeData"].Value<string>());
+        }
+
+        private static JObject WrapJsonData(string typeName, JObject data)
+        {
+            return new JObject
+            {
+                ["typeInfo"] = new JObject { ["fullName"] = typeName },
+                ["JSONnodeData"] = data.ToString(Formatting.Indented)
+            };
         }
 
         private static void ConfigureController()

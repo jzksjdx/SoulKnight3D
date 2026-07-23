@@ -1,10 +1,14 @@
 using System.Collections;
+using System.Collections.Generic;
+using MoreMountains.Feedbacks;
 using UnityEngine;
 
 namespace SoulKnight3D
 {
     public sealed class PriestMeteorProjectile : MonoBehaviour
     {
+        [SerializeField] private MMF_Player _impactFeedback;
+
         private Vector3 _startPosition;
         private Vector3 _targetPosition;
         private float _fallDuration;
@@ -17,13 +21,22 @@ namespace SoulKnight3D
         private MaterialPropertyBlock _warningProperties;
         private Color _warningColor = new Color(1f, 0f, 0f, 0.48f);
         private bool _initialized;
+        private readonly List<GameObject> _flightVisuals = new List<GameObject>();
 
         private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         private static readonly int ColorProperty = Shader.PropertyToID("_Color");
 
+        private void Awake()
+        {
+            CacheReferences();
+        }
+
         public void Initialize(Vector3 targetPosition, float height, float fallDuration,
             float radius, int damage, GameObject warningPrefab)
         {
+            CacheReferences();
+            _impactFeedback?.StopFeedbacks();
+            SetFlightVisualsActive(true);
             _targetPosition = targetPosition;
             _targetPosition.y = targetPosition.y;
             _startPosition = _targetPosition + Vector3.up * Mathf.Max(0f, height);
@@ -46,7 +59,9 @@ namespace SoulKnight3D
         private void OnDisable()
         {
             StopAllCoroutines();
+            _impactFeedback?.StopFeedbacks();
             ReleaseWarning();
+            SetFlightVisualsActive(true);
             _initialized = false;
         }
 
@@ -64,8 +79,53 @@ namespace SoulKnight3D
             }
 
             DamagePlayer();
+            SetFlightVisualsActive(false);
+            _impactFeedback?.PlayFeedbacks();
             yield return FadeWarning();
+            if (_impactFeedback != null)
+            {
+                while (_impactFeedback.IsPlaying)
+                {
+                    yield return null;
+                }
+            }
             Release();
+        }
+
+        private void CacheReferences()
+        {
+            if (_impactFeedback == null)
+            {
+                Transform feedbackTransform = transform.Find("Impact Feedback");
+                if (feedbackTransform != null)
+                {
+                    _impactFeedback = feedbackTransform.GetComponent<MMF_Player>();
+                }
+            }
+
+            if (_flightVisuals.Count > 0) { return; }
+            Transform feedbackRoot = _impactFeedback != null
+                ? _impactFeedback.transform
+                : null;
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                Transform child = transform.GetChild(i);
+                if (child != feedbackRoot)
+                {
+                    _flightVisuals.Add(child.gameObject);
+                }
+            }
+        }
+
+        private void SetFlightVisualsActive(bool active)
+        {
+            for (int i = 0; i < _flightVisuals.Count; i++)
+            {
+                if (_flightVisuals[i] != null)
+                {
+                    _flightVisuals[i].SetActive(active);
+                }
+            }
         }
 
         private void CreateWarning()

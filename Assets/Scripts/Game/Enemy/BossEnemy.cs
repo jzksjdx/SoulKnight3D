@@ -7,7 +7,7 @@ namespace SoulKnight3D
     {
         [Header("Boss Enrage")]
         [SerializeField, Range(0.05f, 0.95f)] private float _enrageHealthFraction = 0.5f;
-        [SerializeField, Min(0)] private int _enrageEnergyOrbCount = 3;
+        [SerializeField, Min(0)] private int _enrageEnergyOrbCount = 10;
         [SerializeField, Range(0.1f, 1f)] private float _enragedAttackIntervalMultiplier = 0.65f;
 
         public EasyEvent OnDeath = new EasyEvent();
