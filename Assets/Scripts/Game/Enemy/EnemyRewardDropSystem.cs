@@ -40,12 +40,19 @@ namespace SoulKnight3D
             }
         }
 
-        private static void SpawnEnergy(Vector3 position, int count)
+        public static void DropEnergy(Vector3 position, int count)
         {
+            if (GameObjectsManager.Instance == null) { return; }
+
             for (int i = 0; i < count; i++)
             {
                 Launch(GameObjectsManager.Instance.SpawnEnergyOrb(position));
             }
+        }
+
+        private static void SpawnEnergy(Vector3 position, int count)
+        {
+            DropEnergy(position, count);
         }
 
         private static void SpawnCoins(Vector3 position, CoinPickup.CoinType type, int count)

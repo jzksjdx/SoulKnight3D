@@ -5,7 +5,7 @@ using MoreMountains.Feedbacks;
 
 namespace SoulKnight3D
 {
-    public class Werewolf : TargetableObject
+    public class Werewolf : BossEnemy
     {
         public enum State
         {
@@ -50,9 +50,6 @@ namespace SoulKnight3D
         private int _attackCount = 0;
         private PlayerController _player;
         private const int SpawnPositionMaxAttempts = 32;
-
-        // events
-        public EasyEvent OnDeath = new EasyEvent();
 
         protected override void Start()
         {
@@ -105,7 +102,7 @@ namespace SoulKnight3D
                 SelfRigidbody.DestroySelf();
                 _minimapIcon.Hide();
                 AudioKit.PlaySound("fx_wolf_growl");
-                OnDeath.Trigger();
+                NotifyDeath();
                 EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
 
                 // show portal
@@ -119,6 +116,12 @@ namespace SoulKnight3D
 
                 Destroy(gameObject, 3);
             }
+        }
+
+        protected override void OnBecameEnraged()
+        {
+            _idleTime = Mathf.Min(_idleTime, 0.6f);
+            _chaseTime *= AttackIntervalMultiplier;
         }
 
         protected virtual void LookAtPlayer()

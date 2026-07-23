@@ -304,7 +304,12 @@ namespace SoulKnight3D
                         UIKit.GetPanel<UIGamePanel>().BossHealthBar.fillAmount = 1;
                         UIKit.GetPanel<UIGamePanel>().BossHealthRect.Show();
                         StartCoroutine(UIKit.OpenPanelAsync<UIBossFight>());
-                        Werewolf boss = generatedBoss.GetComponent<Werewolf>();
+                        BossEnemy boss = generatedBoss.GetComponent<BossEnemy>();
+                        if (boss == null)
+                        {
+                            Debug.LogError($"Boss prefab '{_bossPrefab.name}' has no BossEnemy component.");
+                            return;
+                        }
                         boss.OnDeath.Register(() =>
                         {
                             _generatedPortal.Show();

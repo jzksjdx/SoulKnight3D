@@ -30,3 +30,4 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 4be6f717d3cc94e4a9f645b56d976e3e, type: 2}
   BossPrefabs:
   - {fileID: 6988825691770962464, guid: fad9a2567bb5e4873bbe30b8f678d888, type: 3}
+  - {fileID: 129176778426799768, guid: 89401ffbdce562a478091beae4e04429, type: 3}
