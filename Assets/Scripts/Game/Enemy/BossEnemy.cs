@@ -11,7 +11,9 @@ namespace SoulKnight3D
         [Header("Boss Enrage")]
         [SerializeField, Range(0.05f, 0.95f)] private float _enrageHealthFraction = 0.5f;
         [SerializeField, Min(0)] private int _enrageEnergyOrbCount = 10;
-        [SerializeField, Range(0.1f, 1f)] private float _enragedAttackIntervalMultiplier = 0.65f;
+        [SerializeField, Range(0.1f, 1f)] private float _enragedAttackIntervalMultiplier = 0.5f;
+        [SerializeField, Min(1f)] private float _enragedMovementSpeedMultiplier = 1.5f;
+        [SerializeField, Min(1f)] private float _enragedAnimatorSpeedMultiplier = 1.5f;
 
         [Header("Boss Death")]
         [FormerlySerializedAs("_deathCleanupDelay")]
@@ -25,6 +27,9 @@ namespace SoulKnight3D
         public bool IsEnraged { get; private set; }
         protected float AttackIntervalMultiplier => IsEnraged
             ? _enragedAttackIntervalMultiplier
+            : 1f;
+        protected float MovementSpeedMultiplier => IsEnraged
+            ? _enragedMovementSpeedMultiplier
             : 1f;
 
         private readonly List<Material> _dissolveMaterials = new List<Material>();
@@ -58,6 +63,7 @@ namespace SoulKnight3D
                 Health.Value <= Mathf.CeilToInt(MaxHealth * _enrageHealthFraction))
             {
                 IsEnraged = true;
+                ApplyEnragedAnimatorSpeed();
                 EnemyRewardDropSystem.DropEnergy(transform.position, _enrageEnergyOrbCount);
                 OnBecameEnraged();
                 OnEnraged.Trigger();
@@ -70,6 +76,15 @@ namespace SoulKnight3D
 
         protected virtual void OnDeathSequenceStarted()
         {
+        }
+
+        private void ApplyEnragedAnimatorSpeed()
+        {
+            CacheDeathReferences();
+            if (_deathAnimator != null)
+            {
+                _deathAnimator.speed *= _enragedAnimatorSpeedMultiplier;
+            }
         }
 
         protected void ConfigureDeathReferences(

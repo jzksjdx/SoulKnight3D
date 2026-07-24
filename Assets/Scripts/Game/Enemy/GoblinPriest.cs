@@ -482,7 +482,8 @@ namespace SoulKnight3D
 
             Vector3 direction = toPlayer.normalized;
             Vector3 desiredVelocity = direction *
-                (_moveSpeed * Mathf.Max(0f, _protectiveOrbChaseSpeedMultiplier));
+                (_moveSpeed * MovementSpeedMultiplier *
+                 Mathf.Max(0f, _protectiveOrbChaseSpeedMultiplier));
             _planarVelocity = Vector3.MoveTowards(
                 _planarVelocity, desiredVelocity, _movementAcceleration * Time.deltaTime);
             if (_rigidbody != null)
@@ -541,7 +542,8 @@ namespace SoulKnight3D
             }
             direction.Normalize();
 
-            Vector3 desiredVelocity = direction * (_moveSpeed * _moveSpeedMultiplier);
+            Vector3 desiredVelocity = direction *
+                (_moveSpeed * _moveSpeedMultiplier * MovementSpeedMultiplier);
             _planarVelocity = Vector3.MoveTowards(
                 _planarVelocity, desiredVelocity, _movementAcceleration * Time.deltaTime);
             if (_rigidbody != null)

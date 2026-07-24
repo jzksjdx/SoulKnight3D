@@ -33,6 +33,16 @@ namespace SoulKnight3D
 
         public virtual void Attack() { }
 
+        public float GetRemainingCooldown()
+        {
+            return Mathf.Max(0f, _cooldownTimeout);
+        }
+
+        public void SetAttackDelay(float delay)
+        {
+            _cooldownTimeout = Mathf.Max(0f, delay);
+        }
+
         protected virtual bool GetIsCritHit()
         {
             return InGameData.CritChance > Random.Range(0, 100);

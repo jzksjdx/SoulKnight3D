@@ -186,6 +186,15 @@ namespace SoulKnight3D {
             }
         }
 
+        public void CancelCurrentWeaponCharge()
+        {
+            if (_currentWeapon == null) { return; }
+            if (_currentWeapon.TryGetComponent(out ChargeWeapon chargeWeapon))
+            {
+                chargeWeapon.CancelCharge();
+            }
+        }
+
         public void SetChargeBarProgress(float progress)
         {
             if (progress == 0f)

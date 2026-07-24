@@ -107,12 +107,6 @@ namespace SoulKnight3D
             EnemyRewardDropSystem.Drop(transform.position, _rewardRate, _rewardValues);
         }
 
-        protected override void OnBecameEnraged()
-        {
-            _idleTime = Mathf.Min(_idleTime, 0.6f);
-            _chaseTime *= AttackIntervalMultiplier;
-        }
-
         protected virtual void LookAtPlayer()
         {
             if (Player == null) { return; }
@@ -182,7 +176,7 @@ namespace SoulKnight3D
 
             protected override void OnEnter()
             {
-                _idleTimer = mTarget._idleTime;
+                _idleTimer = mTarget._idleTime * mTarget.AttackIntervalMultiplier;
             }
 
             protected override void OnExit()
@@ -260,9 +254,11 @@ namespace SoulKnight3D
                     // move
                     mTarget.LookAtPlayer();
                     Vector3 moveSpeed = new Vector3(
-                        mTarget._moveDirection.normalized.x * mTarget.Speed,
+                        mTarget._moveDirection.normalized.x * mTarget.Speed *
+                        mTarget.MovementSpeedMultiplier,
                         mTarget.SelfRigidbody.velocity.y,
-                        mTarget._moveDirection.normalized.z * mTarget.Speed);
+                        mTarget._moveDirection.normalized.z * mTarget.Speed *
+                        mTarget.MovementSpeedMultiplier);
                     mTarget.SelfRigidbody.velocity = moveSpeed;
 
                     

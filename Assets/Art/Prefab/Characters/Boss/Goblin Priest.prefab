@@ -589,7 +589,9 @@ MonoBehaviour:
   Statuses: 
   _enrageHealthFraction: 0.5
   _enrageEnergyOrbCount: 10
-  _enragedAttackIntervalMultiplier: 0.65
+  _enragedAttackIntervalMultiplier: 0.5
+  _enragedMovementSpeedMultiplier: 1.5
+  _enragedAnimatorSpeedMultiplier: 1.5
   _rigidbody: {fileID: 8932301507332283122}
   _collider: {fileID: 618762508824608688}
   _animator: {fileID: 6656621379755333208}

@@ -8,9 +8,11 @@ using UnityEngine;
 public static class WeaponRewardSystemBuilder
 {
     private const string WeaponFolder = "Assets/Art/ScriptableObject/Weapons";
+    private const string PickupWeaponFolder = "Assets/Art/Prefab/PickUpWeapons";
     private const string PoolPath = "Assets/Art/ScriptableObject/ChestRewards/Dungeon Weapon Drop Pool.asset";
     private const string BrownRewardPath = "Assets/Art/ScriptableObject/ChestRewards/BrownChestRewards.asset";
     private const string BlueRewardPath = "Assets/Art/ScriptableObject/ChestRewards/BlueChestRewards.asset";
+    private const string WhiteRewardPath = "Assets/Art/ScriptableObject/ChestRewards/WhiteChestRewards.asset";
     private const string LevelZeroRewardPath = "Assets/Art/ScriptableObject/ChestRewards/Level0BrownChestRewards.asset";
     private const string BrownChestPrefabPath = "Assets/Art/Prefab/InteractiveItems/Chests/BrownChest.prefab";
     private const string BlueChestPrefabPath = "Assets/Art/Prefab/InteractiveItems/Chests/BlueChest.prefab";
@@ -20,7 +22,8 @@ public static class WeaponRewardSystemBuilder
     private const string BlueSecondaryMaterialPath = "Assets/Art/Materials/Chest Materials/ChestBlue2.mat";
 
     // Levels are transcribed from the recovered Soul Knight 1.8.4 WeaponDropInfo resource.
-    private static readonly Dictionary<string, int[]> DropLevels = new Dictionary<string, int[]>
+    private static readonly Dictionary<string, int[]> OriginalFiveLevelDropLevels =
+        new Dictionary<string, int[]>
     {
         { "AK-47", new[] { 0, 1 } },
         { "Assault Rocket", new[] { 3 } },
@@ -53,29 +56,61 @@ public static class WeaponRewardSystemBuilder
         { "UZI", new[] { 2 } }
     };
 
+    // Pool 0 remains exclusive to the level-one starter chest. Original tier 4 is
+    // folded into game level 3 so the compact demo can award every weapon.
+    private static readonly Dictionary<string, int[]> CompactThreeLevelDropLevels =
+        OriginalFiveLevelDropLevels.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value
+                .Select(level => level < 0 ? level : Mathf.Min(level, 3))
+                .Distinct()
+                .ToArray());
+
     [MenuItem("Tools/Soul Knight/Rebuild Weapon Reward System")]
     public static void RebuildWeaponRewardSystem()
     {
+        RebuildWeaponRewardSystem(CompactThreeLevelDropLevels, 3);
+        Debug.Log("Rebuilt compact three-level weapon reward system.");
+    }
+
+    [MenuItem("Tools/Soul Knight/Restore Original 5-Level Weapon Reward System")]
+    public static void RestoreOriginalFiveLevelWeaponRewardSystem()
+    {
+        RebuildWeaponRewardSystem(OriginalFiveLevelDropLevels, 4);
+        Debug.Log("Restored original five-level weapon reward system.");
+    }
+
+    private static void RebuildWeaponRewardSystem(
+        IReadOnlyDictionary<string, int[]> dropLevels, int maxPoolLevel)
+    {
         List<WeaponData> weapons = LoadWeapons();
-        AssignDropLevels(weapons);
+        AssignDropLevels(weapons, dropLevels);
 
         WeaponDropPoolSO pool = BuildDropPool(weapons);
-        ConfigureChestReward(BrownRewardPath, "BrownChestRewards", pool, 0);
-        ChestRewardData blueRewards = ConfigureChestReward(BlueRewardPath, "BlueChestRewards", pool, 1);
+        ConfigureChestReward(BrownRewardPath, "BrownChestRewards", pool, 0, maxPoolLevel);
+        ChestRewardData blueRewards = ConfigureChestReward(
+            BlueRewardPath, "BlueChestRewards", pool, 1, maxPoolLevel);
         ChestRewardData levelZeroRewards = ConfigureChestReward(LevelZeroRewardPath,
-            "Level0BrownChestRewards", pool, 0, 0);
+            "Level0BrownChestRewards", pool, 0, maxPoolLevel, 0);
+        ConfigureWhiteChestWeaponPool(pool, maxPoolLevel);
         BuildBlueChestPrefab(blueRewards);
         GameObject levelZeroChest = BuildLevelZeroChestPrefab(levelZeroRewards);
         WireLevelZeroChestToGameController(levelZeroChest);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        ValidateWeaponRewardSystem();
-        Debug.Log("Rebuilt weapon reward system.");
+        ValidateWeaponRewardSystem(dropLevels, maxPoolLevel);
     }
 
     [MenuItem("Tools/Soul Knight/Validate Weapon Reward System")]
     public static void ValidateWeaponRewardSystem()
+    {
+        ValidateWeaponRewardSystem(CompactThreeLevelDropLevels, 3);
+        Debug.Log("Compact weapon reward system validation passed.");
+    }
+
+    private static void ValidateWeaponRewardSystem(
+        IReadOnlyDictionary<string, int[]> expectedDropLevels, int maxPoolLevel)
     {
         WeaponDropPoolSO pool = AssetDatabase.LoadAssetAtPath<WeaponDropPoolSO>(PoolPath);
         if (pool == null)
@@ -83,9 +118,10 @@ public static class WeaponRewardSystemBuilder
             throw new InvalidOperationException($"Weapon drop pool is missing at '{PoolPath}'.");
         }
 
-        ValidateWeaponDefinitions(LoadWeapons());
+        List<WeaponData> weapons = LoadWeapons();
+        ValidateWeaponDefinitions(weapons, expectedDropLevels);
 
-        for (int level = 0; level <= 4; level++)
+        for (int level = 0; level <= maxPoolLevel; level++)
         {
             if (!pool.HasLevel(level))
             {
@@ -95,6 +131,12 @@ public static class WeaponRewardSystemBuilder
 
         foreach (WeaponDropPoolLevel levelPool in pool.Levels)
         {
+            if (levelPool.Level < 0 || levelPool.Level > maxPoolLevel)
+            {
+                throw new InvalidOperationException(
+                    $"Weapon drop pool contains unexpected level {levelPool.Level}.");
+            }
+
             foreach (WeaponDropPoolEntry entry in levelPool.Entries)
             {
                 if (entry == null || !entry.Enabled)
@@ -110,9 +152,13 @@ public static class WeaponRewardSystemBuilder
             }
         }
 
-        ValidateChestReward(BrownRewardPath, 0);
-        ValidateChestReward(BlueRewardPath, 1);
-        ValidateChestReward(LevelZeroRewardPath, 0, 0);
+        ValidatePoolCoverage(pool, weapons);
+        ValidatePickupPrefabCoverage(weapons);
+
+        ValidateChestReward(BrownRewardPath, 0, maxPoolLevel);
+        ValidateChestReward(BlueRewardPath, 1, maxPoolLevel);
+        ValidateChestReward(LevelZeroRewardPath, 0, maxPoolLevel, 0);
+        ValidateWhiteChestReward(pool, maxPoolLevel);
 
         GameObject blueChest = AssetDatabase.LoadAssetAtPath<GameObject>(BlueChestPrefabPath);
         if (blueChest == null || blueChest.GetComponent<Chest>() == null)
@@ -136,7 +182,6 @@ public static class WeaponRewardSystemBuilder
             throw new InvalidOperationException("GameController is not wired to the level-0 brown chest.");
         }
 
-        Debug.Log("Weapon reward system validation passed.");
     }
 
     private static List<WeaponData> LoadWeapons()
@@ -149,11 +194,12 @@ public static class WeaponRewardSystemBuilder
             .ToList();
     }
 
-    private static void AssignDropLevels(List<WeaponData> weapons)
+    private static void AssignDropLevels(List<WeaponData> weapons,
+        IReadOnlyDictionary<string, int[]> dropLevels)
     {
         foreach (WeaponData weapon in weapons)
         {
-            if (!DropLevels.TryGetValue(weapon.name, out int[] levels))
+            if (!dropLevels.TryGetValue(weapon.name, out int[] levels))
             {
                 throw new InvalidOperationException(
                     $"Weapon '{weapon.name}' has no explicit recovered drop-level definition.");
@@ -233,7 +279,7 @@ public static class WeaponRewardSystemBuilder
     }
 
     private static ChestRewardData ConfigureChestReward(string path, string assetName,
-        WeaponDropPoolSO pool, int levelOffset, int fixedLevel = -1)
+        WeaponDropPoolSO pool, int levelOffset, int maxPoolLevel, int fixedLevel = -1)
     {
         ChestRewardData rewards = AssetDatabase.LoadAssetAtPath<ChestRewardData>(path);
         if (rewards == null)
@@ -254,13 +300,32 @@ public static class WeaponRewardSystemBuilder
                 FixedWeaponPoolLevel = fixedLevel,
                 WeaponPoolLevelOffset = levelOffset,
                 MinWeaponPoolLevel = 0,
-                MaxWeaponPoolLevel = 6
+                MaxWeaponPoolLevel = maxPoolLevel
             }
         };
 
         rewards.name = assetName;
         EditorUtility.SetDirty(rewards);
         return rewards;
+    }
+
+    private static void ConfigureWhiteChestWeaponPool(WeaponDropPoolSO pool, int maxPoolLevel)
+    {
+        ChestRewardData rewards = AssetDatabase.LoadAssetAtPath<ChestRewardData>(WhiteRewardPath);
+        ChestRewardData.RewardCategory weaponCategory = rewards?.ChestRewards.Find(
+            category => category.Type == ChestRewardData.ChestRewardType.Weapon);
+        if (weaponCategory == null)
+        {
+            throw new InvalidOperationException("White chest has no weapon reward category.");
+        }
+
+        weaponCategory.UseWeaponPool = true;
+        weaponCategory.WeaponPool = pool;
+        weaponCategory.FixedWeaponPoolLevel = 1;
+        weaponCategory.WeaponPoolLevelOffset = 0;
+        weaponCategory.MinWeaponPoolLevel = 0;
+        weaponCategory.MaxWeaponPoolLevel = maxPoolLevel;
+        EditorUtility.SetDirty(rewards);
     }
 
     private static GameObject BuildLevelZeroChestPrefab(ChestRewardData rewards)
@@ -412,9 +477,10 @@ public static class WeaponRewardSystemBuilder
         }
     }
 
-    private static void ValidateWeaponDefinitions(List<WeaponData> weapons)
+    private static void ValidateWeaponDefinitions(List<WeaponData> weapons,
+        IReadOnlyDictionary<string, int[]> expectedDropLevels)
     {
-        string[] missingAssets = DropLevels.Keys
+        string[] missingAssets = expectedDropLevels.Keys
             .Except(weapons.Select(weapon => weapon.name))
             .OrderBy(name => name)
             .ToArray();
@@ -426,7 +492,7 @@ public static class WeaponRewardSystemBuilder
 
         foreach (WeaponData weapon in weapons)
         {
-            if (!DropLevels.TryGetValue(weapon.name, out int[] expectedLevels))
+            if (!expectedDropLevels.TryGetValue(weapon.name, out int[] expectedLevels))
             {
                 throw new InvalidOperationException(
                     $"Weapon '{weapon.name}' has no explicit drop-level definition.");
@@ -444,8 +510,50 @@ public static class WeaponRewardSystemBuilder
         }
     }
 
+    private static void ValidatePoolCoverage(WeaponDropPoolSO pool, List<WeaponData> weapons)
+    {
+        HashSet<WeaponData> pooledWeapons = new HashSet<WeaponData>(
+            pool.Levels
+                .Where(level => level != null)
+                .SelectMany(level => level.Entries)
+                .Where(entry => entry != null && entry.Enabled && entry.Weapon != null)
+                .Select(entry => entry.Weapon));
+
+        string[] missingWeapons = weapons
+            .Where(weapon => weapon.DropLevel >= 0 && weapon.PickUpPrefab != null)
+            .Where(weapon => !pooledWeapons.Contains(weapon))
+            .Select(weapon => weapon.name)
+            .OrderBy(name => name)
+            .ToArray();
+        if (missingWeapons.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Droppable weapons missing from the pool: {string.Join(", ", missingWeapons)}.");
+        }
+    }
+
+    private static void ValidatePickupPrefabCoverage(List<WeaponData> weapons)
+    {
+        HashSet<GameObject> configuredPickups = new HashSet<GameObject>(
+            weapons.Where(weapon => weapon.PickUpPrefab != null)
+                .Select(weapon => weapon.PickUpPrefab));
+        string[] unconfiguredPickups = AssetDatabase.FindAssets("t:Prefab", new[] { PickupWeaponFolder })
+            .Select(AssetDatabase.GUIDToAssetPath)
+            .Select(AssetDatabase.LoadAssetAtPath<GameObject>)
+            .Where(prefab => prefab != null && prefab.GetComponent<PickupWeapon>() != null)
+            .Where(prefab => !configuredPickups.Contains(prefab))
+            .Select(prefab => prefab.name)
+            .OrderBy(name => name)
+            .ToArray();
+        if (unconfiguredPickups.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Pickup weapon prefabs without weapon data: {string.Join(", ", unconfiguredPickups)}.");
+        }
+    }
+
     private static void ValidateChestReward(string path, int expectedOffset,
-        int expectedFixedLevel = -1)
+        int expectedMaxPoolLevel, int expectedFixedLevel = -1)
     {
         ChestRewardData rewards = AssetDatabase.LoadAssetAtPath<ChestRewardData>(path);
         if (rewards == null || rewards.ChestRewards.Count != 1)
@@ -458,9 +566,24 @@ public static class WeaponRewardSystemBuilder
             !category.UseWeaponPool ||
             category.WeaponPool == null ||
             category.WeaponPoolLevelOffset != expectedOffset ||
+            category.MaxWeaponPoolLevel != expectedMaxPoolLevel ||
             category.FixedWeaponPoolLevel != expectedFixedLevel)
         {
             throw new InvalidOperationException($"Chest reward asset '{path}' has invalid weapon pool settings.");
+        }
+    }
+
+    private static void ValidateWhiteChestReward(WeaponDropPoolSO expectedPool,
+        int expectedMaxPoolLevel)
+    {
+        ChestRewardData rewards = AssetDatabase.LoadAssetAtPath<ChestRewardData>(WhiteRewardPath);
+        ChestRewardData.RewardCategory category = rewards?.ChestRewards.Find(
+            reward => reward.Type == ChestRewardData.ChestRewardType.Weapon);
+        if (category == null || !category.UseWeaponPool || category.WeaponPool != expectedPool ||
+            category.FixedWeaponPoolLevel != 1 || category.WeaponPoolLevelOffset != 0 ||
+            category.MaxWeaponPoolLevel != expectedMaxPoolLevel)
+        {
+            throw new InvalidOperationException("White chest has invalid weapon pool settings.");
         }
     }
 }

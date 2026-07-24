@@ -21,4 +21,4 @@ MonoBehaviour:
     FixedWeaponPoolLevel: 0
     WeaponPoolLevelOffset: 0
     MinWeaponPoolLevel: 0
-    MaxWeaponPoolLevel: 6
+    MaxWeaponPoolLevel: 3

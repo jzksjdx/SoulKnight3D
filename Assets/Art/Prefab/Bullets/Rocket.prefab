@@ -56,12 +56,15 @@ MonoBehaviour:
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
   ViewControllerFullTypeName: 
+  _didHit: 0
   SelfRigidbody: {fileID: 2672804564154535423}
   SelfCapsuleCollider: {fileID: 3576401542793636091}
   PrefabRef: {fileID: 0}
   TrailRenderer: {fileID: 0}
   ImpactFeedback: {fileID: 4558148457886507857}
   ExplosionRadius: 1
+  _horizontalImpulse: 4
+  _upwardImpulse: 3
 --- !u!54 &2672804564154535423
 Rigidbody:
   m_ObjectHideFlags: 0

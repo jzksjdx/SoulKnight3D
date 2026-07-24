@@ -14,7 +14,8 @@ namespace SoulKnight3D
         private GameObject _rightHandWeaponObj;
         private Weapon _rightHandWeapon;
         private GameObject _leftHandWeaponObj;
-        private Weapon _leftHandWeapon;
+        private GameObject _leftHandSourceWeaponObj;
+        private Gun _leftHandWeapon;
         private bool _isAttacking = false;
 
 
@@ -27,6 +28,10 @@ namespace SoulKnight3D
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
             {
                 _isAttacking = isAttacking;
+                if (isAttacking && IsUsingSkill)
+                {
+                    SynchronizeLeftHandAttackDelay();
+                }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             
@@ -40,6 +45,7 @@ namespace SoulKnight3D
         protected override void UsingSkillOnUpdate()
         {
             base.UsingSkillOnUpdate();
+            if (!IsUsingSkill) { return; }
 
             // Left hand attack
             if (_isAttacking)
@@ -109,26 +115,8 @@ namespace SoulKnight3D
             }
             else
             {
-                
-                // Double Weapon
-                if (_leftHandWeaponObj)
-                {
-                    if (_leftHandWeaponObj != _rightHandWeaponObj)
-                    {
-                        Destroy(_leftHandWeaponObj);
-                        AddNewWeaponToLeftHand();
-                    }
-                    else
-                    {
-                        _leftHandWeaponObj.Show();
-                    }
-                }
-                else
-                {
-                    AddNewWeaponToLeftHand();
-                }
-                _leftHandWeaponObj.transform.localPosition = Vector3.zero;
-                _leftHandWeapon = _leftHandWeaponObj.GetComponent<Gun>();
+                EnsureLeftHandWeapon();
+                SynchronizeLeftHandAttackDelay();
                 ChangePlayerAnimation(WeaponData.WeaponAnimation.DoubleGun);
             }
 
@@ -137,6 +125,14 @@ namespace SoulKnight3D
             SkillEffect.Play();
             AudioKit.PlaySound("fx_skill_c1");
             return true;
+        }
+
+        private void LateUpdate()
+        {
+            if (IsUsingSkill)
+            {
+                AimLeftHandWeaponAtTarget();
+            }
         }
 
         private void StopSkillEffect()
@@ -150,13 +146,34 @@ namespace SoulKnight3D
             SkillEffect.gameObject.SetActive(false);
         }
 
-        private void AddNewWeaponToLeftHand()
+        private void EnsureLeftHandWeapon()
         {
-            _leftHandWeaponObj = Instantiate(_rightHandWeaponObj, LeftHandWeaponPos);
-            Weapon weapon = _leftHandWeaponObj.GetComponent<Weapon>();
-            weapon.OnWeaponFired.Register(() =>
+            if (_leftHandWeaponObj != null && _leftHandSourceWeaponObj == _rightHandWeaponObj)
             {
-                PlayerController.Instance.PlayerStats.Energy.Value -= weapon.InGameData.EnergyCost;
+                _leftHandWeaponObj.transform.localPosition = Vector3.zero;
+                _leftHandWeaponObj.transform.localRotation = Quaternion.identity;
+                _leftHandWeaponObj.Show();
+                return;
+            }
+
+            DestroyLeftHandWeapon();
+
+            _leftHandWeaponObj = Instantiate(_rightHandWeaponObj, LeftHandWeaponPos, false);
+            _leftHandWeaponObj.transform.localPosition = Vector3.zero;
+            _leftHandWeaponObj.transform.localRotation = Quaternion.identity;
+            _leftHandWeapon = _leftHandWeaponObj.GetComponent<Gun>();
+            _leftHandSourceWeaponObj = _rightHandWeaponObj;
+
+            if (_leftHandWeapon == null)
+            {
+                DestroyLeftHandWeapon();
+                return;
+            }
+
+            Gun leftHandWeapon = _leftHandWeapon;
+            leftHandWeapon.OnWeaponFired.Register(() =>
+            {
+                PlayerController.Instance.PlayerStats.Energy.Value -= leftHandWeapon.InGameData.EnergyCost;
             }).UnRegisterWhenDisabled(_leftHandWeaponObj);
         }
 
@@ -164,10 +181,40 @@ namespace SoulKnight3D
         {
             if (!_leftHandWeapon) { return; }
             if (_leftHandWeapon.InGameData.EnergyCost > PlayerController.Instance.PlayerStats.Energy.Value) { return; }
-            if (_leftHandWeapon.InGameData)
+
+            AimLeftHandWeaponAtTarget();
+            _leftHandWeapon.Attack();
+        }
+
+        private void AimLeftHandWeaponAtTarget()
+        {
+            if (_leftHandWeapon == null || PlayerController.Instance == null) { return; }
+
+            Transform aimTarget = PlayerController.Instance.PlayerAttack.target;
+            if (aimTarget != null)
             {
-                _leftHandWeapon.Attack();
+                _leftHandWeapon.AimAt(aimTarget.position);
             }
+        }
+
+        private void SynchronizeLeftHandAttackDelay()
+        {
+            if (_leftHandWeapon == null || _rightHandWeapon == null) { return; }
+
+            float halfCooldown = Mathf.Max(0f, _leftHandWeapon.InGameData.Cooldown * 0.5f);
+            _leftHandWeapon.SetAttackDelay(_rightHandWeapon.GetRemainingCooldown() + halfCooldown);
+        }
+
+        private void DestroyLeftHandWeapon()
+        {
+            if (_leftHandWeaponObj != null)
+            {
+                Destroy(_leftHandWeaponObj);
+            }
+
+            _leftHandWeaponObj = null;
+            _leftHandSourceWeaponObj = null;
+            _leftHandWeapon = null;
         }
 
         public void HandleRightHandWeaponChange(WeaponData newWeaponData, GameObject newWeapon)
@@ -184,26 +231,22 @@ namespace SoulKnight3D
             // handle bow
             if (newWeaponData.Animation == WeaponData.WeaponAnimation.Bow)
             {
-                Destroy(_leftHandWeaponObj);
-                _leftHandWeapon = null;
+                DestroyLeftHandWeapon();
                 ChangePlayerAnimation(WeaponData.WeaponAnimation.Bow);
                 newWeapon.GetComponent<ChargeWeapon>().SetChargeSpeed(2);
                 return;
             }
             else if (newWeaponData.Animation == WeaponData.WeaponAnimation.Melee)
             {
-                Destroy(_leftHandWeaponObj);
-                _leftHandWeapon = null;
+                DestroyLeftHandWeapon();
                 ChangePlayerAnimation(WeaponData.WeaponAnimation.Melee);
                 newWeapon.GetComponent<Sword>().SetChargeSpeed(2);
                 return;
             }
 
             // handle weapons other than bows or swords
-            Destroy(_leftHandWeaponObj);
-            _leftHandWeaponObj = Instantiate(_rightHandWeaponObj, LeftHandWeaponPos);
-            _leftHandWeaponObj.transform.localPosition = Vector3.zero;
-            _leftHandWeapon = _leftHandWeaponObj.GetComponent<Gun>();
+            EnsureLeftHandWeapon();
+            SynchronizeLeftHandAttackDelay();
             ChangePlayerAnimation(WeaponData.WeaponAnimation.DoubleGun);
         }
 

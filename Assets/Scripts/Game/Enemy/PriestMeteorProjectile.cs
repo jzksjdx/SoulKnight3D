@@ -9,6 +9,10 @@ namespace SoulKnight3D
     {
         [SerializeField] private MMF_Player _impactFeedback;
 
+        [Header("Impact Force")]
+        [SerializeField, Min(0f)] private float _horizontalImpulse = 4f;
+        [SerializeField, Min(0f)] private float _upwardImpulse = 3.5f;
+
         private Vector3 _startPosition;
         private Vector3 _targetPosition;
         private float _fallDuration;
@@ -78,7 +82,7 @@ namespace SoulKnight3D
                 yield return null;
             }
 
-            DamagePlayer();
+            HitPlayer();
             SetFlightVisualsActive(false);
             _impactFeedback?.PlayFeedbacks();
             yield return FadeWarning();
@@ -184,17 +188,34 @@ namespace SoulKnight3D
             ReleaseWarning();
         }
 
-        private void DamagePlayer()
+        private void HitPlayer()
         {
             PlayerController player = PlayerController.Instance;
             if (player == null) { return; }
 
             Vector3 difference = player.transform.position - _targetPosition;
             difference.y = 0f;
-            if (difference.sqrMagnitude <= _radius * _radius)
+            if (difference.sqrMagnitude > _radius * _radius) { return; }
+
+            ApplyImpactImpulse(player.SelfRigidbody);
+            player.PlayerStats.ApplyDamage(_damage);
+        }
+
+        private void ApplyImpactImpulse(Rigidbody targetBody)
+        {
+            if (targetBody == null || targetBody.isKinematic) { return; }
+
+            Vector3 horizontalDirection =
+                targetBody.worldCenterOfMass - _targetPosition;
+            horizontalDirection.y = 0f;
+            Vector3 impulse = Vector3.up * _upwardImpulse;
+            if (horizontalDirection.sqrMagnitude > 0.0001f)
             {
-                player.PlayerStats.ApplyDamage(_damage);
+                impulse += horizontalDirection.normalized * _horizontalImpulse;
             }
+
+            if (impulse.sqrMagnitude <= 0f) { return; }
+            targetBody.AddForce(impulse, ForceMode.Impulse);
         }
 
         private void SetWarningAlpha(float alpha)

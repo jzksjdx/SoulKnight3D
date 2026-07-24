@@ -49,6 +49,7 @@ namespace SoulKnight3D
         public override bool UseSkill()
         {
             if (!base.UseSkill()) { return false; }
+            PlayerController.Instance.PlayerAttack.CancelCurrentWeaponCharge();
             PlayerController.Instance.PlayerAnimation.ToggleDodge(true);
             PlayerController.Instance.PlayerAttack.DisableAttack = true;
             AudioKit.PlaySound("fx_skill_c2");

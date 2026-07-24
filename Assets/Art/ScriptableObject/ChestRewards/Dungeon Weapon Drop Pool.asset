@@ -153,13 +153,11 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-    - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
+    - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-  - Level: 4
-    Entries:
-    - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
+    - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1

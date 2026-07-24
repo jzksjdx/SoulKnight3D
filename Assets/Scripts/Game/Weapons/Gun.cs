@@ -37,6 +37,18 @@ namespace SoulKnight3D
             _cooldownTimeout = InGameData.Cooldown;
         }
 
+        public bool AimAt(Vector3 targetPosition)
+        {
+            if (shootPoint == null) { return false; }
+
+            Vector3 aimDirection = targetPosition - shootPoint.position;
+            if (aimDirection.sqrMagnitude <= 0.0001f) { return false; }
+
+            Quaternion correction = Quaternion.FromToRotation(shootPoint.up, aimDirection.normalized);
+            transform.rotation = correction * transform.rotation;
+            return true;
+        }
+
 		protected Vector3 DeviateBullet(Vector3 shootDirection)
 		{
 			//float deviateAmount = 0;

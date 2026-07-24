@@ -54,10 +54,21 @@ namespace SoulKnight3D
             ResetChargeProgress();
         }
 
+        public void CancelCharge()
+        {
+            ResetChargeProgress();
+        }
+
         private void ResetChargeProgress()
         {
-            if (!_isCharging) { return; }
+            if (!_isCharging)
+            {
+                _canShoot = false;
+                return;
+            }
+
             _isCharging = false;
+            _canShoot = false;
             _chargeTimeDelta = 0f;
             MidPoint.Hide();
             UpdateBowString(false);
@@ -179,7 +190,20 @@ namespace SoulKnight3D
 
         public void SetChargeSpeed(float multiplier = 1)
         {
-            _chargeTime = (InGameData as ChargeWeaponData).ChargeTime / multiplier;
+            ChargeWeaponData data = InGameData as ChargeWeaponData;
+            if (data == null) { return; }
+
+            float normalizedCharge = _chargeTime > 0f
+                ? Mathf.Clamp01(_chargeTimeDelta / _chargeTime)
+                : 0f;
+            _chargeTime = Mathf.Max(0.01f, data.ChargeTime / Mathf.Max(0.01f, multiplier));
+            _chargeTimeDelta = normalizedCharge * _chargeTime;
+
+            if (_isCharging && PlayerController.Instance != null)
+            {
+                PlayerController.Instance.PlayerAnimation.SetChargeSpeed(1f / _chargeTime);
+                UpdateChargeBar();
+            }
         }
 
         private void UpdateChargeBar()

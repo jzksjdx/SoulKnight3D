@@ -1596,6 +1596,11 @@ MonoBehaviour:
   MaxHealth: 550
   Speed: 1.5
   Statuses: 
+  _enrageHealthFraction: 0.5
+  _enrageEnergyOrbCount: 10
+  _enragedAttackIntervalMultiplier: 0.5
+  _enragedMovementSpeedMultiplier: 1.5
+  _enragedAnimatorSpeedMultiplier: 1.5
   _attack: 3
   _range: 1.5
   _chaseTime: 7
