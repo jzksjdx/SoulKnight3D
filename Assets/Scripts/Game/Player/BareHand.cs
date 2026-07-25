@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
@@ -15,7 +14,10 @@ namespace SoulKnight3D
         private PlayerAnimation _playerAnimation;
         private PlayerAttack _playerAttack;
 
-        private List<Enemy> _enemiesInRange = new List<Enemy>();
+        private readonly HashSet<TargetableObject> _enemiesInRange =
+            new HashSet<TargetableObject>();
+        private readonly HashSet<TargetableObject> _attackTargets =
+            new HashSet<TargetableObject>();
         private bool _canUseBareHand = false;
         [SerializeField] private int _movesLeft = 0;
 
@@ -30,33 +32,18 @@ namespace SoulKnight3D
 
             BareHandRange.OnTriggerEnterEvent((other) =>
             {
-                if (other.CompareTag("Enemy") == false) { return; }
+                if (!TryGetEnemyTarget(other, out TargetableObject enemy)) { return; }
                 if (_playerAttack.GetCurrentWeapon().InGameData.Animation == WeaponData.WeaponAnimation.Melee) { return; }
                 //if (_playerStats.Energy.Value >= _playerAttack.GetCurrentWeapon().Data.EnergyCost) { return; } 
-                
-                if (other.TryGetComponent(out Enemy enemy) == false) { return; }
-                _enemiesInRange.Add(enemy);
-                _canUseBareHand = true;
-                enemy.OnDeath.Register(() =>
-                {
-                    _enemiesInRange.Remove(enemy);
-                    if (_enemiesInRange.Count == 0)
-                    {
-                        _canUseBareHand = false;
-                    }
-                }).UnRegisterWhenGameObjectDestroyed(enemy);
 
+                if (!_enemiesInRange.Add(enemy)) { return; }
+                _canUseBareHand = true;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             BareHandRange.OnTriggerExitEvent((other) =>
             {
-                if (other.CompareTag("Enemy") == false) { return; }
-                if (other.TryGetComponent(out Enemy enemy) == false) { return; }
-                _enemiesInRange.Remove(enemy);
-                if (_enemiesInRange.Count == 0)
-                {
-                    _canUseBareHand = false;
-                }
+                if (!TryGetEnemyTarget(other, out TargetableObject enemy)) { return; }
+                RemoveEnemy(enemy);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
@@ -88,6 +75,12 @@ namespace SoulKnight3D
 
         private void Update()
         {
+            if (_canUseBareHand)
+            {
+                _enemiesInRange.RemoveWhere(IsUnavailableEnemy);
+                _canUseBareHand = _enemiesInRange.Count > 0;
+            }
+
             if (_cooldownTimeoutDelta >= 0f)
             {
                 _cooldownTimeoutDelta -= Time.deltaTime;
@@ -110,13 +103,18 @@ namespace SoulKnight3D
             Vector3 attackCenter = transform.position + Vector3.up * 0.5f + PlayerController.Instance.transform.forward * 0.25f;
             Quaternion boxRotation = PlayerController.Instance.transform.rotation;
             bool didHit = false;
+            _attackTargets.Clear();
             Collider[] targets = Physics.OverlapBox(attackCenter, boxSize / 2, boxRotation);
             foreach (Collider target in targets)
             {
                 if (target.CompareTag(tag)) { continue; }
 
                 // handle targetable objects (enemies, room objects)
-                if (target.TryGetComponent(out TargetableObject targetableObject))
+                TargetableObject targetableObject =
+                    target.GetComponentInParent<TargetableObject>();
+                if (targetableObject != null &&
+                    !targetableObject.CompareTag(tag) &&
+                    _attackTargets.Add(targetableObject))
                 {
                     if (targetableObject.IsDead) { continue; }
                     didHit = true;
@@ -133,6 +131,7 @@ namespace SoulKnight3D
                     bullet.DestroyBullet();
                 }
             }
+            _attackTargets.Clear();
 
             // handle effects
             if (isRightHand)
@@ -159,6 +158,30 @@ namespace SoulKnight3D
                     ToggleBareHand(false);
                 }).Start(this);
             }
+        }
+
+        private static bool TryGetEnemyTarget(
+            Collider collider, out TargetableObject enemy)
+        {
+            enemy = collider != null
+                ? collider.GetComponentInParent<TargetableObject>()
+                : null;
+            return enemy != null && enemy.CompareTag("Enemy") && !enemy.IsDead;
+        }
+
+        private static bool IsUnavailableEnemy(TargetableObject enemy)
+        {
+            return enemy == null || enemy.IsDead ||
+                !enemy.gameObject.activeInHierarchy;
+        }
+
+        private void RemoveEnemy(TargetableObject enemy)
+        {
+            if (enemy != null)
+            {
+                _enemiesInRange.Remove(enemy);
+            }
+            _canUseBareHand = _enemiesInRange.Count > 0;
         }
 
         //private void OnDrawGizmosSelected()
