@@ -43,17 +43,9 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-    - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
-      PickupOverride: {fileID: 0}
-      Weight: 1
-      Enabled: 1
   - Level: 1
     Entries:
     - Weapon: {fileID: 11400000, guid: 754aecfd1c5704a7589f534f59a04e49, type: 2}
-      PickupOverride: {fileID: 0}
-      Weight: 1
-      Enabled: 1
-    - Weapon: {fileID: 11400000, guid: 89c48f271e5d94f10a85cbdac21f53bd, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
@@ -97,10 +89,6 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-    - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
-      PickupOverride: {fileID: 0}
-      Weight: 1
-      Enabled: 1
     - Weapon: {fileID: 11400000, guid: 63806c04648890d41b5d2b62354a94c7, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
@@ -111,6 +99,10 @@ MonoBehaviour:
       Enabled: 1
   - Level: 2
     Entries:
+    - Weapon: {fileID: 11400000, guid: 89c48f271e5d94f10a85cbdac21f53bd, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: cc121d89af3e14a3a8acac6dde41783a, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
@@ -120,6 +112,10 @@ MonoBehaviour:
       Weight: 1
       Enabled: 1
     - Weapon: {fileID: 11400000, guid: eb3093520f1294413b14b5bf550b5583, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: a4e38456921f94875896875f1af18146, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
@@ -153,11 +149,13 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-    - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
+    - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
-    - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
+  - Level: 4
+    Entries:
+    - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1

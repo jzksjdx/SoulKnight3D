@@ -18,11 +18,13 @@ public static class WeaponRewardSystemBuilder
     private const string BlueChestPrefabPath = "Assets/Art/Prefab/InteractiveItems/Chests/BlueChest.prefab";
     private const string LevelZeroChestPrefabPath = "Assets/Art/Prefab/InteractiveItems/Chests/Level0BrownChest.prefab";
     private const string GameControllerPrefabPath = "Assets/Art/Prefab/GameController.prefab";
+    private const string RoomManagerPrefabPath = "Assets/Art/Prefab/MapPrefabs/RoomManagerPrefab.prefab";
+    private const string MerchantRoomPrefabPath = "Assets/Art/Prefab/MapPrefabs/MerchantRoomLayout.prefab";
     private const string BrownSecondaryMaterialPath = "Assets/Art/Materials/Chest Materials/ChestBrown2.mat";
     private const string BlueSecondaryMaterialPath = "Assets/Art/Materials/Chest Materials/ChestBlue2.mat";
 
-    // Levels are transcribed from the recovered Soul Knight 1.8.4 WeaponDropInfo resource.
-    private static readonly Dictionary<string, int[]> OriginalFiveLevelDropLevels =
+    // Current wiki levels take precedence; recovered 1.8.4 data fills remaining gaps.
+    private static readonly Dictionary<string, int[]> AuthenticFiveLevelDropLevels =
         new Dictionary<string, int[]>
     {
         { "AK-47", new[] { 0, 1 } },
@@ -30,7 +32,7 @@ public static class WeaponRewardSystemBuilder
         { "Bad Pistol", new[] { 3 } },
         { "Bazooka", new[] { 3 } },
         { "Blind Missile Battery", new[] { 3 } },
-        { "Blowpipe", new[] { 1 } },
+        { "Blowpipe", new[] { 2 } },
         { "Bow", new[] { 0, 1 } },
         { "Broadsword", new[] { 2 } },
         { "Desert Eagle", new[] { 0, 1 } },
@@ -49,7 +51,7 @@ public static class WeaponRewardSystemBuilder
         { "Shotgun", new[] { 0, 1 } },
         { "Sniper Rifle", new[] { 3 } },
         { "Snow Fox L", new[] { 0, 1 } },
-        { "Snow Fox XL", new[] { 0, 1 } },
+        { "Snow Fox XL", new[] { 2 } },
         { "Splitter Cannon", new[] { 2 } },
         { "Splitter Gun", new[] { 1 } },
         { "Strong Bow", new[] { 1 } },
@@ -59,7 +61,7 @@ public static class WeaponRewardSystemBuilder
     // Pool 0 remains exclusive to the level-one starter chest. Original tier 4 is
     // folded into game level 3 so the compact demo can award every weapon.
     private static readonly Dictionary<string, int[]> CompactThreeLevelDropLevels =
-        OriginalFiveLevelDropLevels.ToDictionary(
+        AuthenticFiveLevelDropLevels.ToDictionary(
             pair => pair.Key,
             pair => pair.Value
                 .Select(level => level < 0 ? level : Mathf.Min(level, 3))
@@ -69,15 +71,15 @@ public static class WeaponRewardSystemBuilder
     [MenuItem("Tools/Soul Knight/Rebuild Weapon Reward System")]
     public static void RebuildWeaponRewardSystem()
     {
-        RebuildWeaponRewardSystem(CompactThreeLevelDropLevels, 3);
-        Debug.Log("Rebuilt compact three-level weapon reward system.");
+        RebuildWeaponRewardSystem(AuthenticFiveLevelDropLevels, 4);
+        Debug.Log("Rebuilt authentic five-level weapon reward system.");
     }
 
-    [MenuItem("Tools/Soul Knight/Restore Original 5-Level Weapon Reward System")]
-    public static void RestoreOriginalFiveLevelWeaponRewardSystem()
+    [MenuItem("Tools/Soul Knight/Build Compact 3-Level Weapon Reward System")]
+    public static void BuildCompactThreeLevelWeaponRewardSystem()
     {
-        RebuildWeaponRewardSystem(OriginalFiveLevelDropLevels, 4);
-        Debug.Log("Restored original five-level weapon reward system.");
+        RebuildWeaponRewardSystem(CompactThreeLevelDropLevels, 3);
+        Debug.Log("Built compact three-level weapon reward system.");
     }
 
     private static void RebuildWeaponRewardSystem(
@@ -105,8 +107,8 @@ public static class WeaponRewardSystemBuilder
     [MenuItem("Tools/Soul Knight/Validate Weapon Reward System")]
     public static void ValidateWeaponRewardSystem()
     {
-        ValidateWeaponRewardSystem(CompactThreeLevelDropLevels, 3);
-        Debug.Log("Compact weapon reward system validation passed.");
+        ValidateWeaponRewardSystem(AuthenticFiveLevelDropLevels, 4);
+        Debug.Log("Five-level weapon reward system validation passed.");
     }
 
     private static void ValidateWeaponRewardSystem(
@@ -159,6 +161,7 @@ public static class WeaponRewardSystemBuilder
         ValidateChestReward(BlueRewardPath, 1, maxPoolLevel);
         ValidateChestReward(LevelZeroRewardPath, 0, maxPoolLevel, 0);
         ValidateWhiteChestReward(pool, maxPoolLevel);
+        ValidateMerchantPool(pool);
 
         GameObject blueChest = AssetDatabase.LoadAssetAtPath<GameObject>(BlueChestPrefabPath);
         if (blueChest == null || blueChest.GetComponent<Chest>() == null)
@@ -584,6 +587,32 @@ public static class WeaponRewardSystemBuilder
             category.MaxWeaponPoolLevel != expectedMaxPoolLevel)
         {
             throw new InvalidOperationException("White chest has invalid weapon pool settings.");
+        }
+    }
+
+    private static void ValidateMerchantPool(WeaponDropPoolSO expectedPool)
+    {
+        GameObject roomManagerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(RoomManagerPrefabPath);
+        RoomManager roomManager = roomManagerPrefab != null
+            ? roomManagerPrefab.GetComponent<RoomManager>()
+            : null;
+        SerializedProperty roomManagerPool = roomManager != null
+            ? new SerializedObject(roomManager).FindProperty("_merchantWeaponPool")
+            : null;
+        if (roomManagerPool == null || roomManagerPool.objectReferenceValue != expectedPool)
+        {
+            throw new InvalidOperationException(
+                "RoomManager prefab is not wired to the dungeon weapon drop pool.");
+        }
+
+        GameObject merchantRoomPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(MerchantRoomPrefabPath);
+        MerchantRoom merchantRoom = merchantRoomPrefab != null
+            ? merchantRoomPrefab.GetComponent<MerchantRoom>()
+            : null;
+        if (merchantRoom == null || merchantRoom.WeaponPool != expectedPool)
+        {
+            throw new InvalidOperationException(
+                "Merchant room prefab is not wired to the dungeon weapon drop pool.");
         }
     }
 }

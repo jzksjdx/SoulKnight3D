@@ -20,6 +20,17 @@ namespace SoulKnight3D
             return levelPool.GetRandomPickupPrefab(random);
         }
 
+        public GameObject GetRandomPickupPrefabAtOrBelow(int level, System.Random random)
+        {
+            WeaponDropPoolLevel levelPool = FindLevelPool(level);
+            if (levelPool == null)
+            {
+                levelPool = FindHighestLevelPoolAtOrBelow(level);
+            }
+
+            return levelPool != null ? levelPool.GetRandomPickupPrefab(random) : null;
+        }
+
         public bool HasLevel(int level)
         {
             return FindLevelPool(level) != null;
@@ -36,6 +47,26 @@ namespace SoulKnight3D
             }
 
             return null;
+        }
+
+        private WeaponDropPoolLevel FindHighestLevelPoolAtOrBelow(int level)
+        {
+            WeaponDropPoolLevel bestMatch = null;
+            for (int i = 0; i < Levels.Count; i++)
+            {
+                WeaponDropPoolLevel candidate = Levels[i];
+                if (candidate == null || candidate.Level > level || !candidate.HasValidEntries())
+                {
+                    continue;
+                }
+
+                if (bestMatch == null || candidate.Level > bestMatch.Level)
+                {
+                    bestMatch = candidate;
+                }
+            }
+
+            return bestMatch;
         }
     }
 

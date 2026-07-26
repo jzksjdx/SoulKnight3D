@@ -1,9 +1,11 @@
 # Original Five-Level Weapon Drop List
 
-This is the recovered Soul Knight 1.8.4 weapon-pool mapping that was active
-before the three-level demo compaction. Use
-`Tools > Soul Knight > Restore Original 5-Level Weapon Reward System` to restore
-these values, or `Rebuild Weapon Reward System` to return to the compact setup.
+This is the active weapon-pool mapping. Current wiki values take precedence,
+with the recovered Soul Knight 1.8.4 data used where current information is
+not available.
+`Tools > Soul Knight > Rebuild Weapon Reward System` rebuilds these values.
+The old three-level demo profile remains available as the explicitly named
+`Build Compact 3-Level Weapon Reward System` development command.
 
 Enemy-only weapons remain at `-1` and never enter chest pools.
 
@@ -14,7 +16,7 @@ Enemy-only weapons remain at `-1` and never enter chest pools.
 | Bad Pistol | 3 |
 | Bazooka | 3 |
 | Blind Missile Battery | 3 |
-| Blowpipe | 1 |
+| Blowpipe | 2 |
 | Bow | 0, 1 |
 | Broadsword | 2 |
 | Desert Eagle | 0, 1 |
@@ -33,7 +35,7 @@ Enemy-only weapons remain at `-1` and never enter chest pools.
 | Shotgun | 0, 1 |
 | Sniper Rifle | 3 |
 | Snow Fox L | 0, 1 |
-| Snow Fox XL | 0, 1 |
+| Snow Fox XL | 2 |
 | Splitter Cannon | 2 |
 | Splitter Gun | 1 |
 | Strong Bow | 1 |

@@ -285,7 +285,7 @@ namespace SoulKnight3D
             {
                 for (int attempt = 0; attempt < 8; attempt++)
                 {
-                    selected = _weaponPool.GetRandomPickupPrefab(_level, StockRandom);
+                    selected = _weaponPool.GetRandomPickupPrefabAtOrBelow(_level, StockRandom);
                     if (selected == null || selected != excludedPrefab)
                     {
                         break;
