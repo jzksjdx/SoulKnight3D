@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | {{{ PRODUCT_NAME }}}</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+#if SHOW_DIAGNOSTICS
+    <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
+    <script src="<<<TemplateData/diagnostics.js>>>"></script>
+#endif
+  </head>
+  <body>
+    <div id="orientation-gate" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="orientation-content">
+        <div class="rotate-device" aria-hidden="true">
+          <div class="phone-shape"></div>
+          <div class="rotate-arrow">&#8635;</div>
+        </div>
+        <h1 id="orientation-title">Rotate your phone</h1>
+        <p id="orientation-message">Rotate your phone for the best experience. You can still start if rotation is unavailable.</p>
+        <button id="orientation-button" type="button">Start game</button>
+      </div>
+    </div>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+#if SHOW_DIAGNOSTICS
+        <img id="diagnostics-icon" src="TemplateData/webmemd-icon.png">
+#endif
+        <div id="unity-build-title">{{{ PRODUCT_NAME }}}</div>
+      </div>
+    </div>
+    <script>
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
+      var orientationGate = document.querySelector("#orientation-gate");
+      var orientationTitle = document.querySelector("#orientation-title");
+      var orientationMessage = document.querySelector("#orientation-message");
+      var orientationButton = document.querySelector("#orientation-button");
+      var isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+      var orientationGateDismissed = false;
+#if SHOW_DIAGNOSTICS
+      var diagnostics_icon = document.getElementById("diagnostics-icon");
+#endif
+
+      if (/^zh\b/i.test(navigator.language || "")) {
+        orientationTitle.textContent = "\u8bf7\u5c06\u624b\u673a\u6a2a\u8fc7\u6765";
+        orientationMessage.textContent = "\u6a2a\u5c4f\u4f53\u9a8c\u66f4\u4f73\u3002\u5982\u679c\u6d4f\u89c8\u5668\u65e0\u6cd5\u81ea\u52a8\u65cb\u8f6c\uff0c\u4ecd\u53ef\u76f4\u63a5\u5f00\u59cb\u3002";
+        orientationButton.textContent = "\u5f00\u59cb\u6e38\u620f";
+      }
+
+      function isPortraitMobile() {
+        return isMobileDevice && window.matchMedia("(orientation: portrait)").matches;
+      }
+
+      function updateOrientationGate() {
+        var shouldShow = isPortraitMobile() && !orientationGateDismissed;
+        document.body.classList.toggle("mobile-portrait", shouldShow);
+        orientationGate.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+      }
+
+      function settleWithin(promise, timeoutMs) {
+        return Promise.race([
+          Promise.resolve(promise).catch(function () {}),
+          new Promise(function (resolve) {
+            setTimeout(resolve, timeoutMs);
+          })
+        ]);
+      }
+
+      async function tryLockLandscape() {
+        if (!screen.orientation || !screen.orientation.lock) {
+          return;
+        }
+
+        try {
+          await settleWithin(screen.orientation.lock("landscape"), 500);
+        } catch (error) {
+          // Orientation locking is best-effort.
+        }
+      }
+
+      async function requestLandscape() {
+        orientationButton.disabled = true;
+
+        try {
+          // Toy hosts the game in an iframe that does not grant fullscreen.
+          // Request it only when the build is running as a top-level page.
+          if (window.self === window.top
+              && !document.fullscreenElement
+              && document.documentElement.requestFullscreen) {
+            try {
+              await settleWithin(document.documentElement.requestFullscreen(), 500);
+            } catch (error) {
+              // Fullscreen is best-effort.
+            }
+          }
+
+          await tryLockLandscape();
+        } finally {
+          // Orientation locking is unavailable in iOS Safari and many host
+          // iframes. Never leave the player trapped behind this prompt.
+          orientationGateDismissed = true;
+          orientationButton.disabled = false;
+          updateOrientationGate();
+        }
+      }
+
+      orientationButton.addEventListener("click", requestLandscape);
+      window.addEventListener("resize", updateOrientationGate);
+      window.addEventListener("orientationchange", updateOrientationGate);
+      document.addEventListener("fullscreenchange", function () {
+        tryLockLandscape();
+        updateOrientationGate();
+      });
+      updateOrientationGate();
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+        workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: unityShowBanner,
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (isMobileDevice) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+#if SHOW_DIAGNOSTICS
+        // position the diagnostics icon in the corner on the canvas
+        diagnostics_icon.style.position = "fixed";
+        diagnostics_icon.style.bottom = "10px";
+        diagnostics_icon.style.right = "0px";
+        canvas.after(diagnostics_icon);
+#endif
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "{{{ WIDTH }}}px";
+        canvas.style.height = "{{{ HEIGHT }}}px";
+      }
+
+#if BACKGROUND_FILENAME
+      canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+#endif
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+#if SHOW_DIAGNOSTICS
+                diagnostics_icon.onclick = () => {
+                  unityDiagnostics.openDiagnosticsDiv(unityInstance.GetMemoryInfo);
+                };
+#endif
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                  setTimeout(tryLockLandscape, 200);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
+</html>

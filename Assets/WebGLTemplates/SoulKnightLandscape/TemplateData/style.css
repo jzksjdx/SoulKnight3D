@@ -1,0 +1,102 @@
+html, body { width: 100%; height: 100%; overflow: hidden }
+body { padding: 0; margin: 0; background: #111416 }
+#unity-container { position: absolute }
+#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
+#unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
+#unity-canvas { background: {{{ BACKGROUND_COLOR }}} }
+.unity-mobile #unity-canvas { width: 100%; height: 100% }
+#unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none }
+#unity-logo { width: 154px; height: 130px; background: url('unity-logo-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
+#unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; margin-left: 6.5px; background: url('progress-bar-empty-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
+#unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
+#unity-footer { position: relative }
+.unity-mobile #unity-footer { display: none }
+#unity-webgl-logo { float:left; width: 204px; height: 38px; background: url('webgl-logo.png') no-repeat center }
+#unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
+#unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
+#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+
+#orientation-gate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  color: #f5f7f7;
+  background: #111416;
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  text-align: center;
+}
+
+.mobile-portrait #orientation-gate { display: flex }
+.mobile-portrait #unity-container { visibility: hidden; pointer-events: none }
+
+.orientation-content { width: min(100%, 420px) }
+.orientation-content h1 { margin: 22px 0 10px; font-size: 30px; line-height: 1.15; letter-spacing: 0 }
+.orientation-content p { margin: 0 auto 24px; max-width: 340px; color: #c5cbcd; font-size: 17px; line-height: 1.5; letter-spacing: 0 }
+
+.rotate-device {
+  position: relative;
+  width: 144px;
+  height: 100px;
+  margin: 0 auto;
+}
+
+.phone-shape {
+  position: absolute;
+  left: 24px;
+  top: 19px;
+  width: 78px;
+  height: 44px;
+  border: 5px solid #f5f7f7;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transform: rotate(-18deg);
+}
+
+.phone-shape::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f5f7f7;
+  transform: translateY(-50%);
+}
+
+.rotate-arrow {
+  position: absolute;
+  right: 5px;
+  bottom: 0;
+  color: #f4c84a;
+  font-size: 64px;
+  line-height: 1;
+  transform: rotate(-24deg);
+}
+
+#orientation-button {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 6px;
+  color: #0d1813;
+  background: #65d48c;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#orientation-button:active { background: #4fbe76 }
+
+@media (max-height: 520px) {
+  .orientation-content h1 { margin-top: 12px; font-size: 25px }
+  .orientation-content p { margin-bottom: 16px; font-size: 15px }
+  .rotate-device { transform: scale(.82); margin-top: -10px; margin-bottom: -8px }
+}
