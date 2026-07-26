@@ -233,7 +233,11 @@ namespace SoulKnight3D
                
             } else
             {
-                SwitchWeaponAnimation(PlayerController.Instance.PlayerAttack.GetCurrentWeapon().InGameData.Animation);
+                Weapon currentWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+                if (currentWeapon != null)
+                {
+                    SwitchWeaponAnimation(currentWeapon.InGameData.Animation);
+                }
             }
         }
 
@@ -256,7 +260,11 @@ namespace SoulKnight3D
 
             } else
             {
-                SwitchWeaponAnimation(PlayerController.Instance.PlayerAttack.GetCurrentWeapon().InGameData.Animation);
+                Weapon currentWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+                if (currentWeapon != null)
+                {
+                    SwitchWeaponAnimation(currentWeapon.InGameData.Animation);
+                }
             }
         }
     }

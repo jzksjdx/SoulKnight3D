@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -32,7 +31,7 @@ namespace SoulKnight3D
             ? _enragedMovementSpeedMultiplier
             : 1f;
 
-        private readonly List<Material> _dissolveMaterials = new List<Material>();
+        private DissolveMaterialController _dissolveMaterials;
         private Rigidbody _deathRigidbody;
         private Collider _deathCollider;
         private Animator _deathAnimator;
@@ -42,6 +41,7 @@ namespace SoulKnight3D
         protected override void Start()
         {
             base.Start();
+            _dissolveMaterials = new DissolveMaterialController();
             IsEnraged = false;
             _deathSequenceStarted = false;
             CacheDeathReferences();
@@ -167,20 +167,7 @@ namespace SoulKnight3D
 
         private void CacheDissolveMaterials()
         {
-            _dissolveMaterials.Clear();
-            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Material[] materials = renderers[i].materials;
-                for (int j = 0; j < materials.Length; j++)
-                {
-                    Material material = materials[j];
-                    if (material == null || !material.HasProperty("_Dissolve")) { continue; }
-
-                    material.SetFloat("_Dissolve", 0f);
-                    _dissolveMaterials.Add(material);
-                }
-            }
+            _dissolveMaterials.Cache(GetComponentsInChildren<Renderer>(true));
         }
 
         private IEnumerator DissolveAndDestroy()
@@ -204,14 +191,7 @@ namespace SoulKnight3D
 
         private void SetDissolveValue(float value)
         {
-            for (int i = 0; i < _dissolveMaterials.Count; i++)
-            {
-                Material material = _dissolveMaterials[i];
-                if (material != null)
-                {
-                    material.SetFloat("_Dissolve", value);
-                }
-            }
+            _dissolveMaterials.SetValue(value);
         }
 
         private void RecycleStatuses()

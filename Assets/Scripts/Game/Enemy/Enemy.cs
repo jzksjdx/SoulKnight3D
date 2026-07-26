@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using MoreMountains.Feedbacks;
 using QFramework;
 using UnityEngine;
@@ -43,7 +42,7 @@ namespace SoulKnight3D
         protected int _animIdDie;
 
         protected Vector3 _patrolDirection;
-        private readonly List<Material> _dissolveMaterials = new List<Material>();
+        private DissolveMaterialController _dissolveMaterials;
 
         protected Vector3 _moveDirection;
         private PlayerController _player;
@@ -51,6 +50,7 @@ namespace SoulKnight3D
         protected override void Start()
 		{
             base.Start();
+            _dissolveMaterials = new DissolveMaterialController();
             // set animations
             _animIdMove = Animator.StringToHash("Move");
             _animIdAttack = Animator.StringToHash("Attack");
@@ -58,19 +58,7 @@ namespace SoulKnight3D
             SelfAnimator.SetTrigger(_animIdMove);
             _player = PlayerController.Instance;
 
-            Renderer[] renders = GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < renders.Length; i++)
-            {
-                Material[] materials = renders[i].materials;
-                for (int j = 0; j < materials.Length; j++)
-                {
-                    if (materials[j] != null && materials[j].HasProperty("_Dissolve"))
-                    {
-                        materials[j].SetFloat("_Dissolve", 0f);
-                        _dissolveMaterials.Add(materials[j]);
-                    }
-                }
-            }
+            _dissolveMaterials.Cache(GetComponentsInChildren<Renderer>());
         }
 
         protected Quaternion _currRotation;
@@ -203,10 +191,7 @@ namespace SoulKnight3D
 
         public void SetDissolveValue(float value)
         {
-            for (int i = 0; i < _dissolveMaterials.Count; i++)
-            {
-                _dissolveMaterials[i].SetFloat("_Dissolve", value);
-            }
+            _dissolveMaterials.SetValue(value);
         }
 
         private IEnumerator DissolveAndDestroy()

@@ -23,13 +23,6 @@ namespace SoulKnight3D
             UIRoot.Instance.Common.GetOrAddComponent<SafeArea>();
         }
 
-        private void Update()
-        {
-            //if (Screen.width == _screenWidth && Screen.height == _screenHeight) { return; }
-            //_screenWidth = Screen.width;
-            //_screenHeight = Screen.height;
-            //UIKit.Root.SetResolution(_screenWidth, _screenHeight, 1);
-        }
     }
 
 }

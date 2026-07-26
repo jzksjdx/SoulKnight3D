@@ -30,9 +30,9 @@ namespace SoulKnight3D
 			Instance = null;
         }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
         private void Update()
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
             if (_waitingForWebAudioUnlock &&
                 (Input.anyKeyDown || Input.GetMouseButtonDown(0) || Input.touchCount > 0))
             {
@@ -40,8 +40,8 @@ namespace SoulKnight3D
                 s_WebAudioUnlocked = true;
                 PlayMenuMusic();
             }
-#endif
         }
+#endif
 
 		private IEnumerator Start()
 		{

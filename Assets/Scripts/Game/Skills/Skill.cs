@@ -24,7 +24,6 @@ namespace SoulKnight3D
 
             PlayerInputs.Instance.OnSkillPerformed.Register(() =>
             {
-                if (_skillDurationDelta > 0 || _skillCooldownDelta > 0) { return; }
                 UseSkill();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
@@ -60,7 +59,9 @@ namespace SoulKnight3D
         protected virtual void HandleSkillEnd()
         {
             IsUsingSkill = false;
+            _skillDurationDelta = 0f;
             _skillCooldownDelta = _skillCooldown;
+            SkillCdNormalized.Value = 0f;
         }
 
         public virtual bool UseSkill()
@@ -76,7 +77,10 @@ namespace SoulKnight3D
             if (IsUsingSkill)
             {
                 HandleSkillEnd();
+                return;
             }
+
+            _skillDurationDelta = 0f;
         }
     }
 

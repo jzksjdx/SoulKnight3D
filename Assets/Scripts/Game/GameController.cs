@@ -248,13 +248,28 @@ namespace SoulKnight3D
                 return;
             }
 
+            _isSceneTransitioning = true;
+            PreparePlayerForLevelTransition();
             SaveCurrentLevel(Level + 1);
             StartCoroutine(LoadCurrentSceneAsync());
         }
 
+        private static void PreparePlayerForLevelTransition()
+        {
+            PlayerController player = PlayerController.Instance;
+            if (player == null)
+            {
+                return;
+            }
+
+            player.PlayerAttack.Skill?.CancelForLevelTransition();
+            player.PlayerAttack.CancelCurrentWeaponCharge();
+            player.SelfRigidbody.velocity = Vector3.zero;
+            player.SelfRigidbody.angularVelocity = Vector3.zero;
+        }
+
         private IEnumerator LoadCurrentSceneAsync()
         {
-            _isSceneTransitioning = true;
             Time.timeScale = 1;
             yield return UIKit.OpenPanelAsync<UILoadingPanel>(UILevel.PopUI);
 

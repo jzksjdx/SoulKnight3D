@@ -21,7 +21,7 @@ PhysicsManager:
   m_LayerCollisionMatrix: fff7fffffff7fffffff7ffffbff5fffffff7fffffff7ffffb7f0fffffff7ffffbffbffffb7f1ffffbff0ffff00f1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
   m_SimulationMode: 0
   m_AutoSyncTransforms: 0
-  m_ReuseCollisionCallbacks: 0
+  m_ReuseCollisionCallbacks: 1
   m_InvokeCollisionCallbacks: 1
   m_ClothInterCollisionSettingsToggle: 0
   m_ClothGravity: {x: 0, y: -9.81, z: 0}

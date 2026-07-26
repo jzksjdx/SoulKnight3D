@@ -79,9 +79,14 @@ namespace SoulKnight3D
                 _weaponCache.InGameData.CritChance = 100;
             }
 
+            ResetDodgeState();
+        }
+
+        private void ResetDodgeState()
+        {
             PlayerController.Instance.PlayerAnimation.ToggleDodge(false);
             PlayerController.Instance.PlayerAttack.DisableAttack = false;
-            PlayerController.Instance.PlayerStats.IsInvincible = true;
+            PlayerController.Instance.PlayerStats.IsInvincible = false;
             Physics.IgnoreLayerCollision(3, 10, false);
         }
     }
