@@ -1,0 +1,226 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5721984883001619999
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 437197427452384212, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_Name
+      value: Cluster Missile
+      objectReference: {fileID: 0}
+    - target: {fileID: 1305253900433612875, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: managedReferences[6105035158855352322].Sfx
+      value: 
+      objectReference: {fileID: 8300000, guid: 00ce10a28e08742aa8114d0fbb10f0c2, type: 3}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3182727270601116620, guid: 68cfd8cfa510346ff9ba4cfbb0e92615, type: 3}
+    m_RemovedGameObjects:
+    - {fileID: 5421400828485997636, guid: 68cfd8cfa510346ff9ba4cfbb0e92615, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5895938866184939740}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 437197427452384212, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2067796456012342899}
+  m_SourcePrefab: {fileID: 100100000, guid: 68cfd8cfa510346ff9ba4cfbb0e92615, type: 3}
+--- !u!4 &1048048086263230514 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4747911943351174701, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+    type: 3}
+  m_PrefabInstance: {fileID: 5721984883001619999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5294454500830275019 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 437197427452384212, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+    type: 3}
+  m_PrefabInstance: {fileID: 5721984883001619999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2067796456012342899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5294454500830275019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 128e01cb808d1460daa26441db3d571b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Namespace: QFramework.Example
+  ScriptName: Cluster Missile
+  ScriptsFolder: Assets\Scripts\Game\Weapons
+  GeneratePrefab: 0
+  PrefabFolder: Assets/Art/Prefab
+  ArchitectureFullTypeName: 
+  ViewControllerFullTypeName: 
+  Data: {fileID: 11400000, guid: f3481b10f787c5f4eb933602863e3e29, type: 2}
+  InGameData: {fileID: 0}
+  BulletSpeed: 10
+  shootPoint: {fileID: 7396324331855263261}
+  bulletPrefab: {fileID: 1378189592200157116, guid: 0efbfa38e879afe488ef799d993c16ac,
+    type: 3}
+  BulletSize: 1
+  ShootFeedback: {fileID: 6734468513001281108}
+--- !u!114 &6734468513001281108 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1305253900433612875, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+    type: 3}
+  m_PrefabInstance: {fileID: 5721984883001619999}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6da43522623d4704e979466dc7650b65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &7396324331855263261 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3012229913411895298, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+    type: 3}
+  m_PrefabInstance: {fileID: 5721984883001619999}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6221771625958870839
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1048048086263230514}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.028
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.106
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0091
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.047219854
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.72377867
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.6875042
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.03539429
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 975076dd8d071b5499cf200c133ec5e4, type: 2}
+    - target: {fileID: 919132149155446097, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_Name
+      value: Cluster Missile Model
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+        type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b2a8dbd1c9b3c0445bee82be13da1e12, type: 3}
+--- !u!4 &5895938866184939740 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b2a8dbd1c9b3c0445bee82be13da1e12,
+    type: 3}
+  m_PrefabInstance: {fileID: 6221771625958870839}
+  m_PrefabAsset: {fileID: 0}

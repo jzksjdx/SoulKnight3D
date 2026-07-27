@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Cluster Missile
+  m_EditorClassIdentifier: 
+  Name: Cluster Missile
+  NameCN: "\u591A\u5F39\u5934\u5BFC\u5F39"
+  Sprite: {fileID: 21300000, guid: d78736f87efad0942970b0ef5f248908, type: 2}
+  Category: 4
+  Rarity: 2
+  Animation: 6
+  Damage: 9
+  EnergyCost: 4
+  CritChance: 0
+  Inaccuracy: 4
+  Price: 30
+  Cooldown: 1
+  DropLevel: 4
+  ExtraDropLevels: 
+  WeaponPrefab: {fileID: 5294454500830275019, guid: 85d2710a1e1fafd4783a26b01f0320a5,
+    type: 3}
+  PickUpPrefab: {fileID: 5084527520217785161, guid: f190b7ca451b614459bb2b630e6382cd,
+    type: 3}

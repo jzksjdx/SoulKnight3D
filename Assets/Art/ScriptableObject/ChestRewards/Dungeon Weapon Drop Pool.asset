@@ -107,11 +107,23 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 0cf6be3254259d8479f3b549143bcf87, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: bb831effa98ade1438293caaee0e7dce, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: b652ba8758e083248a7b97bc072fbc29, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
     - Weapon: {fileID: 11400000, guid: eb3093520f1294413b14b5bf550b5583, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 1517871f818cb3049b88f44c4a52f7e3, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
@@ -149,12 +161,20 @@ MonoBehaviour:
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
+    - Weapon: {fileID: 11400000, guid: 2cc4c4379bdaedc4f937609f48abbb99, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: b58c33d752f084bf3b5fb254afd46f6e, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1
       Enabled: 1
   - Level: 4
     Entries:
+    - Weapon: {fileID: 11400000, guid: f3481b10f787c5f4eb933602863e3e29, type: 2}
+      PickupOverride: {fileID: 0}
+      Weight: 1
+      Enabled: 1
     - Weapon: {fileID: 11400000, guid: 5be749c3086dc45f8801a250df26bdb8, type: 2}
       PickupOverride: {fileID: 0}
       Weight: 1

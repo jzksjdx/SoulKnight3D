@@ -19,6 +19,9 @@ Enemy-only weapons remain at `-1` and never enter chest pools.
 | Blowpipe | 2 |
 | Bow | 0, 1 |
 | Broadsword | 2 |
+| Chu Ko Nu | 2 |
+| Cluster Missile | 4 |
+| Crossbow | 2 |
 | Desert Eagle | 0, 1 |
 | Enemy Blowpipe | -1 |
 | Goblin Giant Staff | -1 |
@@ -32,7 +35,9 @@ Enemy-only weapons remain at `-1` and never enter chest pools.
 | Pioneer | 0, 2 |
 | Pirate Saber | 2 |
 | Revolver | 0, 1 |
+| Rocket Gun | 3 |
 | Shotgun | 0, 1 |
+| SMG Helix | 2 |
 | Sniper Rifle | 3 |
 | Snow Fox L | 0, 1 |
 | Snow Fox XL | 2 |

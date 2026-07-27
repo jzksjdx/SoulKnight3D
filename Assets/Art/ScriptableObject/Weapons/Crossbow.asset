@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d450126ff735f4d949869cf8df3a48bc, type: 3}
+  m_Name: Crossbow
+  m_EditorClassIdentifier: 
+  Name: Crossbow
+  NameCN: "\u5F29"
+  Sprite: {fileID: 21300000, guid: 6095efa287abf2c429557686d111f4ec, type: 2}
+  Category: 6
+  Rarity: 0
+  Animation: 1
+  Damage: 8
+  EnergyCost: 2
+  CritChance: 30
+  Inaccuracy: 2
+  Price: 12
+  Cooldown: 0.8333333
+  DropLevel: 2
+  ExtraDropLevels: 
+  WeaponPrefab: {fileID: 8070438210214072388, guid: 684e3912cfd2c114bbec2c43f093c8fd,
+    type: 3}
+  PickUpPrefab: {fileID: 9207572129338078714, guid: 8081cd6407c3d3f4081c8852b9d8125d,
+    type: 3}
