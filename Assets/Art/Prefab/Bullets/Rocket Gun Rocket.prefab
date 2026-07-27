@@ -11,12 +11,27 @@ PrefabInstance:
     - target: {fileID: -6426309724096316442, guid: c5216a778a4b041999194f8d9cfc96ce,
         type: 3}
       propertyPath: ExplosionRadius
-      value: 2
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 3274414806100878763, guid: c5216a778a4b041999194f8d9cfc96ce,
         type: 3}
       propertyPath: m_Name
       value: Rocket Gun Rocket
+      objectReference: {fileID: 0}
+    - target: {fileID: 4558148457886507857, guid: c5216a778a4b041999194f8d9cfc96ce,
+        type: 3}
+      propertyPath: managedReferences[6496592123500429396].MaxVolume
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4558148457886507857, guid: c5216a778a4b041999194f8d9cfc96ce,
+        type: 3}
+      propertyPath: managedReferences[6496592123500429396].MinVolume
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4558148457886507857, guid: c5216a778a4b041999194f8d9cfc96ce,
+        type: 3}
+      propertyPath: managedReferences[6496592123500429396].SpatialBlend
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4558148457886507857, guid: c5216a778a4b041999194f8d9cfc96ce,
         type: 3}

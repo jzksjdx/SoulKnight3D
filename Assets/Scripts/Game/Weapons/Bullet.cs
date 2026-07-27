@@ -63,12 +63,24 @@ namespace SoulKnight3D
         {
             _originalScale = transform.localScale;
             _impactBehavior = GetComponent<IBulletImpactBehavior>();
+            ConfigureTrailForPooling();
             SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
             {
                 if (_didHit || PassThroughFriendlyCollision(other)) { return; }
                 _didHit = true;
                 OnBulletCollision(other);
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private void ConfigureTrailForPooling()
+        {
+            if (!TrailRenderer) { return; }
+
+            // Auto Destruct removes the trail object after its first use, which
+            // leaves later pool checkouts without a renderer.
+            TrailRenderer.autodestruct = false;
+            TrailRenderer.emitting = false;
+            TrailRenderer.Clear();
         }
 
         private bool PassThroughFriendlyCollision(Collision other)
@@ -280,6 +292,8 @@ namespace SoulKnight3D
             gameObject.Show();
             if (!TrailRenderer) { return; }
 
+            TrailRenderer.autodestruct = false;
+            TrailRenderer.enabled = true;
             TrailRenderer.Clear();
             TrailRenderer.emitting = true;
         }

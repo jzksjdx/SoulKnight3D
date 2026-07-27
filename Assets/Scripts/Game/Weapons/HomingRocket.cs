@@ -12,11 +12,11 @@ namespace SoulKnight3D
         [SerializeField, Min(0.05f)] private float _retargetInterval = 0.1f;
         [SerializeField, Min(0f)] private float _targetRange = 20f;
         [SerializeField] private float _targetHeightOffset = 0.5f;
-        [SerializeField] private LayerMask _targetLayers = ~0;
+        [SerializeField] private LayerMask _targetLayers = 1 << 8;
 
-        private readonly Collider[] _targetBuffer = new Collider[32];
+        private readonly Collider[] _targetBuffer = new Collider[64];
         private Bullet _bullet;
-        private Enemy _target;
+        private TargetableObject _target;
         private float _elapsed;
         private float _retargetTimer;
 
@@ -93,12 +93,12 @@ namespace SoulKnight3D
             _targetHeightOffset = targetHeightOffset;
         }
 
-        private Enemy FindClosestTarget()
+        private TargetableObject FindClosestTarget()
         {
             int hitCount = Physics.OverlapSphereNonAlloc(
                 transform.position, _targetRange, _targetBuffer,
                 _targetLayers, QueryTriggerInteraction.Ignore);
-            Enemy closest = null;
+            TargetableObject closest = null;
             float closestDistance = _targetRange * _targetRange;
 
             for (int i = 0; i < hitCount; i++)
@@ -107,23 +107,25 @@ namespace SoulKnight3D
                 _targetBuffer[i] = null;
                 if (targetCollider == null) { continue; }
 
-                Enemy enemy = targetCollider.GetComponentInParent<Enemy>();
-                if (!IsValidTarget(enemy)) { continue; }
+                TargetableObject target =
+                    targetCollider.GetComponentInParent<TargetableObject>();
+                if (!IsValidTarget(target)) { continue; }
 
                 float distance =
-                    (enemy.transform.position - transform.position).sqrMagnitude;
+                    (target.transform.position - transform.position).sqrMagnitude;
                 if (distance >= closestDistance) { continue; }
 
-                closest = enemy;
+                closest = target;
                 closestDistance = distance;
             }
 
             return closest;
         }
 
-        private static bool IsValidTarget(Enemy target)
+        private static bool IsValidTarget(TargetableObject target)
         {
-            return target != null && target.isActiveAndEnabled && !target.IsDead;
+            bool isEnemyTarget = target is Enemy || target is BossEnemy;
+            return isEnemyTarget && target.isActiveAndEnabled && !target.IsDead;
         }
     }
 }

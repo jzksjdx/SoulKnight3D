@@ -1,5 +1,6 @@
 using MoreMountains.Feedbacks;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SoulKnight3D
 {
@@ -10,8 +11,8 @@ namespace SoulKnight3D
         [SerializeField] private GameObject _splitRocketPrefab;
         [SerializeField] private MMF_Player _splitFeedback;
         [SerializeField, Min(0.05f)] private float _splitDelay = 0.3f;
-        [SerializeField, Min(2)] private int _splitCount = 4;
-        [SerializeField, Min(0f)] private float _angleStep = 22f;
+        [FormerlySerializedAs("_angleStep")]
+        [SerializeField, Min(0f)] private float _splitAngle = 22f;
         [SerializeField, Min(0.01f)] private float _splitRocketSpeed = 16f;
         [SerializeField, Min(0)] private int _splitRocketDamage = 3;
         [SerializeField, Min(0f)] private float _spawnOffset = 0.12f;
@@ -43,14 +44,13 @@ namespace SoulKnight3D
         }
 
         public void Configure(GameObject splitRocketPrefab, MMF_Player splitFeedback,
-            float splitDelay, int splitCount, float angleStep,
+            float splitDelay, float splitAngle,
             float splitRocketSpeed, int splitRocketDamage, float spawnOffset)
         {
             _splitRocketPrefab = splitRocketPrefab;
             _splitFeedback = splitFeedback;
             _splitDelay = Mathf.Max(0.05f, splitDelay);
-            _splitCount = Mathf.Max(2, splitCount);
-            _angleStep = Mathf.Max(0f, angleStep);
+            _splitAngle = Mathf.Max(0f, splitAngle);
             _splitRocketSpeed = Mathf.Max(0.01f, splitRocketSpeed);
             _splitRocketDamage = Mathf.Max(0, splitRocketDamage);
             _spawnOffset = Mathf.Max(0f, spawnOffset);
@@ -62,24 +62,38 @@ namespace SoulKnight3D
 
             if (_splitRocketPrefab != null && GameObjectsManager.Instance != null)
             {
-                Vector3 forward = _bullet.SelfRigidbody != null
-                    ? _bullet.SelfRigidbody.velocity
-                    : Vector3.zero;
-                forward.y = 0f;
-                if (forward.sqrMagnitude <= 0.0001f)
+                Quaternion sourceRotation = transform.rotation;
+                if (_bullet.SelfRigidbody != null &&
+                    _bullet.SelfRigidbody.velocity.sqrMagnitude > 0.0001f)
                 {
-                    forward = transform.forward;
-                    forward.y = 0f;
+                    Vector3 velocityDirection =
+                        _bullet.SelfRigidbody.velocity.normalized;
+                    Quaternion velocityCorrection = Quaternion.FromToRotation(
+                        sourceRotation * Vector3.forward, velocityDirection);
+                    sourceRotation = velocityCorrection * sourceRotation;
                 }
-                forward.Normalize();
 
-                float center = (_splitCount - 1) * 0.5f;
-                for (int i = 0; i < _splitCount; i++)
+                float angle = _splitAngle;
+                Quaternion[] localOffsets =
                 {
-                    float angle = (i - center) * _angleStep;
+                    Quaternion.Euler(angle, 0f, angle),
+                    Quaternion.Euler(-angle, 0f, angle),
+                    Quaternion.Euler(-angle, 0f, -angle),
+                    Quaternion.Euler(angle, 0f, -angle)
+                };
+
+                Quaternion upToForward =
+                    Quaternion.FromToRotation(Vector3.up, Vector3.forward);
+                Quaternion forwardToUp = Quaternion.Inverse(upToForward);
+
+                for (int i = 0; i < localOffsets.Length; i++)
+                {
+                    Quaternion splitRotation =
+                        sourceRotation * upToForward *
+                        localOffsets[i] * forwardToUp;
                     Vector3 direction =
-                        Quaternion.AngleAxis(angle, Vector3.up) * forward;
-                    SpawnSplitRocket(direction);
+                        (splitRotation * Vector3.forward).normalized;
+                    SpawnSplitRocket(direction, splitRotation);
                 }
             }
 
@@ -87,7 +101,8 @@ namespace SoulKnight3D
             _bullet.DestroyBullet();
         }
 
-        private void SpawnSplitRocket(Vector3 direction)
+        private void SpawnSplitRocket(
+            Vector3 direction, Quaternion splitRotation)
         {
             GameObject rocketObject =
                 GameObjectsManager.Instance.SpawnBullet(_splitRocketPrefab);
@@ -99,7 +114,7 @@ namespace SoulKnight3D
 
             Vector3 position = transform.position + direction * _spawnOffset;
             rocketObject.transform.SetPositionAndRotation(
-                position, Quaternion.LookRotation(direction, Vector3.up));
+                position, splitRotation);
             rocket.InitializeBullet(_bullet.WeaponTag, _splitRocketDamage, false,
                 _splitRocketPrefab);
             rocket.SelfRigidbody.velocity = direction * _splitRocketSpeed;

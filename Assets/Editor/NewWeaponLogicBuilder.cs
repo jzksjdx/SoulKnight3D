@@ -143,7 +143,7 @@ public static class NewWeaponLogicBuilder
             GameObject splitRocket =
                 AssetDatabase.LoadAssetAtPath<GameObject>(
                     HomingSmallRocketPath);
-            cluster.Configure(splitRocket, feedback, 0.3f, 4, 22f,
+            cluster.Configure(splitRocket, feedback, 0.3f, 22f,
                 16f, 3, 0.12f);
         });
 
