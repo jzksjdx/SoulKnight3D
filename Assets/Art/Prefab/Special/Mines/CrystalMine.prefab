@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8076448486314840750
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1729069169855993630, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: b731d5ec506a6e441857fe868a629527, type: 2}
+    - target: {fileID: 1732060481721928098, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: managedReferences[3352942640503717904].ParticlesPrefab
+      value: 
+      objectReference: {fileID: 5034250853224737177, guid: 2410a8195a1ca424aa142dbda14f658b,
+        type: 3}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5951134893623560756, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6497382149076103921, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: _rewardType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8341412299132114167, guid: 086d5b7f8cfbe324f938aff8a21d4c58,
+        type: 3}
+      propertyPath: m_Name
+      value: CrystalMine
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 086d5b7f8cfbe324f938aff8a21d4c58, type: 3}

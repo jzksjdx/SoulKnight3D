@@ -50,6 +50,14 @@ namespace SoulKnight3D
             }
         }
 
+        public static void DropCoins(Vector3 position, CoinPickup.CoinType type,
+            int count)
+        {
+            if (GameObjectsManager.Instance == null) { return; }
+
+            SpawnCoins(position, type, Mathf.Max(0, count));
+        }
+
         private static void SpawnEnergy(Vector3 position, int count)
         {
             DropEnergy(position, count);

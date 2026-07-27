@@ -60,6 +60,10 @@ MonoBehaviour:
   RoomManagerPrefab: {fileID: 8739863374466118545, guid: 109cf7629f80f4367b30bd57db2fed9c,
     type: 3}
   _shouldGenerateMap: 1
+  _merchantRoomChance: 0.5
+  _merchantMinimumLevel: 1
+  _specialRoomChance: 1
+  _bossExtraBattleRoomChance: 0.5
   PortalPrefab: {fileID: 2694056907898403194, guid: a900f0f4337974a0794f66c6511d1997,
     type: 3}
   roomGenPrefab: {fileID: 557731140853129520, guid: 8cbdca1fca12a4f1ca628a0db28caed9,

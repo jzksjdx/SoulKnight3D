@@ -7,6 +7,7 @@ using UnityEngine;
 
 public static class EnemySpawnProfileBuilder
 {
+    private const int ForestLevelCount = 5;
     private const string ProfilePath =
         "Assets/Art/ScriptableObject/EnemyWaves/Forest Spawn Profile.asset";
     private const string FloorPath =
@@ -30,7 +31,9 @@ public static class EnemySpawnProfileBuilder
         {
             LevelSettings(1, 12, 8),
             LevelSettings(2, 14, 11),
-            LevelSettings(3, 16, 14)
+            LevelSettings(3, 16, 14),
+            LevelSettings(4, 18, 17),
+            LevelSettings(5, 20, 20)
         };
         profile.Enemies = new List<EnemySpawnEntry>
         {
@@ -42,9 +45,7 @@ public static class EnemySpawnProfileBuilder
             Entry("Elite Goblin Guard Blowpipe.prefab", null, 2, 2, 1, 2),
             Entry("Elite Goblin Guard Sickle.prefab", null, 2, 2, 1, 2),
             Entry("DireBoar.prefab", null, 1, 2, 2, 2),
-            // The project compresses the Forest into three levels, so the original stage-four
-            // Large Goblin unlock is placed at level three with a one-per-wave cap.
-            Entry("GoblinGiant.prefab", null, 4, 4, 1, 3, 1)
+            Entry("GoblinGiant.prefab", null, 4, 4, 1, 4, 1)
         };
 
         EditorUtility.SetDirty(profile);
@@ -118,6 +119,19 @@ public static class EnemySpawnProfileBuilder
             throw new InvalidOperationException($"Forest floor asset is missing at '{FloorPath}'.");
         }
 
+        while (floor.GameLevels.Count < ForestLevelCount)
+        {
+            List<EnemyWaveSO> fallbackWaves = floor.GameLevels.Count > 0
+                ? new List<EnemyWaveSO>(
+                    floor.GameLevels[floor.GameLevels.Count - 1].LevelWaves)
+                : new List<EnemyWaveSO>();
+            floor.GameLevels.Add(new GameLevel
+            {
+                EnemySpawnProfile = profile,
+                LevelWaves = fallbackWaves
+            });
+        }
+
         foreach (GameLevel level in floor.GameLevels)
         {
             level.EnemySpawnProfile = profile;
@@ -147,7 +161,7 @@ public static class EnemySpawnProfileBuilder
             }
         }
 
-        for (int level = 1; level <= 3; level++)
+        for (int level = 1; level <= ForestLevelCount; level++)
         {
             for (int seed = 1; seed <= 500; seed++)
             {

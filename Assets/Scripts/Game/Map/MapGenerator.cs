@@ -23,6 +23,10 @@ namespace SoulKnight3D
         [SerializeField, Range(0f, 1f)] private float _merchantRoomChance = 0.5f;
         [SerializeField, Min(1)] private int _merchantMinimumLevel = 1;
 
+        [Header("Special Rooms")]
+        [SerializeField, Range(0f, 1f)] private float _specialRoomChance = 1f;
+        [SerializeField, Range(0f, 1f)] private float _bossExtraBattleRoomChance = 0.5f;
+
         [Header("Room Objects")]
         [SerializeField] private GameObject PortalPrefab;
         [SerializeField] private GameObject roomGenPrefab;
@@ -106,36 +110,120 @@ namespace SoulKnight3D
 
         private IEnumerator AddRoomRoutine()
         {
-            int nextRoomNumber = 12;
-            yield return AddRangeRoutine(12, value => nextRoomNumber = value);
-            int nextRoomNumber1 = nextRoomNumber;
-            yield return AddRangeRoutine(nextRoomNumber, value => nextRoomNumber1 = value, 2);
-            int nextRoomNumber2 = nextRoomNumber1;
-            yield return AddRangeRoutine(nextRoomNumber1, value => nextRoomNumber2 = value, 2, isReward: true);
-            yield return AddRangeRoutine(nextRoomNumber2, _ => { }, 1, isFinal: true);
-            //int nextRoomNumber3 = AddRange(nextRoomNumber, 1, isFinal: true);
+            const int startRoomKey = 12;
+            bool isBossFloor = GameController.Instance != null &&
+                GameController.Instance.IsFinalLevel;
+            int mandatoryBattleRoomCount = isBossFloor ? 3 : 2;
+            List<RoomManager.RoomType?> branchRoomTypes =
+                BuildBranchRoomTypes(mandatoryBattleRoomCount, isBossFloor);
 
-            _generatedRooms[12].PlayerEntersRoom();
+            int currentRoomKey = startRoomKey;
+            yield return AddRangeRoutine(
+                currentRoomKey,
+                value => currentRoomKey = value,
+                1,
+                RoomManager.RoomType.Battle,
+                RoomManager.RoomType.Battle,
+                1 + (branchRoomTypes[0].HasValue ? 1 : 0));
+            if (currentRoomKey == startRoomKey)
+            {
+                Debug.LogError("Map generation could not place the first battle room.");
+                yield break;
+            }
+
+            for (int i = 0; i < mandatoryBattleRoomCount; i++)
+            {
+                bool connectsToFinalRoom = i == mandatoryBattleRoomCount - 1;
+                RoomManager.RoomType pathRoomType = connectsToFinalRoom
+                    ? (isBossFloor
+                        ? RoomManager.RoomType.Boss
+                        : RoomManager.RoomType.Portal)
+                    : RoomManager.RoomType.Battle;
+                RoomManager.RoomType? branchRoomType = branchRoomTypes[i];
+
+                int nextRoomKey = currentRoomKey;
+                yield return AddRangeRoutine(
+                    currentRoomKey,
+                    value => nextRoomKey = value,
+                    branchRoomType.HasValue ? 2 : 1,
+                    pathRoomType,
+                    branchRoomType ?? RoomManager.RoomType.Battle,
+                    connectsToFinalRoom
+                        ? 0
+                        : 1 + (branchRoomTypes[i + 1].HasValue ? 1 : 0));
+                if (nextRoomKey == currentRoomKey)
+                {
+                    Debug.LogError(
+                        $"Map generation stopped at room {currentRoomKey}: " +
+                        "the required path and branch rooms could not be placed.");
+                    yield break;
+                }
+                currentRoomKey = nextRoomKey;
+            }
+
+            _generatedRooms[startRoomKey].PlayerEntersRoom();
         }
 
-        public int AddRange(int oldRoomKey, int newRoomCount = 1, bool isReward = false , bool isFinal = false)
+        private List<RoomManager.RoomType?> BuildBranchRoomTypes(
+            int mandatoryBattleRoomCount, bool isBossFloor)
         {
-            if (!TryPrepareRoomRange(oldRoomKey, newRoomCount, out int nextRoomKey, out int deadEndKey))
+            List<RoomManager.RoomType?> roomTypes =
+                new List<RoomManager.RoomType?>
+            {
+                RoomManager.RoomType.Reward
+            };
+            if (Random.value < _specialRoomChance)
+            {
+                roomTypes.Add(RoomManager.RoomType.Special);
+            }
+            if (isBossFloor && Random.value < _bossExtraBattleRoomChance)
+            {
+                roomTypes.Add(RoomManager.RoomType.Battle);
+            }
+
+            while (roomTypes.Count < mandatoryBattleRoomCount)
+            {
+                roomTypes.Add(null);
+            }
+
+            for (int i = roomTypes.Count - 1; i > 0; i--)
+            {
+                int swapIndex = Random.Range(0, i + 1);
+                (roomTypes[i], roomTypes[swapIndex]) =
+                    (roomTypes[swapIndex], roomTypes[i]);
+            }
+
+            return roomTypes;
+        }
+
+        public int AddRange(int oldRoomKey, int newRoomCount = 1,
+            RoomManager.RoomType pathRoomType = RoomManager.RoomType.Battle,
+            RoomManager.RoomType branchRoomType = RoomManager.RoomType.Battle,
+            int requiredPathRoomExits = 0)
+        {
+            if (!TryPrepareRoomRange(oldRoomKey, newRoomCount,
+                    requiredPathRoomExits, out int nextRoomKey))
             {
                 return oldRoomKey;
             }
 
             foreach (int newRoomKey in range)
             {
-                GenerateRoomConnection(oldRoomKey, newRoomKey, deadEndKey, isReward, isFinal);
+                GenerateRoomConnection(oldRoomKey, newRoomKey, nextRoomKey,
+                    pathRoomType, branchRoomType);
             }
 
             return nextRoomKey;
         }
 
-        private IEnumerator AddRangeRoutine(int oldRoomKey, Action<int> onComplete, int newRoomCount = 1, bool isReward = false, bool isFinal = false)
+        private IEnumerator AddRangeRoutine(int oldRoomKey, Action<int> onComplete,
+            int newRoomCount = 1,
+            RoomManager.RoomType pathRoomType = RoomManager.RoomType.Battle,
+            RoomManager.RoomType branchRoomType = RoomManager.RoomType.Battle,
+            int requiredPathRoomExits = 0)
         {
-            if (!TryPrepareRoomRange(oldRoomKey, newRoomCount, out int nextRoomKey, out int deadEndKey))
+            if (!TryPrepareRoomRange(oldRoomKey, newRoomCount,
+                    requiredPathRoomExits, out int nextRoomKey))
             {
                 onComplete?.Invoke(oldRoomKey);
                 yield break;
@@ -143,17 +231,18 @@ namespace SoulKnight3D
 
             foreach (int newRoomKey in range)
             {
-                GenerateRoomConnection(oldRoomKey, newRoomKey, deadEndKey, isReward, isFinal);
+                GenerateRoomConnection(oldRoomKey, newRoomKey, nextRoomKey,
+                    pathRoomType, branchRoomType);
                 yield return null;
             }
 
             onComplete?.Invoke(nextRoomKey);
         }
 
-        private bool TryPrepareRoomRange(int oldRoomKey, int newRoomCount, out int nextRoomKey, out int deadEndKey)
+        private bool TryPrepareRoomRange(int oldRoomKey, int newRoomCount,
+            int requiredPathRoomExits, out int nextRoomKey)
         {
             nextRoomKey = oldRoomKey;
-            deadEndKey = -99;
 
             int x = oldRoomKey % gridWidth;
             int y = oldRoomKey / gridWidth;
@@ -173,33 +262,45 @@ namespace SoulKnight3D
                 }
             }
 
-            if (range.Count == 0)
+            if (range.Count < newRoomCount)
             {
                 return false;
             }
 
-            newRoomCount = Mathf.Min(newRoomCount, range.Count);
-            int roomLeftToRemove = range.Count - newRoomCount;
-            for (int j = 0; j < roomLeftToRemove; j++)
+            List<int> pathCandidates = range.FindAll(
+                roomKey => CountAvailableNeighbors(roomKey) >= requiredPathRoomExits);
+            if (pathCandidates.Count == 0)
             {
-                int randomIndex = Random.Range(0, range.Count);
-                range.RemoveAt(randomIndex);
+                return false;
             }
 
-            nextRoomKey = range[Random.Range(0, range.Count)];
-            foreach (int roomKey in range)
+            nextRoomKey = pathCandidates[Random.Range(0, pathCandidates.Count)];
+            range.Remove(nextRoomKey);
+            while (range.Count > newRoomCount - 1)
             {
-                if (roomKey != nextRoomKey)
-                {
-                    deadEndKey = roomKey;
-                    break;
-                }
+                range.RemoveAt(Random.Range(0, range.Count));
             }
-
+            range.Insert(0, nextRoomKey);
             return true;
         }
 
-        private void GenerateRoomConnection(int oldRoomKey, int newRoomKey, int deadEndKey, bool isReward, bool isFinal)
+        private int CountAvailableNeighbors(int roomKey)
+        {
+            int x = roomKey % gridWidth;
+            int y = roomKey / gridWidth;
+            int availableCount = 0;
+
+            if (y > 0 && map[y - 1, x] == 0) { availableCount++; }
+            if (y < gridHeight - 1 && map[y + 1, x] == 0) { availableCount++; }
+            if (x > 0 && map[y, x - 1] == 0) { availableCount++; }
+            if (x < gridWidth - 1 && map[y, x + 1] == 0) { availableCount++; }
+
+            return availableCount;
+        }
+
+        private void GenerateRoomConnection(int oldRoomKey, int newRoomKey,
+            int pathRoomKey, RoomManager.RoomType pathRoomType,
+            RoomManager.RoomType branchRoomType)
         {
             map[newRoomKey / gridWidth, newRoomKey % gridWidth] = 1;
 
@@ -247,22 +348,25 @@ namespace SoulKnight3D
             RoomGate newRoomGateComponent = newRoomGate.GetComponent<RoomGate>();
             _roomDataDict[oldRoomKey].gates.Add(oldRoomGateComponent);
 
-            RoomManager.RoomType roomType = RoomManager.RoomType.Battle;
-            if (isFinal)
+            RoomManager.RoomType roomType = newRoomKey == pathRoomKey
+                ? pathRoomType
+                : branchRoomType;
+            if (roomType == RoomManager.RoomType.Reward &&
+                ShouldGenerateMerchantRoom())
             {
-                roomType = GameController.Instance.IsFinalLevel ? RoomManager.RoomType.Boss : RoomManager.RoomType.Portal;
-                _generatedPortal = Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
+                roomType = RoomManager.RoomType.Merchant;
             }
-            else if (isReward && newRoomKey == deadEndKey)
+
+            bool isFinalRoom = roomType == RoomManager.RoomType.Portal ||
+                roomType == RoomManager.RoomType.Boss;
+            if (isFinalRoom)
             {
-                roomType = ShouldGenerateMerchantRoom()
-                    ? RoomManager.RoomType.Merchant
-                    : RoomManager.RoomType.Reward;
+                _generatedPortal = Instantiate(PortalPrefab, newRoomWorldPosition, Quaternion.identity);
             }
 
             _roomDataDict.Add(newRoomKey, new RoomData(newRoomWorldPosition, new List<RoomGate> { newRoomGateComponent }, roomType));
 
-            SetupRoomManager(newRoomKey, isFinal ? _generatedPortal : null);
+            SetupRoomManager(newRoomKey, isFinalRoom ? _generatedPortal : null);
             GameObject newRoom = GenerateRoom(newRoomKey, newRoomWorldPosition);
 
             GameObject hallwayGenObj = Instantiate(hallwayGenPrefab, hallWayPosition, Quaternion.identity);

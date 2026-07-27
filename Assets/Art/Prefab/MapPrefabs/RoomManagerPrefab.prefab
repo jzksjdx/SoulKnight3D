@@ -84,6 +84,10 @@ MonoBehaviour:
   _merchantPriceLabelPrefab: {fileID: 8389503412826759230, guid: 0cba4d1550fdebf4b85d8e3784a24f2e, type: 3}
   _merchantPotionStockYOffset: 0.2
   _merchantPriceIncreasePerLevel: 0.15
+  _specialRoomPrefabs:
+  - {fileID: 8341412299132114167, guid: 086d5b7f8cfbe324f938aff8a21d4c58, type: 3}
+  - {fileID: 8341412299132114167, guid: 116dba62bcd7b6049b6e82bfd98ca45d, type: 3}
+  _specialRoomYOffset: 0.02
 --- !u!1 &5597688572168817023
 GameObject:
   m_ObjectHideFlags: 0

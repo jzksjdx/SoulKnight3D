@@ -50,6 +50,10 @@ namespace SoulKnight3D
         [SerializeField, Min(0f)] private float _merchantPotionStockYOffset = 0.2f;
         [SerializeField, Min(0f)] private float _merchantPriceIncreasePerLevel = 0.15f;
 
+        [Header("Special Room")]
+        [SerializeField] private List<GameObject> _specialRoomPrefabs = new List<GameObject>();
+        [SerializeField] private float _specialRoomYOffset = 0.02f;
+
         // room objects references
         private List<GameObject> _enemies = new List<GameObject>();
         private SpikeTilesController _spikeTilesController;
@@ -58,7 +62,7 @@ namespace SoulKnight3D
 
         public enum RoomType
         {
-            Home, Battle, Reward, Portal, Boss, Merchant
+            Home, Battle, Reward, Portal, Boss, Merchant, Special
         }
 
         public enum RoomStatus
@@ -149,6 +153,11 @@ namespace SoulKnight3D
             else if (type == RoomType.Merchant)
             {
                 SpawnMerchantRoom();
+                _roomIcon.sprite = IconChest;
+            }
+            else if (type == RoomType.Special)
+            {
+                SpawnSpecialRoom();
                 _roomIcon.sprite = IconSpecial;
             }
             else if (type == RoomType.Boss)
@@ -178,7 +187,7 @@ namespace SoulKnight3D
             }
 
             GameObject merchantObject = Instantiate(_merchantRoomPrefab, transform.position,
-                GetMerchantRoomRotation(), transform);
+                GetEntranceFacingRotation(), transform);
             MerchantRoom merchantRoom = merchantObject.GetComponent<MerchantRoom>();
             if (merchantRoom == null)
             {
@@ -191,7 +200,22 @@ namespace SoulKnight3D
                 _merchantPotionStockYOffset);
         }
 
-        private Quaternion GetMerchantRoomRotation()
+        private void SpawnSpecialRoom()
+        {
+            _specialRoomPrefabs.RemoveAll(prefab => prefab == null);
+            if (_specialRoomPrefabs.Count == 0)
+            {
+                Debug.LogWarning($"Special room '{name}' has no content prefabs configured.");
+                return;
+            }
+
+            GameObject contentPrefab =
+                _specialRoomPrefabs[Random.Range(0, _specialRoomPrefabs.Count)];
+            Vector3 spawnPosition = transform.position + Vector3.up * _specialRoomYOffset;
+            Instantiate(contentPrefab, spawnPosition, GetEntranceFacingRotation(), transform);
+        }
+
+        private Quaternion GetEntranceFacingRotation()
         {
             if (_gates == null)
             {
@@ -460,7 +484,8 @@ namespace SoulKnight3D
 
         public void PlayerEntersRoom()
         {
-            if (Type == RoomType.Portal || Type == RoomType.Reward || Type == RoomType.Merchant)
+            if (Type == RoomType.Portal || Type == RoomType.Reward ||
+                Type == RoomType.Merchant || Type == RoomType.Special)
             {
                 Status = RoomStatus.Explored;
             }

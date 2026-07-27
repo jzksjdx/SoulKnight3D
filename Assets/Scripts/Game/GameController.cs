@@ -59,7 +59,7 @@ namespace SoulKnight3D
                 RunsStarted++;
                 saveSystem.SaveInt(RunsStartedSaveKey, RunsStarted);
             }
-            IsFinalLevel = Level == 3;
+            IsFinalLevel = Level == GameFloor.GameLevels.Count;
             GameLevel currentLevel = GameFloor.GameLevels[Level - 1];
             MapGenerator.EnemySpawnProfile = currentLevel.EnemySpawnProfile;
             MapGenerator.EnemySpawnLevel = Level;

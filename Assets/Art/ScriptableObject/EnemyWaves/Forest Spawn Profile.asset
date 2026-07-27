@@ -28,6 +28,14 @@ MonoBehaviour:
     MinTotalPoints: 16
     MaxTotalPoints: 16
     WaveCapacity: 14
+  - Level: 4
+    MinTotalPoints: 18
+    MaxTotalPoints: 18
+    WaveCapacity: 17
+  - Level: 5
+    MinTotalPoints: 20
+    MaxTotalPoints: 20
+    WaveCapacity: 20
   Enemies:
   - EnemyPrefab: {fileID: 8500170153172678778, guid: b1a359556de6d434d968a9c60f54fb61,
       type: 3}
@@ -118,7 +126,7 @@ MonoBehaviour:
     PointCost: 4
     WaveSize: 4
     Weight: 1
-    MinLevel: 3
+    MinLevel: 4
     MaxLevel: 0
     MaxCountPerWave: 1
     EliteChanceMultiplier: 1

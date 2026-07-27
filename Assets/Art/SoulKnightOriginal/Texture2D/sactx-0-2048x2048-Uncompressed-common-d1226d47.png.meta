@@ -316,6 +316,27 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: ui_mech_health
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 1282
+        width: 44
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 13, y: 3, z: 5, w: 3}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 146f4a9e88fd6434cb441d787b3cee30
+      internalID: 1953343150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -332,6 +353,7 @@ TextureImporter:
       ui_blue_bar: -1935997155
       ui_coin: 204215996
       ui_knob: 711425073
+      ui_mech_health: 1953343150
       ui_menu_text: -322354205
       ui_sensitivity: 376475273
       ui_sfx: 2079221028
