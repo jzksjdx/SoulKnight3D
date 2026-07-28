@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using MoreMountains.Feedbacks;
 using QFramework;
 using SoulKnight3D;
 using UnityEditor;
@@ -109,6 +110,9 @@ internal static class BlueMechMountBuilder
         Rigidbody body = mount.GetComponent<Rigidbody>();
         Require(interaction != null, "MountInteraction is missing.");
         Require(interaction.Label != null, "Mount interaction label was not created.");
+        ValidateFeedback(mount.transform, "FeedbacksJump");
+        ValidateFeedback(mount.transform, "FeedbacksLand");
+        ValidateFeedback(mount.transform, "FeedbacksWalk");
         Require(bodyCollider != null && !bodyCollider.enabled,
             "Parked mount body collider should be disabled.");
         Require(body != null && body.isKinematic,
@@ -119,8 +123,9 @@ internal static class BlueMechMountBuilder
             "Interacting did not mount Blue Mech.");
         Require(bodyCollider.enabled && !body.isKinematic,
             "Mounted Blue Mech did not enable occupied physics.");
-        Require(!player.ModelRoot.gameObject.activeSelf,
-            "Armor mount did not hide the player model.");
+        Require(!player.GetComponentsInChildren<Renderer>(true)
+                .Any(renderer => renderer != null && renderer.enabled),
+            "Armor mount did not hide the complete player presentation.");
 
         int healthBeforeDamage = mount.Health.Value;
         mount.ApplyDamage(1);
@@ -130,16 +135,32 @@ internal static class BlueMechMountBuilder
         UIGamePanel panel = UIKit.GetPanel<UIGamePanel>();
         Require(panel != null && panel.ArmorMountHealthBar.gameObject.activeSelf,
             "Armor mount health bar is not visible while mounted.");
+        Require(!panel.SkillImage.gameObject.activeSelf,
+            "Skill icon stayed visible under the dismount button.");
+        Transform skillBackground =
+            panel.SkillButton.transform.Find("Background");
+        Require(skillBackground != null &&
+                !skillBackground.gameObject.activeSelf,
+            "Skill button background stayed visible under the dismount button.");
+        Require(panel.SkillButton.image != null &&
+                panel.SkillButton.image.color == Color.white,
+            "Dismount button is not opaque white.");
 
         PlayerInputs.Instance.TriggerSkillAction();
         Require(!player.MountRider.IsMounted,
             "The shared skill action did not dismount.");
-        Require(player.ModelRoot.gameObject.activeSelf,
-            "Dismount did not restore the player model.");
+        Require(player.GetComponentsInChildren<Renderer>(true)
+                .Any(renderer => renderer != null && renderer.enabled &&
+                    renderer.gameObject.activeInHierarchy),
+            "Dismount did not restore the player presentation.");
         Require(!bodyCollider.enabled && body.isKinematic,
             "Dismount did not return Blue Mech to parked physics.");
         Require(!panel.ArmorMountHealthBar.gameObject.activeSelf,
             "Armor mount health bar stayed visible after dismount.");
+        Require(panel.SkillImage.gameObject.activeSelf,
+            "Skill icon did not return after dismount.");
+        Require(skillBackground.gameObject.activeSelf,
+            "Skill button background did not return after dismount.");
 
         GameController.Instance.SetRoomBattleState(true);
         interaction.RefreshAvailability();
@@ -153,6 +174,20 @@ internal static class BlueMechMountBuilder
             "Blue Mech did not become mountable after battle.");
 
         Debug.Log("Blue Mech mount Play Mode validation passed.");
+    }
+
+    private static void ValidateFeedback(
+        Transform mountTransform, string feedbackName)
+    {
+        Transform feedbackTransform = mountTransform.Find(feedbackName);
+        Require(feedbackTransform != null,
+            $"{feedbackName} is missing from Blue Mech.");
+        Require(feedbackTransform.localPosition.sqrMagnitude <= 0.0001f,
+            $"{feedbackName} is not positioned at the mount origin.");
+
+        MMF_Player feedback = feedbackTransform.GetComponent<MMF_Player>();
+        Require(feedback != null,
+            $"{feedbackName} is missing its MMF_Player component.");
     }
 
     private static Vector3 GetStatePosition(string stateName)

@@ -12,7 +12,10 @@ namespace SoulKnight3D
 	{
         private bool _isBugMode = false;
         [SerializeField] private Sprite _dismountSprite;
-        private Sprite _defaultSkillSprite;
+        private Image _skillButtonImage;
+        private GameObject _skillButtonBackground;
+        private Sprite _defaultSkillButtonSprite;
+        private Color _defaultSkillButtonColor;
         private IUnRegister _mountHealthRegistration;
 
 		protected override void OnInit(IUIData uiData = null)
@@ -52,7 +55,17 @@ namespace SoulKnight3D
             }
 
             // Skill button
-            _defaultSkillSprite = SkillImage.sprite;
+            _skillButtonImage = SkillButton.image;
+            Transform skillBackground =
+                SkillButton.transform.Find("Background");
+            _skillButtonBackground = skillBackground != null
+                ? skillBackground.gameObject
+                : null;
+            if (_skillButtonImage != null)
+            {
+                _defaultSkillButtonSprite = _skillButtonImage.sprite;
+                _defaultSkillButtonColor = _skillButtonImage.color;
+            }
             PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.RegisterWithInitValue((amount) =>
 			{
                 if (PlayerController.Instance.MountRider.IsMounted) { return; }
@@ -201,17 +214,27 @@ namespace SoulKnight3D
             _mountHealthRegistration = null;
 
             bool hasMount = mount != null;
-            SkillImage.sprite = hasMount && _dismountSprite != null
-                ? _dismountSprite
-                : _defaultSkillSprite;
-
             if (hasMount)
             {
-                SkillImage.fillAmount = 1f;
-                SkillImage.color = new Color(74f / 255f, 218f / 255f, 1f);
+                SkillImage.gameObject.Hide();
+                _skillButtonBackground?.Hide();
+                if (_skillButtonImage != null && _dismountSprite != null)
+                {
+                    _skillButtonImage.sprite = _dismountSprite;
+                    _skillButtonImage.color = Color.white;
+                    _skillButtonImage.preserveAspect = true;
+                }
             }
             else
             {
+                if (_skillButtonImage != null)
+                {
+                    _skillButtonImage.sprite = _defaultSkillButtonSprite;
+                    _skillButtonImage.color = _defaultSkillButtonColor;
+                }
+                SkillImage.gameObject.Show();
+                _skillButtonBackground?.Show();
+
                 float skillAmount =
                     PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.Value;
                 SkillImage.fillAmount = skillAmount;

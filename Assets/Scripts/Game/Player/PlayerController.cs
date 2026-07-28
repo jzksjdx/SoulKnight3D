@@ -56,6 +56,8 @@ namespace SoulKnight3D
         private CapsuleCollider _movementCollider;
         private PhysicMaterial _groundedPhysicsMaterial;
         private int _movementColliderInstanceId;
+        private Renderer[] _mountedHiddenRenderers = Array.Empty<Renderer>();
+        private bool[] _mountedRendererStates = Array.Empty<bool>();
 
         public MountRider MountRider { get; private set; }
         public float FacingYaw => _targetYaw;
@@ -258,11 +260,11 @@ namespace SoulKnight3D
             }
         }
 
-        internal void EnterMountControl(bool hidePlayerModel)
+        internal void EnterMountControl(bool replacePlayer)
         {
             PlayerAttack.Skill?.CancelForLevelTransition();
             PlayerAttack.CancelCurrentWeaponCharge();
-            PlayerAttack.IsMountAttackSuppressed = hidePlayerModel;
+            PlayerAttack.IsMountAttackSuppressed = replacePlayer;
 
             SelfRigidbody.velocity = Vector3.zero;
             SelfRigidbody.angularVelocity = Vector3.zero;
@@ -272,19 +274,16 @@ namespace SoulKnight3D
             {
                 _movementCollider.enabled = false;
             }
-            if (hidePlayerModel && ModelRoot != null)
+            if (replacePlayer)
             {
-                ModelRoot.gameObject.SetActive(false);
+                HidePlayerPresentation();
             }
         }
 
         internal void ExitMountControl(Vector3 worldPosition)
         {
             transform.position = worldPosition;
-            if (ModelRoot != null)
-            {
-                ModelRoot.gameObject.SetActive(true);
-            }
+            RestorePlayerPresentation();
             PlayerAttack.IsMountAttackSuppressed = false;
 
             if (_movementCollider != null)
@@ -304,6 +303,42 @@ namespace SoulKnight3D
             transform.SetPositionAndRotation(
                 mountTransform.position,
                 mountTransform.rotation);
+        }
+
+        private void HidePlayerPresentation()
+        {
+            RestorePlayerPresentation();
+
+            _mountedHiddenRenderers =
+                GetComponentsInChildren<Renderer>(true);
+            _mountedRendererStates =
+                new bool[_mountedHiddenRenderers.Length];
+            for (int i = 0; i < _mountedHiddenRenderers.Length; i++)
+            {
+                Renderer playerRenderer = _mountedHiddenRenderers[i];
+                if (playerRenderer == null) { continue; }
+
+                _mountedRendererStates[i] = playerRenderer.enabled;
+                playerRenderer.enabled = false;
+            }
+        }
+
+        private void RestorePlayerPresentation()
+        {
+            int count = Mathf.Min(
+                _mountedHiddenRenderers.Length,
+                _mountedRendererStates.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (_mountedHiddenRenderers[i] != null)
+                {
+                    _mountedHiddenRenderers[i].enabled =
+                        _mountedRendererStates[i];
+                }
+            }
+
+            _mountedHiddenRenderers = Array.Empty<Renderer>();
+            _mountedRendererStates = Array.Empty<bool>();
         }
 
         private void OnDrawGizmosSelected()

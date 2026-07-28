@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MoreMountains.Feedbacks;
 using QFramework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,9 +18,18 @@ namespace SoulKnight3D
         [SerializeField, Min(0.01f)] private float _groundCheckDistance = 0.35f;
         [SerializeField, Min(0f)] private float _jumpLockout = 0.3f;
         [SerializeField, Min(0.1f)] private float _dismountDistance = 0.9f;
+        [SerializeField, Min(0f)] private float _movementAcceleration = 20f;
+        [SerializeField, Min(0f)] private float _movementDeceleration = 40f;
 
         [Header("Mount Presentation")]
         [SerializeField] private Animator _animator;
+
+        [Header("Mount Feedbacks")]
+        [SerializeField] private MMF_Player _jumpFeedback;
+        [SerializeField] private MMF_Player _landFeedback;
+        [SerializeField] private MMF_Player _walkFeedback;
+        [SerializeField, Min(0.05f)] private float _walkFeedbackInterval = 0.5f;
+        [SerializeField, Min(0f)] private float _walkFeedbackMinSpeed = 0.1f;
 
         [Header("Mount Damage")]
         [SerializeField, Min(0f)] private float _damageInvulnerability = 0.4f;
@@ -39,7 +49,10 @@ namespace SoulKnight3D
         private MountAnimationState _animationState = MountAnimationState.None;
         private float _jumpLockoutRemaining;
         private float _damageInvulnerabilityRemaining;
+        private float _walkFeedbackTimer;
         private bool _isGrounded;
+        private bool _jumpWasStarted;
+        private bool _wasWalking;
 
         public bool IsMounted => _rider != null;
         public virtual bool ReplacesRider => false;
@@ -62,6 +75,9 @@ namespace SoulKnight3D
             if (_body == null) { _body = GetComponent<Rigidbody>(); }
             if (_bodyCollider == null) { _bodyCollider = GetComponent<Collider>(); }
             if (_animator == null) { _animator = GetComponentInChildren<Animator>(true); }
+            if (_jumpFeedback == null) { _jumpFeedback = FindFeedback("FeedbacksJump"); }
+            if (_landFeedback == null) { _landFeedback = FindFeedback("FeedbacksLand"); }
+            if (_walkFeedback == null) { _walkFeedback = FindFeedback("FeedbacksWalk"); }
             _interaction = GetComponent<MountInteraction>();
             CacheAnimatorParameters();
             SetOccupiedPhysics(false);
@@ -99,9 +115,10 @@ namespace SoulKnight3D
                 return;
             }
 
-            UpdateGroundedState();
+            bool landedThisFrame = UpdateGroundedState();
             MoveMount();
             UpdateAnimation();
+            UpdateWalkFeedback(landedThisFrame);
         }
 
         internal bool BeginRide(MountRider rider)
@@ -120,11 +137,19 @@ namespace SoulKnight3D
 
             _jumpLockoutRemaining = 0f;
             _damageInvulnerabilityRemaining = 0f;
+            _walkFeedbackTimer = 0f;
+            _jumpWasStarted = false;
+            _wasWalking = false;
             SetOccupiedPhysics(true);
             _interaction?.RefreshAvailability();
             rider.EnterMountControl(this, ReplacesRider);
             SetAnimationState(MountAnimationState.Idle);
+            OnRideStarted();
             return true;
+        }
+
+        protected virtual void OnRideStarted()
+        {
         }
 
         internal Vector3 EndRide(MountRider rider, bool wasDestroyed)
@@ -137,6 +162,9 @@ namespace SoulKnight3D
             Vector3 dismountPosition =
                 transform.position + transform.right * _dismountDistance;
             _rider = null;
+            _jumpWasStarted = false;
+            _wasWalking = false;
+            _walkFeedbackTimer = 0f;
             SetOccupiedPhysics(false);
             SetAnimationState(MountAnimationState.Idle);
 
@@ -197,19 +225,29 @@ namespace SoulKnight3D
         private void MoveMount()
         {
             PlayerController player = _rider.Player;
-            _body.MoveRotation(Quaternion.Euler(0f, player.FacingYaw, 0f));
+            Quaternion facingRotation =
+                Quaternion.Euler(0f, player.FacingYaw, 0f);
+            _body.MoveRotation(facingRotation);
 
             Vector2 movementInput = PlayerInputs.Instance != null
                 ? PlayerInputs.Instance.GetMovementVectorNormalized()
                 : Vector2.zero;
-            Vector2 horizontalVelocity =
-                new Vector2(_body.velocity.x, _body.velocity.z);
-            if (horizontalVelocity.magnitude <= Speed)
-            {
-                Vector3 movement = transform.rotation *
-                    new Vector3(movementInput.x, 0f, movementInput.y);
-                _body.velocity += movement;
-            }
+            Vector3 desiredVelocity = facingRotation *
+                new Vector3(movementInput.x, 0f, movementInput.y) * Speed;
+            Vector3 currentVelocity =
+                new Vector3(_body.velocity.x, 0f, _body.velocity.z);
+            float acceleration = movementInput.sqrMagnitude > 0.0001f
+                ? _movementAcceleration
+                : _movementDeceleration;
+            Vector3 horizontalVelocity = Vector3.MoveTowards(
+                currentVelocity,
+                desiredVelocity,
+                acceleration * Time.fixedDeltaTime);
+
+            _body.velocity = new Vector3(
+                horizontalVelocity.x,
+                _body.velocity.y,
+                horizontalVelocity.z);
         }
 
         private void TryJump()
@@ -222,18 +260,21 @@ namespace SoulKnight3D
 
             _body.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _isGrounded = false;
+            _jumpWasStarted = true;
             _jumpLockoutRemaining = _jumpLockout;
+            _jumpFeedback?.PlayFeedbacks();
             SetAnimationState(MountAnimationState.JumpUp);
         }
 
-        private void UpdateGroundedState()
+        private bool UpdateGroundedState()
         {
             if (_jumpLockoutRemaining > 0f)
             {
                 _isGrounded = false;
-                return;
+                return false;
             }
 
+            bool wasGrounded = _isGrounded;
             Vector3 rayOrigin =
                 transform.position + Vector3.up * _groundCheckHeight;
             _isGrounded = _body.velocity.y <= 0.1f &&
@@ -243,6 +284,61 @@ namespace SoulKnight3D
                     _groundCheckHeight + _groundCheckDistance,
                     _groundLayers,
                     QueryTriggerInteraction.Ignore);
+
+            bool landedThisFrame =
+                _jumpWasStarted && !wasGrounded && _isGrounded;
+            if (landedThisFrame)
+            {
+                _jumpWasStarted = false;
+                _landFeedback?.PlayFeedbacks();
+            }
+
+            return landedThisFrame;
+        }
+
+        private void UpdateWalkFeedback(bool landedThisFrame)
+        {
+            Vector2 horizontalVelocity =
+                new Vector2(_body.velocity.x, _body.velocity.z);
+            bool isWalking = _isGrounded &&
+                horizontalVelocity.magnitude >= _walkFeedbackMinSpeed;
+
+            if (!isWalking)
+            {
+                _wasWalking = false;
+                _walkFeedbackTimer = 0f;
+                return;
+            }
+
+            float interval = Mathf.Max(0.05f, _walkFeedbackInterval);
+            if (landedThisFrame)
+            {
+                _wasWalking = true;
+                _walkFeedbackTimer = interval * 0.5f;
+                return;
+            }
+
+            if (!_wasWalking)
+            {
+                _wasWalking = true;
+                _walkFeedbackTimer = interval;
+                _walkFeedback?.PlayFeedbacks();
+                return;
+            }
+
+            _walkFeedbackTimer -= Time.fixedDeltaTime;
+            if (_walkFeedbackTimer > 0f) { return; }
+
+            _walkFeedback?.PlayFeedbacks();
+            _walkFeedbackTimer += interval;
+        }
+
+        private MMF_Player FindFeedback(string feedbackName)
+        {
+            Transform feedbackTransform = transform.Find(feedbackName);
+            return feedbackTransform != null
+                ? feedbackTransform.GetComponent<MMF_Player>()
+                : null;
         }
 
         private void UpdateAnimation()
