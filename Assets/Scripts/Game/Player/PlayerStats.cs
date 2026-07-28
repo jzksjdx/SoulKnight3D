@@ -82,6 +82,14 @@ namespace SoulKnight3D
         {
             if (IsDead) { return; }
             if (IsInvincible) { return; }
+
+            MountRider mountRider = GetComponent<MountRider>();
+            if (mountRider != null && mountRider.IsMounted)
+            {
+                mountRider.CurrentMount.ApplyDamage(damage);
+                return;
+            }
+
             IsInvincible = true;
             if (Armor.Value >= damage)
             {

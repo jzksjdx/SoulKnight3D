@@ -9,40 +9,19 @@ namespace SoulKnight3D
     {
         [SerializeField] float DodgeForce = 3f;
 
-        Weapon _weaponCache;
-        private int _critChanceCache = 0;
+        private Weapon _weaponWithDodgeBonus;
 
         protected override void Start()
         {
             base.Start();
 
-            // register starting weapon
-            Weapon startWeapon = PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
-            if (startWeapon != null)
+            PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((_, __) =>
             {
-                _weaponCache = startWeapon;
-                _critChanceCache = startWeapon.InGameData.CritChance;
-            }
-            PlayerController.Instance.PlayerAttack.OnPlayerAttaked.Register(() =>
-            {
-                if (_weaponCache != null)
+                if (_weaponWithDodgeBonus != null)
                 {
-                    _weaponCache.InGameData.CritChance = _critChanceCache;
+                    _weaponWithDodgeBonus.ClearGuaranteedCriticalHit();
+                    _weaponWithDodgeBonus = null;
                 }
-            }).UnRegisterWhenGameObjectDestroyed(this);
-
-            PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData, weaponObject) =>
-            {
-                // reset previous weapon
-                if (_weaponCache)
-                {
-                    _weaponCache.InGameData.CritChance = _critChanceCache;
-                }
-
-                // handle new weapon
-                Weapon weapon = weaponObject.GetComponent<Weapon>();
-                _weaponCache = weapon;
-                _critChanceCache = weaponData.CritChance;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
@@ -73,13 +52,35 @@ namespace SoulKnight3D
         {
             base.HandleSkillEnd();
 
-            // enforce critical attack
-            if (_weaponCache != null)
+            Weapon currentWeapon =
+                PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+            if (currentWeapon != null)
             {
-                _weaponCache.InGameData.CritChance = 100;
+                currentWeapon.GrantGuaranteedCriticalHit();
+                _weaponWithDodgeBonus = currentWeapon;
             }
 
             ResetDodgeState();
+        }
+
+        public override void CancelForLevelTransition()
+        {
+            bool wasUsingSkill = IsUsingSkill;
+            IsUsingSkill = false;
+            _skillDurationDelta = 0f;
+
+            if (wasUsingSkill)
+            {
+                _skillCooldownDelta = _skillCooldown;
+                SkillCdNormalized.Value = 0f;
+                ResetDodgeState();
+            }
+
+            if (_weaponWithDodgeBonus != null)
+            {
+                _weaponWithDodgeBonus.ClearGuaranteedCriticalHit();
+                _weaponWithDodgeBonus = null;
+            }
         }
 
         private void ResetDodgeState()

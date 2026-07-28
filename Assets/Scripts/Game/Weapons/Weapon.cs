@@ -12,10 +12,12 @@ namespace SoulKnight3D
         [HideInInspector] public WeaponData InGameData;
 
         protected float _cooldownTimeout = 0f;
+        private bool _guaranteedCriticalHit;
 
         private void Awake()
         {
             InGameData = Instantiate(Data);
+            OnWeaponFired.Register(ClearGuaranteedCriticalHit);
         }
 
         protected virtual void Start()
@@ -45,7 +47,20 @@ namespace SoulKnight3D
 
         protected virtual bool GetIsCritHit()
         {
-            return InGameData.CritChance > Random.Range(0, 100);
+            return HasGuaranteedCriticalHit ||
+                InGameData.CritChance > Random.Range(0, 100);
+        }
+
+        protected bool HasGuaranteedCriticalHit => _guaranteedCriticalHit;
+
+        public void GrantGuaranteedCriticalHit()
+        {
+            _guaranteedCriticalHit = true;
+        }
+
+        public void ClearGuaranteedCriticalHit()
+        {
+            _guaranteedCriticalHit = false;
         }
 
         public WeaponData GetPrefabWeaponData()

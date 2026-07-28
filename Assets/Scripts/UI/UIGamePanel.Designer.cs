@@ -37,6 +37,10 @@ namespace SoulKnight3D
 		[SerializeField]
 		public UnityEngine.UI.Text CoinText;
 		[SerializeField]
+		public RectTransform ArmorMountHealthBar;
+		[SerializeField]
+		public UnityEngine.UI.Image ArmorMountHealthBarFill;
+		[SerializeField]
 		public UnityEngine.UI.Button PauseButton;
 		[SerializeField]
 		public PausePanel PausePanel;
@@ -70,6 +74,8 @@ namespace SoulKnight3D
 			EnergyCostText = null;
 			BtnInteract = null;
 			CoinText = null;
+			ArmorMountHealthBar = null;
+			ArmorMountHealthBarFill = null;
 			PauseButton = null;
 			PausePanel = null;
 			MinimapRawImage = null;

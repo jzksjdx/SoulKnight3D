@@ -11,6 +11,9 @@ namespace SoulKnight3D
 	public partial class UIGamePanel : UIPanel, IController
 	{
         private bool _isBugMode = false;
+        [SerializeField] private Sprite _dismountSprite;
+        private Sprite _defaultSkillSprite;
+        private IUnRegister _mountHealthRegistration;
 
 		protected override void OnInit(IUIData uiData = null)
 		{
@@ -49,8 +52,10 @@ namespace SoulKnight3D
             }
 
             // Skill button
+            _defaultSkillSprite = SkillImage.sprite;
             PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.RegisterWithInitValue((amount) =>
 			{
+                if (PlayerController.Instance.MountRider.IsMounted) { return; }
 				SkillImage.fillAmount = amount;
 				if (amount >= 0.999)
 				{
@@ -64,8 +69,14 @@ namespace SoulKnight3D
 
             SkillButton.onClick.AddListener(() =>
             {
-                PlayerInputs.Instance.OnSkillPerformed.Trigger();
+                PlayerInputs.Instance.TriggerSkillAction();
             });
+
+            ArmorMountHealthBar.gameObject.Hide();
+            MountRider mountRider = PlayerController.Instance.MountRider;
+            mountRider.OnMountChanged.Register(HandleMountChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            HandleMountChanged(mountRider.CurrentMount);
 
             // Interact button
             BtnInteract.Hide();
@@ -180,7 +191,57 @@ namespace SoulKnight3D
 		
 		protected override void OnClose()
 		{
+            _mountHealthRegistration?.UnRegister();
+            _mountHealthRegistration = null;
 		}
+
+        private void HandleMountChanged(MountBase mount)
+        {
+            _mountHealthRegistration?.UnRegister();
+            _mountHealthRegistration = null;
+
+            bool hasMount = mount != null;
+            SkillImage.sprite = hasMount && _dismountSprite != null
+                ? _dismountSprite
+                : _defaultSkillSprite;
+
+            if (hasMount)
+            {
+                SkillImage.fillAmount = 1f;
+                SkillImage.color = new Color(74f / 255f, 218f / 255f, 1f);
+            }
+            else
+            {
+                float skillAmount =
+                    PlayerController.Instance.PlayerAttack.Skill.SkillCdNormalized.Value;
+                SkillImage.fillAmount = skillAmount;
+                SkillImage.color = skillAmount >= 0.999f
+                    ? new Color(74f / 255f, 218f / 255f, 1f)
+                    : Color.white;
+            }
+
+            ArmorMount armorMount = mount as ArmorMount;
+            if (armorMount == null)
+            {
+                ArmorMountHealthBar.gameObject.Hide();
+                return;
+            }
+
+            ArmorMountHealthBar.gameObject.Show();
+            _mountHealthRegistration = armorMount.Health.RegisterWithInitValue(
+                health =>
+                {
+                    if (PlayerController.Instance.MountRider.CurrentMount != armorMount)
+                    {
+                        return;
+                    }
+
+                    ArmorMountHealthBarFill.fillAmount =
+                        armorMount.MaxHealth > 0
+                            ? (float)health / armorMount.MaxHealth
+                            : 0f;
+                });
+        }
 
         public IArchitecture GetArchitecture()
         {

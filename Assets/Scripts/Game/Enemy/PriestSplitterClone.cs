@@ -71,6 +71,15 @@ namespace SoulKnight3D
         {
             if (!_initialized || collision.collider.CompareTag("Enemy")) { return; }
 
+            MountBase mount =
+                collision.collider.GetComponentInParent<MountBase>();
+            if (mount != null && mount.IsMounted)
+            {
+                mount.ApplyDamage(_damage);
+                Release();
+                return;
+            }
+
             PlayerController player =
                 collision.collider.GetComponentInParent<PlayerController>();
             if (player != null)

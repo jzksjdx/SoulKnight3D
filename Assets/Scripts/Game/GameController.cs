@@ -40,6 +40,8 @@ namespace SoulKnight3D
 
         public EasyEvent OnRoomClear = new EasyEvent();
         public EasyEvent OnReturnMenu = new EasyEvent();
+        public EasyEvent<bool> OnRoomBattleStateChanged = new EasyEvent<bool>();
+        public bool IsRoomBattleActive { get; private set; }
         private bool _isSceneTransitioning;
 
         private void Awake()
@@ -134,6 +136,8 @@ namespace SoulKnight3D
             }
 
             PlayerController.Instance.transform.position = _playerSpawnPoint;
+            PlayerController.Instance.MountRider?.RestoreAfterLevelTransition(
+                _playerSpawnPoint);
             SpawnLevelOneStarterChest(PlayerController.Instance.transform);
             PlayerController.Instance.gameObject.Show();
             PlayerController.Instance.PlayerAttack.RestoreWeaponState();
@@ -254,6 +258,14 @@ namespace SoulKnight3D
             StartCoroutine(LoadCurrentSceneAsync());
         }
 
+        public void SetRoomBattleState(bool isActive)
+        {
+            if (IsRoomBattleActive == isActive) { return; }
+
+            IsRoomBattleActive = isActive;
+            OnRoomBattleStateChanged.Trigger(isActive);
+        }
+
         private static void PreparePlayerForLevelTransition()
         {
             PlayerController player = PlayerController.Instance;
@@ -264,6 +276,7 @@ namespace SoulKnight3D
 
             player.PlayerAttack.Skill?.CancelForLevelTransition();
             player.PlayerAttack.CancelCurrentWeaponCharge();
+            player.MountRider?.PrepareForLevelTransition();
             player.SelfRigidbody.velocity = Vector3.zero;
             player.SelfRigidbody.angularVelocity = Vector3.zero;
         }

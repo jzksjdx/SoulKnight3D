@@ -21,10 +21,7 @@ namespace SoulKnight3D
                 newBullet.transform.rotation = Quaternion.LookRotation(bulletDirection);
             }
 
-            if (InGameData.EnergyCost > 0)
-            {
-                OnWeaponFired.Trigger();
-            }
+            OnWeaponFired.Trigger();
 
             //feedback
             ShootFeedback?.PlayFeedbacks();

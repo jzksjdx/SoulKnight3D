@@ -139,10 +139,7 @@ namespace SoulKnight3D
             UpdateChargeBar();
             ToggleChargeBar(false);
 
-            if (InGameData.EnergyCost > 0)
-            {
-                OnWeaponFired.Trigger();
-            }
+            OnWeaponFired.Trigger();
 
             //feedback
             ShootFeedback?.PlayFeedbacks();
@@ -166,6 +163,11 @@ namespace SoulKnight3D
 
         protected override bool GetIsCritHit()
         {
+            if (HasGuaranteedCriticalHit)
+            {
+                return true;
+            }
+
             ChargeWeaponData data = InGameData as ChargeWeaponData;
             float actualCritChance = _chargeTimeDelta / _chargeTime * (data.MaxCritChance - data.CritChance) + data.CritChance;
             float actualDamageClamped = Mathf.Clamp(actualCritChance, data.CritChance, data.MaxCritChance);

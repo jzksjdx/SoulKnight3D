@@ -88,6 +88,19 @@ namespace SoulKnight3D
         private void Skill_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
             if (Time.timeScale == 0) { return; }
+            TriggerSkillAction();
+        }
+
+        public void TriggerSkillAction()
+        {
+            MountRider rider = PlayerController.Instance != null
+                ? PlayerController.Instance.MountRider
+                : null;
+            if (rider != null && rider.TryHandleSkillAction())
+            {
+                return;
+            }
+
             OnSkillPerformed.Trigger();
         }
 

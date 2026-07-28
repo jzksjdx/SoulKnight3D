@@ -61,6 +61,15 @@ namespace SoulKnight3D
         {
             if (_consumed) { return; }
 
+            MountBase mount = other.GetComponentInParent<MountBase>();
+            if (mount != null && mount.IsMounted)
+            {
+                _consumed = true;
+                mount.ApplyDamage(_damage);
+                Release();
+                return;
+            }
+
             PlayerController player = other.GetComponentInParent<PlayerController>();
             if (player == null) { return; }
 

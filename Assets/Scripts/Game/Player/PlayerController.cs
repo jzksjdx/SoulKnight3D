@@ -57,6 +57,9 @@ namespace SoulKnight3D
         private PhysicMaterial _groundedPhysicsMaterial;
         private int _movementColliderInstanceId;
 
+        public MountRider MountRider { get; private set; }
+        public float FacingYaw => _targetYaw;
+
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _jumpTimeout = 0.3f;
@@ -80,6 +83,11 @@ namespace SoulKnight3D
             _targetYaw = transform.eulerAngles.y;
             SelfRigidbody.constraints |= RigidbodyConstraints.FreezeRotation;
             SelfRigidbody.angularVelocity = Vector3.zero;
+            MountRider = GetComponent<MountRider>();
+            if (MountRider == null)
+            {
+                MountRider = gameObject.AddComponent<MountRider>();
+            }
             DontDestroyOnLoad(gameObject);
         }
 
@@ -126,12 +134,14 @@ namespace SoulKnight3D
 
         private void Update()
         {
+            if (MountRider != null && MountRider.IsMounted) { return; }
             GroundedCheck();
         }
 
         private void FixedUpdate()
         {
             if (_playerStats.IsDead) { return; }
+            if (MountRider != null && MountRider.IsMounted) { return; }
 
             SelfRigidbody.MoveRotation(Quaternion.Euler(0f, _targetYaw, 0f));
 
@@ -159,6 +169,7 @@ namespace SoulKnight3D
         private void Jump()
         {
             if (_playerStats.IsDead) { return; }
+            if (MountRider != null && MountRider.IsMounted) { return; }
             if (_jumpTimeoutDelta > 0 || !Grounded) { return; }
 
             SelfRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
@@ -245,6 +256,54 @@ namespace SoulKnight3D
                     }
                 }
             }
+        }
+
+        internal void EnterMountControl(bool hidePlayerModel)
+        {
+            PlayerAttack.Skill?.CancelForLevelTransition();
+            PlayerAttack.CancelCurrentWeaponCharge();
+            PlayerAttack.IsMountAttackSuppressed = hidePlayerModel;
+
+            SelfRigidbody.velocity = Vector3.zero;
+            SelfRigidbody.angularVelocity = Vector3.zero;
+            SelfRigidbody.useGravity = false;
+            SelfRigidbody.isKinematic = true;
+            if (_movementCollider != null)
+            {
+                _movementCollider.enabled = false;
+            }
+            if (hidePlayerModel && ModelRoot != null)
+            {
+                ModelRoot.gameObject.SetActive(false);
+            }
+        }
+
+        internal void ExitMountControl(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+            if (ModelRoot != null)
+            {
+                ModelRoot.gameObject.SetActive(true);
+            }
+            PlayerAttack.IsMountAttackSuppressed = false;
+
+            if (_movementCollider != null)
+            {
+                _movementCollider.enabled = true;
+            }
+            SelfRigidbody.isKinematic = false;
+            SelfRigidbody.useGravity = true;
+            SelfRigidbody.velocity = Vector3.zero;
+            SelfRigidbody.angularVelocity = Vector3.zero;
+            SetGroundedState(false);
+        }
+
+        internal void SyncToMount(Transform mountTransform)
+        {
+            if (mountTransform == null) { return; }
+            transform.SetPositionAndRotation(
+                mountTransform.position,
+                mountTransform.rotation);
         }
 
         private void OnDrawGizmosSelected()

@@ -1585,7 +1585,7 @@ GameObject:
   - component: {fileID: 5657486895852784672}
   - component: {fileID: 8425110541658568729}
   m_Layer: 0
-  m_Name: Image
+  m_Name: ArmorMountHealthBarFill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3617,6 +3617,8 @@ MonoBehaviour:
   EnergyCostText: {fileID: 1438631380287468828}
   BtnInteract: {fileID: 2243910859749870168}
   CoinText: {fileID: 7912868544864513572}
+  ArmorMountHealthBar: {fileID: 3383847712969610657}
+  ArmorMountHealthBarFill: {fileID: 8425110541658568729}
   PauseButton: {fileID: 342924049660877086}
   PausePanel: {fileID: 5240393144580825110}
   MinimapRawImage: {fileID: 670338650264737218}
@@ -3625,6 +3627,7 @@ MonoBehaviour:
   UiBugMode: {fileID: 8235899127729594114}
   BossHealthRect: {fileID: 80266715732715046}
   BossHealthBar: {fileID: 6479274538903257614}
+  _dismountSprite: {fileID: 21300000, guid: 5d06bba8e41b2d3459d3c8c1a19219ff, type: 2}
 --- !u!1 &6096473032845287523
 GameObject:
   m_ObjectHideFlags: 0
@@ -4014,7 +4017,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3383847712969610657
 RectTransform:
   m_ObjectHideFlags: 0

@@ -51,8 +51,13 @@ namespace SoulKnight3D
         [SerializeField, Min(0f)] private float _merchantPriceIncreasePerLevel = 0.15f;
 
         [Header("Special Room")]
-        [SerializeField] private List<GameObject> _specialRoomPrefabs = new List<GameObject>();
+        [SerializeField] private List<SpecialRoomContentGroup> _specialRoomContentGroups =
+            new List<SpecialRoomContentGroup>();
         [SerializeField] private float _specialRoomYOffset = 0.02f;
+
+        private static readonly Dictionary<SpecialRoomContentType, int>
+            LastSpawnedRunByContentType =
+                new Dictionary<SpecialRoomContentType, int>();
 
         // room objects references
         private List<GameObject> _enemies = new List<GameObject>();
@@ -68,6 +73,27 @@ namespace SoulKnight3D
         public enum RoomStatus
         {
             Unexplored, InBattle, Explored
+        }
+
+        private enum SpecialRoomContentType
+        {
+            Mine,
+            Mount
+        }
+
+        [Serializable]
+        private sealed class SpecialRoomContentGroup
+        {
+            [SerializeField] private SpecialRoomContentType _contentType;
+            [SerializeField, Min(0f)] private float _weight = 1f;
+            [SerializeField] private bool _oncePerRun;
+            [SerializeField] private List<GameObject> _prefabs =
+                new List<GameObject>();
+
+            public SpecialRoomContentType ContentType => _contentType;
+            public float Weight => _weight;
+            public bool OncePerRun => _oncePerRun;
+            public List<GameObject> Prefabs => _prefabs;
         }
 
         private void Awake()
@@ -202,17 +228,61 @@ namespace SoulKnight3D
 
         private void SpawnSpecialRoom()
         {
-            _specialRoomPrefabs.RemoveAll(prefab => prefab == null);
-            if (_specialRoomPrefabs.Count == 0)
+            int runId = GameController.Instance != null
+                ? GameController.Instance.RunsStarted
+                : 0;
+            List<SpecialRoomContentGroup> eligibleGroups =
+                new List<SpecialRoomContentGroup>();
+            float totalWeight = 0f;
+
+            for (int i = 0; i < _specialRoomContentGroups.Count; i++)
+            {
+                SpecialRoomContentGroup group = _specialRoomContentGroups[i];
+                if (group == null) { continue; }
+
+                group.Prefabs.RemoveAll(prefab => prefab == null);
+                bool alreadySpawnedThisRun =
+                    LastSpawnedRunByContentType.TryGetValue(
+                        group.ContentType, out int lastRunId) &&
+                    lastRunId == runId;
+                if (group.Prefabs.Count == 0 || group.Weight <= 0f ||
+                    (group.OncePerRun && alreadySpawnedThisRun))
+                {
+                    continue;
+                }
+
+                eligibleGroups.Add(group);
+                totalWeight += group.Weight;
+            }
+
+            if (eligibleGroups.Count == 0 || totalWeight <= 0f)
             {
                 Debug.LogWarning($"Special room '{name}' has no content prefabs configured.");
                 return;
             }
 
-            GameObject contentPrefab =
-                _specialRoomPrefabs[Random.Range(0, _specialRoomPrefabs.Count)];
+            float roll = Random.value * totalWeight;
+            SpecialRoomContentGroup selectedGroup =
+                eligibleGroups[eligibleGroups.Count - 1];
+            for (int i = 0; i < eligibleGroups.Count; i++)
+            {
+                roll -= eligibleGroups[i].Weight;
+                if (roll <= 0f)
+                {
+                    selectedGroup = eligibleGroups[i];
+                    break;
+                }
+            }
+
+            GameObject contentPrefab = selectedGroup.Prefabs[
+                Random.Range(0, selectedGroup.Prefabs.Count)];
             Vector3 spawnPosition = transform.position + Vector3.up * _specialRoomYOffset;
             Instantiate(contentPrefab, spawnPosition, GetEntranceFacingRotation(), transform);
+
+            if (selectedGroup.OncePerRun)
+            {
+                LastSpawnedRunByContentType[selectedGroup.ContentType] = runId;
+            }
         }
 
         private Quaternion GetEntranceFacingRotation()
@@ -315,6 +385,7 @@ namespace SoulKnight3D
                         mGate.ToggleGate();
                     }
                     Status = RoomStatus.InBattle;
+                    GameController.Instance?.SetRoomBattleState(true);
                     AudioKit.PlaySound("fx_door");
                     _roomIcon.Hide();
                     //Debug.Log("Closing Door");
@@ -380,14 +451,22 @@ namespace SoulKnight3D
             boss.OnDeath.Register(() =>
             {
                 if (_generatedPortal != null) { _generatedPortal.Show(); }
+                Status = RoomStatus.Explored;
+                GameController.Instance?.SetRoomBattleState(false);
+                GameController.Instance?.OnRoomClear.Trigger();
                 AudioKit.StopMusic();
                 _roomIcon.Show();
+                foreach (RoomGate gate in _gates)
+                {
+                    gate.ToggleGate();
+                }
             }).UnRegisterWhenGameObjectDestroyed(generatedBoss);
         }
 
         private void CompleteBossRoomWithoutBoss()
         {
             Status = RoomStatus.Explored;
+            GameController.Instance?.SetRoomBattleState(false);
             if (_generatedPortal != null) { _generatedPortal.Show(); }
             _roomIcon.Show();
 
@@ -463,6 +542,7 @@ namespace SoulKnight3D
                 room.IconTransform.Show();
             }
             // room clear
+            GameController.Instance?.SetRoomBattleState(false);
             GameController.Instance.OnRoomClear.Trigger();
 
             // spawn white chest

@@ -32,10 +32,7 @@ namespace SoulKnight3D
             }
 
 
-            if (InGameData.EnergyCost > 0)
-            {
-                OnWeaponFired.Trigger();
-            }
+            OnWeaponFired.Trigger();
 
             //feedback
             ShootFeedback?.PlayFeedbacks();

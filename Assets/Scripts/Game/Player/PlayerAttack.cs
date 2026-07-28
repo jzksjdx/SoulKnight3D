@@ -25,6 +25,7 @@ namespace SoulKnight3D {
         private Camera _mainCamera;
 
         public bool DisableAttack = false;
+        public bool IsMountAttackSuppressed { get; set; }
 
         public EasyEvent<InteractiveItem> OnInteractiveItemChanged = new EasyEvent<InteractiveItem>();
         public EasyEvent<WeaponData, GameObject> OnWeaponSwitched = new EasyEvent<WeaponData, GameObject>();
@@ -74,7 +75,7 @@ namespace SoulKnight3D {
 
         private void Attack()
         {
-            if (DisableAttack) { return; }
+            if (DisableAttack || IsMountAttackSuppressed) { return; }
             if (_currentWeapon == null) { return; }
             if (_currentWeapon.InGameData.EnergyCost > _playerStats.Energy.Value) { return; }
             _currentWeapon.Attack();
@@ -123,6 +124,7 @@ namespace SoulKnight3D {
 
         public void SwitchWeapon()
         {
+            if (IsMountAttackSuppressed) { return; }
             if (Weapons.Count == 0) { return; }
 
             if (Weapons.Count == 1)
