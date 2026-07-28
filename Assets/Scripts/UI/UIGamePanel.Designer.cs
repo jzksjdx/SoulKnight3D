@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:fe45c0d5-853d-4728-bc17-941a358d827b
+	// Generate Id:36070ec5-8c91-4560-b57d-a70e0b52f2b0
 	public partial class UIGamePanel
 	{
 		public const string Name = "UIGamePanel";
@@ -37,10 +37,6 @@ namespace SoulKnight3D
 		[SerializeField]
 		public UnityEngine.UI.Text CoinText;
 		[SerializeField]
-		public RectTransform ArmorMountHealthBar;
-		[SerializeField]
-		public UnityEngine.UI.Image ArmorMountHealthBarFill;
-		[SerializeField]
 		public UnityEngine.UI.Button PauseButton;
 		[SerializeField]
 		public PausePanel PausePanel;
@@ -56,6 +52,12 @@ namespace SoulKnight3D
 		public RectTransform BossHealthRect;
 		[SerializeField]
 		public UnityEngine.UI.Image BossHealthBar;
+		[SerializeField]
+		public UnityEngine.UI.Image ArmorMountHealthBar;
+		[SerializeField]
+		public UnityEngine.UI.Image ArmorMountHealthBarFill;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnSpecialAttack;
 		
 		private UIGamePanelData mPrivateData = null;
 		
@@ -74,8 +76,6 @@ namespace SoulKnight3D
 			EnergyCostText = null;
 			BtnInteract = null;
 			CoinText = null;
-			ArmorMountHealthBar = null;
-			ArmorMountHealthBarFill = null;
 			PauseButton = null;
 			PausePanel = null;
 			MinimapRawImage = null;
@@ -84,6 +84,9 @@ namespace SoulKnight3D
 			UiBugMode = null;
 			BossHealthRect = null;
 			BossHealthBar = null;
+			ArmorMountHealthBar = null;
+			ArmorMountHealthBarFill = null;
+			BtnSpecialAttack = null;
 			
 			mData = null;
 		}

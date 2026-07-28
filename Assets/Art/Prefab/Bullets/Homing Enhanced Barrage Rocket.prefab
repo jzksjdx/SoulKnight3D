@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7928942276681490872
 Transform:
   m_ObjectHideFlags: 0
@@ -4839,7 +4839,7 @@ PrefabInstance:
     - target: {fileID: 3274414806100878763, guid: cbc86d16b28b0440a83a78892c539db4,
         type: 3}
       propertyPath: m_Name
-      value: Barrage Rocket
+      value: Homing Enhanced Barrage Rocket
       objectReference: {fileID: 0}
     - target: {fileID: 4814041444562935185, guid: cbc86d16b28b0440a83a78892c539db4,
         type: 3}
@@ -4908,8 +4908,39 @@ PrefabInstance:
         type: 3}
       insertIndex: 0
       addedObject: {fileID: 7928942276681490872}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3274414806100878763, guid: cbc86d16b28b0440a83a78892c539db4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8285389187580395523}
   m_SourcePrefab: {fileID: 100100000, guid: cbc86d16b28b0440a83a78892c539db4, type: 3}
+--- !u!1 &1686870683794811903 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3274414806100878763, guid: cbc86d16b28b0440a83a78892c539db4,
+    type: 3}
+  m_PrefabInstance: {fileID: 4186651218504846932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8285389187580395523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686870683794811903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0a6d4f7a20ae924bafb9cfd28590bc9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _speed: 8
+  _turnDegreesPerSecond: 200
+  _homingDuration: 1.2
+  _retargetInterval: 0.1
+  _targetRange: 10
+  _targetHeightOffset: 0.5
+  _targetLayers:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!4 &8707446176722359237 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4814041444562935185, guid: cbc86d16b28b0440a83a78892c539db4,

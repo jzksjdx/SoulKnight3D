@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7928942276681490872
 Transform:
   m_ObjectHideFlags: 0
@@ -4839,7 +4839,7 @@ PrefabInstance:
     - target: {fileID: 3274414806100878763, guid: cbc86d16b28b0440a83a78892c539db4,
         type: 3}
       propertyPath: m_Name
-      value: Barrage Rocket
+      value: Enhanced Barrage Rocket
       objectReference: {fileID: 0}
     - target: {fileID: 4814041444562935185, guid: cbc86d16b28b0440a83a78892c539db4,
         type: 3}

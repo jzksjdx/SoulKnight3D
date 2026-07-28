@@ -23,6 +23,10 @@ namespace SoulKnight3D {
         private float _interactDistance = 2f;
         private InteractiveItem _interactiveItem;
         private Camera _mainCamera;
+        private const float MaxAimDistance = 100f;
+        private const int AimRaycastBufferSize = 32;
+        private readonly RaycastHit[] _aimRaycastHits =
+            new RaycastHit[AimRaycastBufferSize];
 
         public bool DisableAttack = false;
         public bool IsMountAttackSuppressed { get; set; }
@@ -263,8 +267,9 @@ namespace SoulKnight3D {
             Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
             Ray ray = _mainCamera.ScreenPointToRay(screenCenterPoint);
 
-            if (!Physics.Raycast(ray, out RaycastHit raycastHit, 100f, AimLayer))
+            if (!TryGetAimHit(ray, out RaycastHit raycastHit))
             {
+                target.position = ray.GetPoint(MaxAimDistance);
                 SetInteractiveItem(null);
                 return;
             }
@@ -281,6 +286,54 @@ namespace SoulKnight3D {
             {
                 SetInteractiveItem(null);
             }
+        }
+
+        private bool TryGetAimHit(Ray ray, out RaycastHit closestHit)
+        {
+            closestHit = default;
+            int hitCount = Physics.RaycastNonAlloc(
+                ray,
+                _aimRaycastHits,
+                MaxAimDistance,
+                AimLayer,
+                QueryTriggerInteraction.UseGlobal);
+            if (hitCount <= 0)
+            {
+                return false;
+            }
+
+            MountBase currentMount =
+                PlayerController.Instance != null &&
+                PlayerController.Instance.MountRider != null
+                    ? PlayerController.Instance.MountRider.CurrentMount
+                    : null;
+            Transform mountRoot =
+                currentMount != null ? currentMount.transform : null;
+            float closestDistance = float.PositiveInfinity;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider hitCollider = _aimRaycastHits[i].collider;
+                if (hitCollider == null)
+                {
+                    continue;
+                }
+
+                Transform hitTransform = hitCollider.transform;
+                bool hitPlayer = hitTransform.IsChildOf(transform);
+                bool hitCurrentMount = mountRoot != null &&
+                    hitTransform.IsChildOf(mountRoot);
+                if (hitPlayer || hitCurrentMount ||
+                    _aimRaycastHits[i].distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                closestHit = _aimRaycastHits[i];
+                closestDistance = closestHit.distance;
+            }
+
+            return closestDistance < float.PositiveInfinity;
         }
 
         private void SetInteractiveItem(InteractiveItem interactiveItem)

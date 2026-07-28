@@ -109,6 +109,11 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: d945278b3f43047a6b3c60cc884d40e6, type: 3}
     - target: {fileID: 1305253900433612875, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
         type: 3}
+      propertyPath: managedReferences[6105035158855352322].Active
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1305253900433612875, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,
+        type: 3}
       propertyPath: managedReferences[6105035584968327169].ShakeRange
       value: -7
       objectReference: {fileID: 0}
@@ -240,6 +245,11 @@ MonoBehaviour:
   ShootFeedback: {fileID: 8119512745719602421}
   _shotsPerAttack: 4
   _shotInterval: 0.1
+  _enhancedBulletPrefab: {fileID: 1686870683794811903, guid: ac21c27d411f3174d95c6ba7bbedb927,
+    type: 3}
+  _enhancedDamageMultiplier: 1.5
+  _regularShotSound: fx_gun_1
+  _enhancedShotSound: fx_missle
 --- !u!114 &8119512745719602421 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1305253900433612875, guid: 68cfd8cfa510346ff9ba4cfbb0e92615,

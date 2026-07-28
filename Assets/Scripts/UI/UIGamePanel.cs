@@ -17,6 +17,7 @@ namespace SoulKnight3D
         private Sprite _defaultSkillButtonSprite;
         private Color _defaultSkillButtonColor;
         private IUnRegister _mountHealthRegistration;
+        private IUnRegister _specialAttackChargeRegistration;
 
 		protected override void OnInit(IUIData uiData = null)
 		{
@@ -90,6 +91,12 @@ namespace SoulKnight3D
             mountRider.OnMountChanged.Register(HandleMountChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             HandleMountChanged(mountRider.CurrentMount);
+
+            BtnSpecialAttack.gameObject.Hide();
+            BtnSpecialAttack.onClick.AddListener(() =>
+            {
+                PlayerInputs.Instance.TriggerSpecialAttackAction();
+            });
 
             // Interact button
             BtnInteract.Hide();
@@ -210,12 +217,15 @@ namespace SoulKnight3D
 		{
             _mountHealthRegistration?.UnRegister();
             _mountHealthRegistration = null;
+            _specialAttackChargeRegistration?.UnRegister();
+            _specialAttackChargeRegistration = null;
 		}
 
         private void HandleMountChanged(MountBase mount)
         {
             _mountHealthRegistration?.UnRegister();
             _mountHealthRegistration = null;
+            BindSpecialAttack(mount);
 
             bool hasMount = mount != null;
             if (hasMount)
@@ -273,6 +283,38 @@ namespace SoulKnight3D
                             ? (float)health / armorMount.MaxHealth
                             : 0f;
                 });
+        }
+
+        private void BindSpecialAttack(MountBase mount)
+        {
+            _specialAttackChargeRegistration?.UnRegister();
+            _specialAttackChargeRegistration = null;
+
+            MountSpecialAttack specialAttack =
+                mount != null ? mount.SpecialAttack : null;
+            bool shouldShow = specialAttack != null &&
+                !this.GetSystem<ControlSystem>().IsMobile;
+            if (!shouldShow)
+            {
+                BtnSpecialAttack.gameObject.Hide();
+                return;
+            }
+
+            BtnSpecialAttack.gameObject.Show();
+            UpdateSpecialAttackButton(specialAttack.ChargeNormalized);
+            _specialAttackChargeRegistration =
+                specialAttack.OnChargeChanged.Register(
+                    UpdateSpecialAttackButton);
+        }
+
+        private void UpdateSpecialAttackButton(float charge)
+        {
+            float normalizedCharge = Mathf.Clamp01(charge);
+            if (BtnSpecialAttack.image != null)
+            {
+                BtnSpecialAttack.image.fillAmount = normalizedCharge;
+            }
+            BtnSpecialAttack.interactable = normalizedCharge >= 0.999f;
         }
 
         private void SetWeaponDisplay(WeaponData weaponData)

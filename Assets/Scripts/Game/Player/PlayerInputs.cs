@@ -28,6 +28,8 @@ namespace SoulKnight3D
             inputActions.Player.Attack.performed += Attack_performed;
             inputActions.Player.Attack.canceled += Attack_canceled;
             inputActions.Player.Skill.performed += Skill_performed;
+            inputActions.Player.SpecialAttack.performed +=
+                SpecialAttack_performed;
             inputActions.Player.Switch.performed += Switch_performed;
             inputActions.Player.Interact.performed += Interact_performed;
             inputActions.Player.Pause.performed += Pause_performed;
@@ -50,6 +52,8 @@ namespace SoulKnight3D
             inputActions.Player.Attack.performed -= Attack_performed;
             inputActions.Player.Attack.canceled -= Attack_canceled;
             inputActions.Player.Skill.performed -= Skill_performed;
+            inputActions.Player.SpecialAttack.performed -=
+                SpecialAttack_performed;
             inputActions.Player.Switch.performed -= Switch_performed;
             inputActions.Player.Interact.performed -= Interact_performed;
             inputActions.Player.Pause.performed -= Pause_performed;
@@ -63,6 +67,8 @@ namespace SoulKnight3D
             inputActions.Player.Attack.performed -= Attack_performed;
             inputActions.Player.Attack.canceled -= Attack_canceled;
             inputActions.Player.Skill.performed -= Skill_performed;
+            inputActions.Player.SpecialAttack.performed -=
+                SpecialAttack_performed;
             inputActions.Player.Switch.performed -= Switch_performed;
             inputActions.Player.Interact.performed -= Interact_performed;
         }
@@ -102,6 +108,21 @@ namespace SoulKnight3D
             }
 
             OnSkillPerformed.Trigger();
+        }
+
+        private void SpecialAttack_performed(
+            UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            if (Time.timeScale == 0) { return; }
+            TriggerSpecialAttackAction();
+        }
+
+        public bool TriggerSpecialAttackAction()
+        {
+            MountRider rider = PlayerController.Instance != null
+                ? PlayerController.Instance.MountRider
+                : null;
+            return rider != null && rider.TryHandleSpecialAttackAction();
         }
 
         private void Switch_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)

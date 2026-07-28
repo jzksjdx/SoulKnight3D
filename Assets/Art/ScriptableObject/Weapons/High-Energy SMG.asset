@@ -18,7 +18,7 @@ MonoBehaviour:
   Category: 1
   Rarity: 4
   Animation: 6
-  Damage: 10
+  Damage: 5
   EnergyCost: 0
   CritChance: 0
   Inaccuracy: 2

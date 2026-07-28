@@ -5,7 +5,7 @@ using QFramework;
 
 namespace SoulKnight3D
 {
-	// Generate Id:843a7d87-0944-4f68-b9c0-1a83422890ef
+	// Generate Id:73f8be8c-f614-4085-8ba6-28faa4ad9787
 	public partial class UIMobileControlPanel
 	{
 		public const string Name = "UIMobileControlPanel";
@@ -14,6 +14,8 @@ namespace SoulKnight3D
 		public UnityEngine.UI.Button JoystickAttack;
 		[SerializeField]
 		public UnityEngine.UI.Button JoystickJump;
+		[SerializeField]
+		public UnityEngine.UI.Button BtnSpecialAttack;
 		
 		private UIMobileControlPanelData mPrivateData = null;
 		
@@ -21,6 +23,7 @@ namespace SoulKnight3D
 		{
 			JoystickAttack = null;
 			JoystickJump = null;
+			BtnSpecialAttack = null;
 			
 			mData = null;
 		}

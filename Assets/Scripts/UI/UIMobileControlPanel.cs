@@ -13,6 +13,7 @@ namespace SoulKnight3D
 		private int _animIdInteract;
 		private bool _canInteract = false;
 		private bool _isJoystickRightPressed = false;
+		private IUnRegister _specialAttackChargeRegistration;
 
 		protected override void OnInit(IUIData uiData = null)
 		{
@@ -44,7 +45,16 @@ namespace SoulKnight3D
                 PlayerInputs.Instance.OnAttackPerformed.Trigger(isPressed);
             }).UnRegisterWhenGameObjectDestroyed(this);
 
-			
+			BtnSpecialAttack.gameObject.Hide();
+			BtnSpecialAttack.onClick.AddListener(() =>
+			{
+				PlayerInputs.Instance.TriggerSpecialAttackAction();
+			});
+
+			MountRider mountRider = PlayerController.Instance.MountRider;
+			mountRider.OnMountChanged.Register(BindSpecialAttack)
+				.UnRegisterWhenGameObjectDestroyed(gameObject);
+			BindSpecialAttack(mountRider.CurrentMount);
         }
 		
 		protected override void OnOpen(IUIData uiData = null)
@@ -77,6 +87,38 @@ namespace SoulKnight3D
 		
 		protected override void OnClose()
 		{
+			_specialAttackChargeRegistration?.UnRegister();
+			_specialAttackChargeRegistration = null;
+		}
+
+		private void BindSpecialAttack(MountBase mount)
+		{
+			_specialAttackChargeRegistration?.UnRegister();
+			_specialAttackChargeRegistration = null;
+
+			MountSpecialAttack specialAttack =
+				mount != null ? mount.SpecialAttack : null;
+			if (specialAttack == null)
+			{
+				BtnSpecialAttack.gameObject.Hide();
+				return;
+			}
+
+			BtnSpecialAttack.gameObject.Show();
+			UpdateSpecialAttackButton(specialAttack.ChargeNormalized);
+			_specialAttackChargeRegistration =
+				specialAttack.OnChargeChanged.Register(
+					UpdateSpecialAttackButton);
+		}
+
+		private void UpdateSpecialAttackButton(float charge)
+		{
+			float normalizedCharge = Mathf.Clamp01(charge);
+			if (BtnSpecialAttack.image != null)
+			{
+				BtnSpecialAttack.image.fillAmount = normalizedCharge;
+			}
+			BtnSpecialAttack.interactable = normalizedCharge >= 0.999f;
 		}
 	}
 }

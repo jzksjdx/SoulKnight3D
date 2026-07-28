@@ -66,6 +66,13 @@ namespace SoulKnight3D
             return true;
         }
 
+        public bool TryHandleSpecialAttackAction()
+        {
+            return IsMounted &&
+                CurrentMount.HasSpecialAttack &&
+                CurrentMount.SpecialAttack.TryActivate();
+        }
+
         public void Dismount()
         {
             if (!IsMounted) { return; }

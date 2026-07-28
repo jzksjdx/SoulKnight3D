@@ -139,6 +139,15 @@ namespace SoulKnight3D
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""SpecialAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""fe25a7f5-511f-4da0-9079-f615932d2e4e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Switch"",
                     ""type"": ""Button"",
                     ""id"": ""24d40d22-c6c8-48f2-a875-9de05645dc08"",
@@ -257,6 +266,17 @@ namespace SoulKnight3D
                 },
                 {
                     ""name"": """",
+                    ""id"": ""e1814d62-550a-4f41-a22a-9fc98b9f1aa8"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpecialAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""e67261c1-cbb4-46c6-bef4-2be38df69505"",
                     ""path"": ""<Keyboard>/q"",
                     ""interactions"": """",
@@ -322,6 +342,7 @@ namespace SoulKnight3D
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
             m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
             m_Player_Skill = m_Player.FindAction("Skill", throwIfNotFound: true);
+            m_Player_SpecialAttack = m_Player.FindAction("SpecialAttack", throwIfNotFound: true);
             m_Player_Switch = m_Player.FindAction("Switch", throwIfNotFound: true);
             m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
             m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
@@ -410,6 +431,7 @@ namespace SoulKnight3D
         private readonly InputAction m_Player_Jump;
         private readonly InputAction m_Player_Attack;
         private readonly InputAction m_Player_Skill;
+        private readonly InputAction m_Player_SpecialAttack;
         private readonly InputAction m_Player_Switch;
         private readonly InputAction m_Player_Interact;
         private readonly InputAction m_Player_Pause;
@@ -444,6 +466,10 @@ namespace SoulKnight3D
             /// Provides access to the underlying input action "Player/Skill".
             /// </summary>
             public InputAction @Skill => m_Wrapper.m_Player_Skill;
+            /// <summary>
+            /// Provides access to the underlying input action "Player/SpecialAttack".
+            /// </summary>
+            public InputAction @SpecialAttack => m_Wrapper.m_Player_SpecialAttack;
             /// <summary>
             /// Provides access to the underlying input action "Player/Switch".
             /// </summary>
@@ -497,6 +523,9 @@ namespace SoulKnight3D
                 @Skill.started += instance.OnSkill;
                 @Skill.performed += instance.OnSkill;
                 @Skill.canceled += instance.OnSkill;
+                @SpecialAttack.started += instance.OnSpecialAttack;
+                @SpecialAttack.performed += instance.OnSpecialAttack;
+                @SpecialAttack.canceled += instance.OnSpecialAttack;
                 @Switch.started += instance.OnSwitch;
                 @Switch.performed += instance.OnSwitch;
                 @Switch.canceled += instance.OnSwitch;
@@ -532,6 +561,9 @@ namespace SoulKnight3D
                 @Skill.started -= instance.OnSkill;
                 @Skill.performed -= instance.OnSkill;
                 @Skill.canceled -= instance.OnSkill;
+                @SpecialAttack.started -= instance.OnSpecialAttack;
+                @SpecialAttack.performed -= instance.OnSpecialAttack;
+                @SpecialAttack.canceled -= instance.OnSpecialAttack;
                 @Switch.started -= instance.OnSwitch;
                 @Switch.performed -= instance.OnSwitch;
                 @Switch.canceled -= instance.OnSwitch;
@@ -616,6 +648,13 @@ namespace SoulKnight3D
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnSkill(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "SpecialAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSpecialAttack(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "Switch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

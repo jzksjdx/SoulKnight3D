@@ -80,12 +80,22 @@ namespace SoulKnight3D
 
 		public virtual Bullet SpawnBulletFromPool(Vector3 position)
 		{
-            GameObject newBulletObj = GameObjectsManager.Instance.SpawnBullet(bulletPrefab)
-				.Position(position);
-			Bullet newBullet = newBulletObj.GetComponent<Bullet>();
-            newBullet.InitializeBullet(tag, InGameData.Damage, GetIsCritHit(), bulletPrefab, BulletSize);
+            return SpawnBulletFromPool(
+                position, bulletPrefab, InGameData.Damage, BulletSize);
+		}
+
+        protected Bullet SpawnBulletFromPool(
+            Vector3 position, GameObject projectilePrefab, int damage,
+            float bulletSize)
+        {
+            GameObject newBulletObj =
+                GameObjectsManager.Instance.SpawnBullet(projectilePrefab)
+                    .Position(position);
+            Bullet newBullet = newBulletObj.GetComponent<Bullet>();
+            newBullet.InitializeBullet(
+                tag, damage, GetIsCritHit(), projectilePrefab, bulletSize);
             newBullet.ShowFromPool();
             return newBullet;
-		}
+        }
     }
 }

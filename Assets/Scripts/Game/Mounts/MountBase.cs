@@ -46,6 +46,7 @@ namespace SoulKnight3D
         private readonly HashSet<int> _availableTriggers = new HashSet<int>();
         private MountRider _rider;
         private MountInteraction _interaction;
+        private MountSpecialAttack _specialAttack;
         private MountAnimationState _animationState = MountAnimationState.None;
         private float _jumpLockoutRemaining;
         private float _damageInvulnerabilityRemaining;
@@ -53,9 +54,16 @@ namespace SoulKnight3D
         private bool _isGrounded;
         private bool _jumpWasStarted;
         private bool _wasWalking;
+        private bool _isSettlingAfterDismount;
+        private readonly List<TransformPose> _defaultPose =
+            new List<TransformPose>();
+        private readonly RaycastHit[] _settlingGroundHits =
+            new RaycastHit[8];
 
         public bool IsMounted => _rider != null;
         public virtual bool ReplacesRider => false;
+        public MountSpecialAttack SpecialAttack => _specialAttack;
+        public bool HasSpecialAttack => _specialAttack != null;
 
         private enum MountAnimationState
         {
@@ -70,6 +78,14 @@ namespace SoulKnight3D
             JumpDown
         }
 
+        private struct TransformPose
+        {
+            public Transform Transform;
+            public Vector3 LocalPosition;
+            public Quaternion LocalRotation;
+            public Vector3 LocalScale;
+        }
+
         protected virtual void Awake()
         {
             if (_body == null) { _body = GetComponent<Rigidbody>(); }
@@ -79,14 +95,16 @@ namespace SoulKnight3D
             if (_landFeedback == null) { _landFeedback = FindFeedback("FeedbacksLand"); }
             if (_walkFeedback == null) { _walkFeedback = FindFeedback("FeedbacksWalk"); }
             _interaction = GetComponent<MountInteraction>();
+            _specialAttack = GetComponent<MountSpecialAttack>();
             CacheAnimatorParameters();
+            CaptureDefaultPose();
             SetOccupiedPhysics(false);
+            SetAnimatorActive(false);
         }
 
         protected override void Start()
         {
             base.Start();
-            SetAnimationState(MountAnimationState.Idle);
 
             if (PlayerInputs.Instance != null)
             {
@@ -112,6 +130,7 @@ namespace SoulKnight3D
         {
             if (!IsMounted || _body == null || _rider == null)
             {
+                UpdateInactiveSettlement();
                 return;
             }
 
@@ -140,7 +159,9 @@ namespace SoulKnight3D
             _walkFeedbackTimer = 0f;
             _jumpWasStarted = false;
             _wasWalking = false;
+            _isSettlingAfterDismount = false;
             SetOccupiedPhysics(true);
+            SetAnimatorActive(true);
             _interaction?.RefreshAvailability();
             rider.EnterMountControl(this, ReplacesRider);
             SetAnimationState(MountAnimationState.Idle);
@@ -167,12 +188,13 @@ namespace SoulKnight3D
             Vector3 dismountPosition =
                 transform.position + transform.right * _dismountDistance;
             _rider = null;
+            _specialAttack?.HandleRideEnded();
             OnRideEnded(wasDestroyed);
             _jumpWasStarted = false;
             _wasWalking = false;
             _walkFeedbackTimer = 0f;
-            SetOccupiedPhysics(false);
-            SetAnimationState(MountAnimationState.Idle);
+            BeginInactiveSettlement();
+            SetAnimatorActive(false);
 
             if (!wasDestroyed)
             {
@@ -195,6 +217,7 @@ namespace SoulKnight3D
         {
             if (!IsMounted) { return; }
 
+            _isSettlingAfterDismount = false;
             SetOccupiedPhysics(false);
             gameObject.SetActive(false);
         }
@@ -209,6 +232,7 @@ namespace SoulKnight3D
                 MaxHealth,
                 Health.Value + Mathf.FloorToInt(MaxHealth * 0.5f));
             SetOccupiedPhysics(true);
+            SetAnimatorActive(true);
             SetAnimationState(MountAnimationState.Idle);
         }
 
@@ -396,11 +420,12 @@ namespace SoulKnight3D
         {
             if (_bodyCollider != null)
             {
-                _bodyCollider.enabled = isOccupied;
+                _bodyCollider.enabled = true;
             }
 
             if (_body == null) { return; }
 
+            _isSettlingAfterDismount = false;
             if (isOccupied)
             {
                 _body.isKinematic = false;
@@ -417,6 +442,126 @@ namespace SoulKnight3D
                 }
                 _body.useGravity = false;
                 _body.isKinematic = true;
+            }
+        }
+
+        private void BeginInactiveSettlement()
+        {
+            if (_bodyCollider != null)
+            {
+                _bodyCollider.enabled = true;
+            }
+
+            if (_body == null)
+            {
+                _isSettlingAfterDismount = false;
+                return;
+            }
+
+            _isSettlingAfterDismount = true;
+            _body.isKinematic = false;
+            _body.useGravity = true;
+            _body.velocity = Vector3.zero;
+            _body.angularVelocity = Vector3.zero;
+        }
+
+        private void UpdateInactiveSettlement()
+        {
+            if (!_isSettlingAfterDismount || _body == null)
+            {
+                return;
+            }
+
+            if (_body.velocity.y > 0.1f || !IsInactiveMountGrounded())
+            {
+                return;
+            }
+
+            _isSettlingAfterDismount = false;
+            _isGrounded = true;
+            _body.velocity = Vector3.zero;
+            _body.angularVelocity = Vector3.zero;
+            _body.useGravity = false;
+            _body.isKinematic = true;
+        }
+
+        private bool IsInactiveMountGrounded()
+        {
+            if (_bodyCollider == null)
+            {
+                return false;
+            }
+
+            Bounds bounds = _bodyCollider.bounds;
+            float maxDistance = bounds.extents.y + 0.08f;
+            int hitCount = Physics.RaycastNonAlloc(
+                bounds.center,
+                Vector3.down,
+                _settlingGroundHits,
+                maxDistance,
+                _groundLayers,
+                QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider hitCollider = _settlingGroundHits[i].collider;
+                if (hitCollider != null &&
+                    !hitCollider.transform.IsChildOf(transform))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void CaptureDefaultPose()
+        {
+            _defaultPose.Clear();
+            if (_animator == null) { return; }
+
+            Transform[] transforms =
+                _animator.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                Transform poseTransform = transforms[i];
+                _defaultPose.Add(new TransformPose
+                {
+                    Transform = poseTransform,
+                    LocalPosition = poseTransform.localPosition,
+                    LocalRotation = poseTransform.localRotation,
+                    LocalScale = poseTransform.localScale
+                });
+            }
+        }
+
+        private void SetAnimatorActive(bool isActive)
+        {
+            if (_animator == null) { return; }
+
+            if (isActive)
+            {
+                RestoreDefaultPose();
+                _animator.enabled = true;
+                _animator.Rebind();
+                _animationState = MountAnimationState.None;
+                return;
+            }
+
+            _animator.enabled = false;
+            RestoreDefaultPose();
+            _animationState = MountAnimationState.None;
+        }
+
+        private void RestoreDefaultPose()
+        {
+            for (int i = 0; i < _defaultPose.Count; i++)
+            {
+                TransformPose pose = _defaultPose[i];
+                if (pose.Transform == null) { continue; }
+
+                pose.Transform.localPosition = pose.LocalPosition;
+                pose.Transform.localRotation = pose.LocalRotation;
+                pose.Transform.localScale = pose.LocalScale;
             }
         }
 
@@ -437,7 +582,8 @@ namespace SoulKnight3D
 
         private void SetAnimationState(MountAnimationState state)
         {
-            if (_animationState == state || _animator == null)
+            if (_animationState == state || _animator == null ||
+                !_animator.isActiveAndEnabled)
             {
                 return;
             }

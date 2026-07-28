@@ -16,6 +16,14 @@ internal static class BarrageMountBuilder
         "Assets/Art/Animation/Mech/";
     private const string BarragePrefabPath =
         "Assets/Art/Prefab/Special/Mechs/Barrage.prefab";
+    private const string BarrageWeaponPrefabPath =
+        "Assets/Art/Prefab/WeaponPrefabs/High-Energy SMG.prefab";
+    private const string BarrageRocketPrefabPath =
+        "Assets/Art/Prefab/Bullets/Barrage Rocket.prefab";
+    private const string EnhancedBarrageRocketPrefabPath =
+        "Assets/Art/Prefab/Bullets/Enhanced Barrage Rocket.prefab";
+    private const string HomingEnhancedBarrageRocketPrefabPath =
+        "Assets/Art/Prefab/Bullets/Homing Enhanced Barrage Rocket.prefab";
     private static readonly Vector3 DefaultSpine2AimOffset =
         new Vector3(12.6f, 14.51f, -2.12f);
 
@@ -217,6 +225,236 @@ internal static class BarrageMountBuilder
         Debug.Log("Barrage aiming rig validation passed.");
     }
 
+    [MenuItem("Tools/Soul Knight/Configure Barrage Special Attack")]
+    private static void ConfigureSpecialAttack()
+    {
+        ConfigureEnhancedRocket(
+            BarrageRocketPrefabPath,
+            EnhancedBarrageRocketPrefabPath,
+            false);
+        ConfigureEnhancedRocket(
+            EnhancedBarrageRocketPrefabPath,
+            HomingEnhancedBarrageRocketPrefabPath,
+            true);
+
+        GameObject enhancedRocket =
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                EnhancedBarrageRocketPrefabPath);
+        GameObject homingRocket =
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                HomingEnhancedBarrageRocketPrefabPath);
+        Require(enhancedRocket != null,
+            "Enhanced Barrage Rocket prefab was not created.");
+        Require(homingRocket != null,
+            "Homing Enhanced Barrage Rocket prefab was not created.");
+
+        GameObject weaponRoot =
+            PrefabUtility.LoadPrefabContents(BarrageWeaponPrefabPath);
+        try
+        {
+            ConsecutiveGun weapon =
+                weaponRoot.GetComponent<ConsecutiveGun>();
+            Require(weapon != null,
+                "High-Energy SMG is missing ConsecutiveGun.");
+
+            SerializedObject serializedWeapon =
+                new SerializedObject(weapon);
+            serializedWeapon.FindProperty("_enhancedBulletPrefab")
+                .objectReferenceValue = enhancedRocket;
+            serializedWeapon.FindProperty("_enhancedDamageMultiplier")
+                .floatValue = 1.3f;
+            serializedWeapon.FindProperty("_regularShotSound")
+                .stringValue = "fx_gun_1";
+            serializedWeapon.FindProperty("_enhancedShotSound")
+                .stringValue = "fx_missle";
+            serializedWeapon.ApplyModifiedPropertiesWithoutUndo();
+
+            if (weapon.ShootFeedback != null)
+            {
+                MMF_Sound feedback =
+                    weapon.ShootFeedback.GetFeedbackOfType<MMF_Sound>();
+                if (feedback != null)
+                {
+                    feedback.Active = false;
+                    EditorUtility.SetDirty(weapon.ShootFeedback);
+                }
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(
+                weaponRoot, BarrageWeaponPrefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(weaponRoot);
+        }
+
+        GameObject barrageRoot =
+            PrefabUtility.LoadPrefabContents(BarragePrefabPath);
+        try
+        {
+            ArmorMount mount = barrageRoot.GetComponent<ArmorMount>();
+            Require(mount != null,
+                "Barrage is missing ArmorMount.");
+            ConsecutiveGun weapon =
+                barrageRoot.GetComponentInChildren<ConsecutiveGun>(true);
+            Require(weapon != null,
+                "Barrage is missing its High-Energy SMG.");
+
+            Transform launchPoint =
+                barrageRoot.transform.Find("SwarmLaunchPoint");
+            bool createdLaunchPoint = launchPoint == null;
+            if (createdLaunchPoint)
+            {
+                launchPoint =
+                    GetOrCreateChild(
+                        barrageRoot.transform, "SwarmLaunchPoint");
+                launchPoint.localPosition =
+                    new Vector3(0f, 1.6f, -0.45f);
+                launchPoint.localRotation = Quaternion.identity;
+            }
+
+            BarrageSpecialAttack specialAttack =
+                GetOrAddComponent<BarrageSpecialAttack>(barrageRoot);
+            SerializedObject serializedSpecialAttack =
+                new SerializedObject(specialAttack);
+            serializedSpecialAttack.FindProperty("_mount")
+                .objectReferenceValue = mount;
+            serializedSpecialAttack.FindProperty("_weapon")
+                .objectReferenceValue = weapon;
+            serializedSpecialAttack.FindProperty("_swarmLaunchPoint")
+                .objectReferenceValue = launchPoint;
+            serializedSpecialAttack.FindProperty("_homingRocketPrefab")
+                .objectReferenceValue = homingRocket;
+            serializedSpecialAttack.FindProperty("_cooldown")
+                .floatValue = 10f;
+            serializedSpecialAttack.FindProperty("_enhancedBurstCount")
+                .intValue = 3;
+            serializedSpecialAttack.FindProperty("_enhancedShotsPerBurst")
+                .intValue = 8;
+            serializedSpecialAttack.FindProperty(
+                "_enhancedDamageMultiplier").floatValue = 1.3f;
+            serializedSpecialAttack.FindProperty("_swarmRocketCount")
+                .intValue = 10;
+            serializedSpecialAttack.FindProperty("_swarmShotInterval")
+                .floatValue = 0.1f;
+            serializedSpecialAttack.FindProperty("_swarmSpreadAngle")
+                .floatValue = 90f;
+            serializedSpecialAttack.FindProperty("_swarmLaunchSpeed")
+                .floatValue = 8f;
+            serializedSpecialAttack.FindProperty("_swarmDamageMultiplier")
+                .floatValue = 1.3f;
+            serializedSpecialAttack.FindProperty("_activationSound")
+                .stringValue = "fx_ice_shock";
+            serializedSpecialAttack.ApplyModifiedPropertiesWithoutUndo();
+
+            PrefabUtility.SaveAsPrefabAsset(
+                barrageRoot, BarragePrefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(barrageRoot);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        ValidateSpecialAttack();
+        Debug.Log("Configured Barrage special attack and enhanced rockets.");
+    }
+
+    [MenuItem("Tools/Soul Knight/Validate Barrage Special Attack")]
+    private static void ValidateSpecialAttack()
+    {
+        GameObject barrage =
+            AssetDatabase.LoadAssetAtPath<GameObject>(BarragePrefabPath);
+        GameObject enhancedRocket =
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                EnhancedBarrageRocketPrefabPath);
+        GameObject homingRocket =
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                HomingEnhancedBarrageRocketPrefabPath);
+        Require(barrage != null, "Barrage prefab is missing.");
+        Require(enhancedRocket != null,
+            "Enhanced Barrage Rocket prefab is missing.");
+        Require(homingRocket != null,
+            "Homing Enhanced Barrage Rocket prefab is missing.");
+
+        Transform coneParticle =
+            enhancedRocket.transform.Find("ConeParticle");
+        Require(coneParticle != null && coneParticle.gameObject.activeSelf,
+            "Enhanced rocket ConeParticle is not enabled.");
+        Require(homingRocket.GetComponent<HomingRocket>() != null,
+            "Homing enhanced rocket is missing HomingRocket.");
+
+        BarrageSpecialAttack specialAttack =
+            barrage.GetComponent<BarrageSpecialAttack>();
+        ConsecutiveGun weapon =
+            barrage.GetComponentInChildren<ConsecutiveGun>(true);
+        Require(specialAttack != null,
+            "BarrageSpecialAttack is missing.");
+        Require(barrage.transform.Find("SwarmLaunchPoint") != null,
+            "Barrage swarm launch point is missing.");
+        Require(weapon != null,
+            "Barrage High-Energy SMG is missing.");
+
+        SerializedObject serializedWeapon =
+            new SerializedObject(weapon);
+        Require(
+            serializedWeapon.FindProperty("_enhancedBulletPrefab")
+                .objectReferenceValue == enhancedRocket,
+            "Enhanced rocket is not wired to High-Energy SMG.");
+        Require(
+            serializedWeapon.FindProperty("_regularShotSound").stringValue ==
+                "fx_gun_1" &&
+            serializedWeapon.FindProperty("_enhancedShotSound").stringValue ==
+                "fx_missle",
+            "Barrage shot sounds are not configured.");
+
+        Debug.Log("Barrage special attack validation passed.");
+    }
+
+    private static void ConfigureEnhancedRocket(
+        string sourcePath, string destinationPath, bool addHoming)
+    {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(destinationPath) == null)
+        {
+            Require(AssetDatabase.CopyAsset(sourcePath, destinationPath),
+                $"Could not copy {sourcePath} to {destinationPath}.");
+            AssetDatabase.ImportAsset(
+                destinationPath, ImportAssetOptions.ForceUpdate);
+        }
+
+        GameObject root =
+            PrefabUtility.LoadPrefabContents(destinationPath);
+        try
+        {
+            root.name = System.IO.Path.GetFileNameWithoutExtension(
+                destinationPath);
+            Transform coneParticle = root.transform.Find("ConeParticle");
+            Require(coneParticle != null,
+                "Barrage Rocket is missing ConeParticle.");
+            coneParticle.gameObject.SetActive(true);
+
+            HomingRocket homing = root.GetComponent<HomingRocket>();
+            if (addHoming)
+            {
+                homing = homing != null
+                    ? homing
+                    : root.AddComponent<HomingRocket>();
+                homing.Configure(8f, 200f, 1.2f, 0.1f, 4f, 0.5f);
+            }
+            else if (homing != null)
+            {
+                UnityEngine.Object.DestroyImmediate(homing, true);
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(root, destinationPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
     [MenuItem("Tools/Soul Knight/Validate Barrage Mount in Play Mode")]
     private static void ValidateMountInPlayMode()
     {
@@ -251,6 +489,12 @@ internal static class BarrageMountBuilder
             "Barrage's aiming rig should be disabled while parked.");
         Require(!builtInWeapon.enabled,
             "Barrage's weapon should be disabled while parked.");
+        Require(mount.HasSpecialAttack &&
+                mount.SpecialAttack is BarrageSpecialAttack,
+            "Barrage special attack is not available.");
+        Require(Mathf.Approximately(
+                mount.SpecialAttack.ChargeNormalized, 1f),
+            "Barrage special attack should start fully charged.");
         Require(mount.BuiltInWeaponData != null &&
                 mount.BuiltInWeaponData.Name == "High-Energy SMG" &&
                 mount.BuiltInWeaponData.NameCN == "高能冲锋枪",
@@ -347,6 +591,24 @@ internal static class BarrageMountBuilder
         Require(panel.SkillButton.image != null &&
                 panel.SkillButton.image.color == Color.white,
             "Dismount button is not opaque white.");
+        Require(panel.BtnSpecialAttack.gameObject.activeSelf,
+            "Barrage special attack button is not visible while mounted.");
+
+        GameObject homingRocket =
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                HomingEnhancedBarrageRocketPrefabPath);
+        int homingRocketsBefore = CountActiveBullets(homingRocket);
+        Require(PlayerInputs.Instance.TriggerSpecialAttackAction(),
+            "Barrage special attack did not activate.");
+        Require(builtInWeapon.EnhancedBurstsRemaining == 3,
+            "Barrage did not queue three enhanced weapon bursts.");
+        Require(mount.SpecialAttack.ChargeNormalized < 0.01f,
+            "Barrage special attack cooldown did not reset.");
+        Require(CountActiveBullets(homingRocket) > homingRocketsBefore,
+            "Barrage swarm did not launch a homing enhanced rocket.");
+        Require(!panel.BtnSpecialAttack.interactable &&
+                panel.BtnSpecialAttack.image.fillAmount < 0.01f,
+            "Barrage special attack button did not enter cooldown.");
 
         PlayerInputs.Instance.TriggerSkillAction();
         Require(!player.MountRider.IsMounted,
@@ -372,6 +634,10 @@ internal static class BarrageMountBuilder
             "Skill icon did not return after dismount.");
         Require(skillBackground.gameObject.activeSelf,
             "Skill button background did not return after dismount.");
+        Require(!panel.BtnSpecialAttack.gameObject.activeSelf,
+            "Special attack button stayed visible after dismount.");
+        Require(builtInWeapon.EnhancedBurstsRemaining == 0,
+            "Enhanced Barrage bursts stayed queued after dismount.");
 
         GameController.Instance.SetRoomBattleState(true);
         interaction.RefreshAvailability();
