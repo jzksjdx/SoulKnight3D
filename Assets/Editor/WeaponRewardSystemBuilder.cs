@@ -41,6 +41,7 @@ public static class WeaponRewardSystemBuilder
         { "Desert Eagle", new[] { 0, 1 } },
         { "Enemy Blowpipe", new[] { -1 } },
         { "Goblin Giant Staff", new[] { -1 } },
+        { "High-Energy SMG", new[] { -1 } },
         { "M14", new[] { 1 } },
         { "M4", new[] { 3 } },
         { "Machete", new[] { 1 } },

@@ -75,7 +75,19 @@ namespace SoulKnight3D {
 
         private void Attack()
         {
-            if (DisableAttack || IsMountAttackSuppressed) { return; }
+            if (DisableAttack) { return; }
+
+            MountBase mount = PlayerController.Instance != null &&
+                PlayerController.Instance.MountRider != null
+                    ? PlayerController.Instance.MountRider.CurrentMount
+                    : null;
+            if (mount != null && mount.ReplacesRider)
+            {
+                mount.TryAttack(target.position);
+                return;
+            }
+
+            if (IsMountAttackSuppressed) { return; }
             if (_currentWeapon == null) { return; }
             if (_currentWeapon.InGameData.EnergyCost > _playerStats.Energy.Value) { return; }
             _currentWeapon.Attack();
@@ -303,6 +315,7 @@ namespace SoulKnight3D {
             _currentWeaponIndex = weaponIndex;
             GameObject weaponObject = Weapons[_currentWeaponIndex];
             weaponObject.Show();
+            PlayerController.Instance?.HideMountedPresentation(weaponObject);
             _currentWeapon = weaponObject.GetComponent<Weapon>();
 
             RegisterWeaponEnergySpend(_currentWeapon);

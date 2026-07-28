@@ -308,18 +308,43 @@ namespace SoulKnight3D
         private void HidePlayerPresentation()
         {
             RestorePlayerPresentation();
+            TrackAndHideMountedPresentation(gameObject);
+        }
 
-            _mountedHiddenRenderers =
-                GetComponentsInChildren<Renderer>(true);
-            _mountedRendererStates =
-                new bool[_mountedHiddenRenderers.Length];
-            for (int i = 0; i < _mountedHiddenRenderers.Length; i++)
+        internal void HideMountedPresentation(GameObject presentationRoot)
+        {
+            if (presentationRoot == null ||
+                MountRider?.CurrentMount?.ReplacesRider != true)
             {
-                Renderer playerRenderer = _mountedHiddenRenderers[i];
-                if (playerRenderer == null) { continue; }
+                return;
+            }
 
-                _mountedRendererStates[i] = playerRenderer.enabled;
-                playerRenderer.enabled = false;
+            TrackAndHideMountedPresentation(presentationRoot);
+        }
+
+        private void TrackAndHideMountedPresentation(
+            GameObject presentationRoot)
+        {
+            Renderer[] renderers =
+                presentationRoot.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer mountedRenderer in renderers)
+            {
+                if (mountedRenderer == null) { continue; }
+
+                int existingIndex =
+                    Array.IndexOf(_mountedHiddenRenderers, mountedRenderer);
+                if (existingIndex >= 0)
+                {
+                    mountedRenderer.enabled = false;
+                    continue;
+                }
+
+                int newIndex = _mountedHiddenRenderers.Length;
+                Array.Resize(ref _mountedHiddenRenderers, newIndex + 1);
+                Array.Resize(ref _mountedRendererStates, newIndex + 1);
+                _mountedHiddenRenderers[newIndex] = mountedRenderer;
+                _mountedRendererStates[newIndex] = mountedRenderer.enabled;
+                mountedRenderer.enabled = false;
             }
         }
 

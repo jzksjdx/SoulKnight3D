@@ -10,6 +10,7 @@ namespace SoulKnight3D
 
         private int _remainingShots;
         private float _nextShotTimer;
+        private Vector3 _burstDirection;
 
         protected override void Update()
         {
@@ -29,11 +30,32 @@ namespace SoulKnight3D
         {
             _remainingShots = 0;
             _nextShotTimer = 0f;
+            _burstDirection = Vector3.zero;
         }
 
         public override void Attack()
         {
-            if (_cooldownTimeout > 0f || _remainingShots > 0) { return; }
+            if (shootPoint == null) { return; }
+            BeginBurst(shootPoint.up);
+        }
+
+        public bool AttackTowards(Vector3 direction)
+        {
+            return BeginBurst(direction);
+        }
+
+        private bool BeginBurst(Vector3 direction)
+        {
+            if (shootPoint == null || direction.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            _burstDirection = direction.normalized;
+            if (_cooldownTimeout > 0f || _remainingShots > 0)
+            {
+                return false;
+            }
 
             FireShot();
             _remainingShots = Mathf.Max(2, _shotsPerAttack) - 1;
@@ -41,6 +63,7 @@ namespace SoulKnight3D
 
             OnWeaponFired.Trigger();
             _cooldownTimeout = InGameData.Cooldown;
+            return true;
         }
 
         public void ConfigureBurst(int shotsPerAttack, float shotInterval)
@@ -51,7 +74,7 @@ namespace SoulKnight3D
 
         private void FireShot()
         {
-            Vector3 direction = DeviateBullet(shootPoint.up);
+            Vector3 direction = DeviateBullet(_burstDirection);
             Bullet bullet = SpawnBulletFromPool(shootPoint.position);
             bullet.SelfRigidbody.velocity = direction * BulletSpeed;
             bullet.transform.rotation = Quaternion.LookRotation(direction);

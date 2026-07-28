@@ -7,7 +7,7 @@ not available.
 The old three-level demo profile remains available as the explicitly named
 `Build Compact 3-Level Weapon Reward System` development command.
 
-Enemy-only weapons remain at `-1` and never enter chest pools.
+Enemy-only and mount-only weapons remain at `-1` and never enter chest pools.
 
 | Weapon | Original pool level(s) |
 | --- | --- |
@@ -25,6 +25,7 @@ Enemy-only weapons remain at `-1` and never enter chest pools.
 | Desert Eagle | 0, 1 |
 | Enemy Blowpipe | -1 |
 | Goblin Giant Staff | -1 |
+| High-Energy SMG | -1 |
 | M14 | 1 |
 | M4 | 3 |
 | Machete | 1 |

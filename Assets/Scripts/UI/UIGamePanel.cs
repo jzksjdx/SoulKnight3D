@@ -141,8 +141,12 @@ namespace SoulKnight3D
 
             PlayerController.Instance.PlayerAttack.OnWeaponSwitched.Register((weaponData, _) =>
             {
-                WeaponSprite.sprite = weaponData.Sprite;
-                EnergyCostText.text = weaponData.EnergyCost.ToString();
+                if (PlayerController.Instance.MountRider.CurrentMount is ArmorMount)
+                {
+                    return;
+                }
+
+                SetWeaponDisplay(weaponData);
             }).UnRegisterWhenGameObjectDestroyed(this);
             
         }
@@ -247,9 +251,14 @@ namespace SoulKnight3D
             if (armorMount == null)
             {
                 ArmorMountHealthBar.gameObject.Hide();
+                Weapon currentWeapon =
+                    PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+                SetWeaponDisplay(
+                    currentWeapon != null ? currentWeapon.InGameData : null);
                 return;
             }
 
+            SetWeaponDisplay(armorMount.BuiltInWeaponData);
             ArmorMountHealthBar.gameObject.Show();
             _mountHealthRegistration = armorMount.Health.RegisterWithInitValue(
                 health =>
@@ -264,6 +273,14 @@ namespace SoulKnight3D
                             ? (float)health / armorMount.MaxHealth
                             : 0f;
                 });
+        }
+
+        private void SetWeaponDisplay(WeaponData weaponData)
+        {
+            if (weaponData == null) { return; }
+
+            WeaponSprite.sprite = weaponData.Sprite;
+            EnergyCostText.text = weaponData.EnergyCost.ToString();
         }
 
         public IArchitecture GetArchitecture()

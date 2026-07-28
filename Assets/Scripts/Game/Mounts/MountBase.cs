@@ -152,6 +152,11 @@ namespace SoulKnight3D
         {
         }
 
+        public virtual bool TryAttack(Vector3 targetPosition)
+        {
+            return false;
+        }
+
         internal Vector3 EndRide(MountRider rider, bool wasDestroyed)
         {
             if (_rider != rider)
@@ -162,6 +167,7 @@ namespace SoulKnight3D
             Vector3 dismountPosition =
                 transform.position + transform.right * _dismountDistance;
             _rider = null;
+            OnRideEnded(wasDestroyed);
             _jumpWasStarted = false;
             _wasWalking = false;
             _walkFeedbackTimer = 0f;
@@ -179,6 +185,10 @@ namespace SoulKnight3D
             }
 
             return dismountPosition;
+        }
+
+        protected virtual void OnRideEnded(bool wasDestroyed)
+        {
         }
 
         internal void PrepareForLevelTransition()
