@@ -5465,6 +5465,11 @@ MonoBehaviour:
   _throwHitLayers:
     serializedVersion: 2
     m_Bits: 256
+  _dissolveDelay: 3
+  _dissolveDuration: 3
+  _deathCollisionLayers:
+    serializedVersion: 2
+    m_Bits: 129
 --- !u!1001 &6054953785892916469
 PrefabInstance:
   m_ObjectHideFlags: 0

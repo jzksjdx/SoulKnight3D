@@ -53,14 +53,23 @@ namespace SoulKnight3D
         [SerializeField, Min(0.05f)] private float _throwHitRadius = 0.3f;
         [SerializeField] private LayerMask _throwHitLayers;
 
+        [Header("Death")]
+        [SerializeField, Min(0f)] private float _dissolveDelay = 3f;
+        [SerializeField, Min(0.1f)] private float _dissolveDuration = 3f;
+        [SerializeField] private LayerMask _deathCollisionLayers =
+            (1 << 0) | (1 << 7);
+
         private readonly Collider[] _throwHits = new Collider[24];
         private readonly HashSet<TargetableObject> _damagedTargets =
             new HashSet<TargetableObject>();
+        private readonly DissolveMaterialController _dissolveMaterials =
+            new DissolveMaterialController();
 
         private PooledGameObject _pooledObject;
         private VoidSummoner _owner;
         private PlayerController _player;
         private VoidSummonerGripStatus _gripStatus;
+        private Coroutine _deathCoroutine;
         private HandState _state;
         private Vector3 _patrolDirection;
         private Vector3 _lungeTarget;
@@ -70,8 +79,13 @@ namespace SoulKnight3D
         private float _dashCooldownTimer;
         private float _throwElapsed;
         private int _gripAnimatorId;
+        private int _dieAnimatorId;
+        private LayerMask _activeIncludeLayers;
+        private LayerMask _activeExcludeLayers;
+        private int _activeLayerOverridePriority;
         private bool _registeredWithOwner;
         private bool _isCombatActive;
+        private bool _colliderOverridesCached;
 
         public bool IsCombatActive => _isCombatActive &&
                                       _state != HandState.Dead;
@@ -80,12 +94,17 @@ namespace SoulKnight3D
         {
             CacheComponents();
             _gripAnimatorId = Animator.StringToHash("Gripped");
+            _dieAnimatorId = Animator.StringToHash("Die");
+            CacheColliderLayerOverrides();
+            CacheDissolveMaterials();
         }
 
         protected override void Start()
         {
             base.Start();
             CacheComponents();
+            CacheColliderLayerOverrides();
+            CacheDissolveMaterials();
         }
 
         private void Update()
@@ -128,6 +147,7 @@ namespace SoulKnight3D
 
         private void OnDisable()
         {
+            _deathCoroutine = null;
             if (_isCombatActive)
             {
                 ReleaseGripStatus();
@@ -140,8 +160,15 @@ namespace SoulKnight3D
             int spawnIndex)
         {
             CacheComponents();
+            if (_deathCoroutine != null)
+            {
+                StopCoroutine(_deathCoroutine);
+                _deathCoroutine = null;
+            }
             ReleaseGripStatus();
             UnregisterFromOwner();
+            SetDissolveValue(0f);
+            RestoreColliderLayerOverrides();
 
             _owner = owner;
             _player = PlayerController.Instance;
@@ -174,6 +201,9 @@ namespace SoulKnight3D
             }
             if (_animator != null)
             {
+                _animator.Rebind();
+                _animator.Update(0f);
+                _animator.ResetTrigger(_dieAnimatorId);
                 _animator.SetBool(_gripAnimatorId, false);
             }
             _minimapIcon?.gameObject.Show();
@@ -196,16 +226,33 @@ namespace SoulKnight3D
 
             _state = HandState.Dead;
             _isCombatActive = false;
+            transform.SetParent(
+                GameObjectsManager.Instance != null
+                    ? GameObjectsManager.Instance.transform
+                    : null, true);
             StopMovement();
+            if (_rigidbody != null)
+            {
+                _rigidbody.isKinematic = false;
+                _rigidbody.useGravity = true;
+                _rigidbody.detectCollisions = true;
+            }
             if (_collider != null)
             {
-                _collider.enabled = false;
+                ApplyDeathColliderLayerOverrides();
+                _collider.enabled = true;
+                _collider.isTrigger = false;
+            }
+            if (_animator != null)
+            {
+                _animator.SetBool(_gripAnimatorId, false);
+                _animator.SetTrigger(_dieAnimatorId);
             }
             _minimapIcon?.gameObject.Hide();
             ReleaseGripStatus();
             UnregisterFromOwner();
             _deadFeedback?.PlayFeedbacks();
-            StartCoroutine(ReleaseAfterDelay(0.25f));
+            _deathCoroutine = StartCoroutine(DissolveAndRelease());
         }
 
         public void ThrowBackAtSummoner()
@@ -546,13 +593,36 @@ namespace SoulKnight3D
             _owner?.UnregisterHand(this);
         }
 
-        private IEnumerator ReleaseAfterDelay(float delay)
+        private IEnumerator DissolveAndRelease()
         {
-            if (delay > 0f)
+            if (_dissolveDelay > 0f)
             {
-                yield return new WaitForSeconds(delay);
+                yield return new WaitForSeconds(_dissolveDelay);
             }
 
+            StopMovement();
+            if (_rigidbody != null)
+            {
+                _rigidbody.isKinematic = true;
+                _rigidbody.useGravity = false;
+            }
+            if (_collider != null)
+            {
+                _collider.enabled = false;
+                RestoreColliderLayerOverrides();
+            }
+
+            float elapsed = 0f;
+            while (elapsed < _dissolveDuration)
+            {
+                elapsed += Time.deltaTime;
+                SetDissolveValue(
+                    Mathf.Clamp01(elapsed / _dissolveDuration));
+                yield return null;
+            }
+
+            SetDissolveValue(1f);
+            _deathCoroutine = null;
             if (_pooledObject != null)
             {
                 _pooledObject.ReleaseToPool();
@@ -561,6 +631,49 @@ namespace SoulKnight3D
             {
                 Destroy(gameObject);
             }
+        }
+
+        private void CacheDissolveMaterials()
+        {
+            _dissolveMaterials.Cache(
+                GetComponentsInChildren<Renderer>(true));
+        }
+
+        private void SetDissolveValue(float value)
+        {
+            _dissolveMaterials.SetValue(value);
+        }
+
+        private void CacheColliderLayerOverrides()
+        {
+            if (_collider == null || _colliderOverridesCached) { return; }
+
+            _activeIncludeLayers = _collider.includeLayers;
+            _activeExcludeLayers = _collider.excludeLayers;
+            _activeLayerOverridePriority =
+                _collider.layerOverridePriority;
+            _colliderOverridesCached = true;
+        }
+
+        private void ApplyDeathColliderLayerOverrides()
+        {
+            if (_collider == null) { return; }
+
+            CacheColliderLayerOverrides();
+            _collider.includeLayers = _deathCollisionLayers;
+            _collider.excludeLayers = ~_deathCollisionLayers;
+            _collider.layerOverridePriority =
+                _activeLayerOverridePriority + 1;
+        }
+
+        private void RestoreColliderLayerOverrides()
+        {
+            if (_collider == null || !_colliderOverridesCached) { return; }
+
+            _collider.includeLayers = _activeIncludeLayers;
+            _collider.excludeLayers = _activeExcludeLayers;
+            _collider.layerOverridePriority =
+                _activeLayerOverridePriority;
         }
 
         private void CacheComponents()

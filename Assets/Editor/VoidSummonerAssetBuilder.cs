@@ -30,6 +30,8 @@ public static class VoidSummonerAssetBuilder
         "Assets/Art/Animation/Void Summoner/Summon.anim";
     private const string OrbClipPath =
         "Assets/Art/Animation/Goblin Priest/SplitBulletAttack.anim";
+    private const string HandDieClipPath =
+        "Assets/Art/Animation/Void Summoner/Hand/Die.anim";
     private const string SoundTemplatePrefabPath =
         "Assets/Art/Prefab/Characters/Boss/Goblin Priest.prefab";
     private const string SpawnProfilePath =
@@ -135,8 +137,12 @@ public static class VoidSummonerAssetBuilder
             AnimatorControllerParameterType.Trigger);
         ValidateParameter(summonerController, "Orb",
             AnimatorControllerParameterType.Trigger);
+        ValidateParameter(summonerController, "Die",
+            AnimatorControllerParameterType.Trigger);
         ValidateParameter(handController, "Gripped",
             AnimatorControllerParameterType.Bool);
+        ValidateParameter(handController, "Die",
+            AnimatorControllerParameterType.Trigger);
 
         AnimationClip summonClip =
             AssetDatabase.LoadAssetAtPath<AnimationClip>(SummonClipPath);
@@ -176,6 +182,7 @@ public static class VoidSummonerAssetBuilder
             HandControllerPath,
             SummonClipPath,
             OrbClipPath,
+            HandDieClipPath,
             SoundTemplatePrefabPath,
             SpawnProfilePath,
             HandIconPath,
@@ -272,10 +279,12 @@ public static class VoidSummonerAssetBuilder
         AnimatorState move = FindState(machine, "Move");
         AnimatorState summon = FindState(machine, "SummonAttack");
         AnimatorState orb = FindState(machine, "OrbAttack");
-        if (move == null || summon == null || orb == null)
+        AnimatorState death = FindState(machine, "DeathForward");
+        if (move == null || summon == null || orb == null || death == null)
         {
             throw new InvalidOperationException(
-                "Void Summoner controller is missing Move, SummonAttack, or OrbAttack.");
+                "Void Summoner controller is missing Move, SummonAttack, " +
+                "OrbAttack, or DeathForward.");
         }
 
         machine.defaultState = move;
@@ -286,6 +295,8 @@ public static class VoidSummonerAssetBuilder
         }
         RemoveTransitions(summon);
         RemoveTransitions(orb);
+        RemoveTransitions(death);
+        AddAnyStateTrigger(machine, death, "Die");
         AddAnyStateTrigger(machine, summon, "Summon");
         AddAnyStateTrigger(machine, orb, "Orb");
         AddExitTransition(summon, move);
@@ -294,6 +305,7 @@ public static class VoidSummonerAssetBuilder
         AnimationClip summonClip =
             AssetDatabase.LoadAssetAtPath<AnimationClip>(SummonClipPath);
         SetLooping(summonClip, false);
+        SetLooping(death.motion as AnimationClip, false);
         AnimationUtility.SetAnimationEvents(summonClip, new[]
         {
             new AnimationEvent
@@ -314,14 +326,18 @@ public static class VoidSummonerAssetBuilder
                 HandControllerPath);
         EnsureParameter(controller, "Gripped",
             AnimatorControllerParameterType.Bool);
+        EnsureParameter(controller, "Die",
+            AnimatorControllerParameterType.Trigger);
 
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
         AnimatorState idle = FindState(machine, "IdleAndMove");
         AnimatorState grip = FindState(machine, "Grip");
-        if (idle == null || grip == null)
+        AnimatorState death = FindState(machine, "Die");
+        if (idle == null || grip == null || death == null)
         {
             throw new InvalidOperationException(
-                "Void Summoner Hand controller is missing IdleAndMove or Grip.");
+                "Void Summoner Hand controller is missing IdleAndMove, " +
+                "Grip, or Die.");
         }
 
         machine.defaultState = idle;
@@ -331,6 +347,8 @@ public static class VoidSummonerAssetBuilder
             machine.RemoveAnyStateTransition(transition);
         }
         RemoveTransitions(grip);
+        RemoveTransitions(death);
+        AddAnyStateTrigger(machine, death, "Die");
 
         AnimatorStateTransition enterGrip =
             machine.AddAnyStateTransition(grip);
@@ -347,6 +365,9 @@ public static class VoidSummonerAssetBuilder
         exitGrip.AddCondition(
             AnimatorConditionMode.IfNot, 0f, "Gripped");
 
+        SetLooping(
+            AssetDatabase.LoadAssetAtPath<AnimationClip>(HandDieClipPath),
+            false);
         EditorUtility.SetDirty(controller);
     }
 
@@ -498,6 +519,11 @@ public static class VoidSummonerAssetBuilder
             serialized.FindProperty("_throwDuration").floatValue = 0.42f;
             serialized.FindProperty("_throwDamage").intValue = 6;
             serialized.FindProperty("_occupiedGripDamage").intValue = 2;
+            serialized.FindProperty("_dissolveDelay").floatValue = 3f;
+            serialized.FindProperty("_dissolveDuration").floatValue = 3f;
+            serialized.FindProperty("_deathCollisionLayers").intValue =
+                (1 << LayerMask.NameToLayer("Default")) |
+                (1 << LayerMask.NameToLayer("RoomProps"));
             serialized.ApplyModifiedPropertiesWithoutUndo();
 
             EditorUtility.SetDirty(hand);
