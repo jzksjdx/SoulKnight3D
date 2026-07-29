@@ -27,6 +27,8 @@ namespace SoulKnight3D
         [SerializeField, Range(0f, 1f)] private float _bossExtraBattleRoomChance = 0.5f;
 
         [Header("Room Objects")]
+        [SerializeField] private Vector3 _homeRoomSpawnOffset =
+            new Vector3(1f, 0.05f, 1f);
         [SerializeField] private GameObject PortalPrefab;
         [SerializeField] private GameObject roomGenPrefab;
         [SerializeField] private GameObject roomGatePrefab;
@@ -49,6 +51,8 @@ namespace SoulKnight3D
         private List<GameObject> _generatedHallways = new List<GameObject>();
         private GameObject _generatedPortal;
         public bool IsMapReady { get; private set; }
+        public Vector3 HomeRoomSpawnPosition { get; private set; }
+        public bool HasHomeRoomSpawnPosition { get; private set; }
         public EasyEvent OnMapReady = new EasyEvent();
 
         private struct RoomData
@@ -71,6 +75,7 @@ namespace SoulKnight3D
         private IEnumerator Start()
         {
             IsMapReady = false;
+            HasHomeRoomSpawnPosition = false;
             map = new int[gridHeight, gridWidth];
             if (_shouldGenerateMap)
             {
@@ -100,6 +105,9 @@ namespace SoulKnight3D
 
             // generate home room
             Vector3 initialRoomPos = new Vector3(2 * mapScale, 0, 2 * mapScale);
+            HomeRoomSpawnPosition =
+                initialRoomPos + _homeRoomSpawnOffset;
+            HasHomeRoomSpawnPosition = true;
             _roomDataDict.Add(startRoom, new RoomData(initialRoomPos, new List<RoomGate>(), RoomManager.RoomType.Home, RoomManager.RoomStatus.Explored));
             SetupRoomManager(startRoom);
             GameObject homeRoom = GenerateRoom(startRoom, initialRoomPos);

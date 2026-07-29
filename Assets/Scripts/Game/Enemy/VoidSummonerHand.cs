@@ -83,6 +83,7 @@ namespace SoulKnight3D
         private LayerMask _activeIncludeLayers;
         private LayerMask _activeExcludeLayers;
         private int _activeLayerOverridePriority;
+        private int _activeColliderGameObjectLayer;
         private bool _registeredWithOwner;
         private bool _isCombatActive;
         private bool _colliderOverridesCached;
@@ -652,6 +653,8 @@ namespace SoulKnight3D
             _activeExcludeLayers = _collider.excludeLayers;
             _activeLayerOverridePriority =
                 _collider.layerOverridePriority;
+            _activeColliderGameObjectLayer =
+                _collider.gameObject.layer;
             _colliderOverridesCached = true;
         }
 
@@ -664,6 +667,7 @@ namespace SoulKnight3D
             _collider.excludeLayers = ~_deathCollisionLayers;
             _collider.layerOverridePriority =
                 _activeLayerOverridePriority + 1;
+            _collider.gameObject.layer = Physics.IgnoreRaycastLayer;
         }
 
         private void RestoreColliderLayerOverrides()
@@ -674,6 +678,8 @@ namespace SoulKnight3D
             _collider.excludeLayers = _activeExcludeLayers;
             _collider.layerOverridePriority =
                 _activeLayerOverridePriority;
+            _collider.gameObject.layer =
+                _activeColliderGameObjectLayer;
         }
 
         private void CacheComponents()

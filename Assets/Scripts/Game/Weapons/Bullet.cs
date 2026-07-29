@@ -24,6 +24,8 @@ namespace SoulKnight3D
         private Vector3 _preCollisionVelocity;
         private Quaternion _preCollisionRotation;
         private bool _hasPreCollisionPose;
+        private RigidbodyInterpolation _originalInterpolation;
+        private Coroutine _trailStartCoroutine;
 
         public string WeaponTag => _weaponTag;
         public Vector3 PreCollisionVelocity => _hasPreCollisionPose
@@ -45,11 +47,7 @@ namespace SoulKnight3D
             _preCollisionVelocity = Vector3.zero;
             _hasPreCollisionPose = false;
             RestoreIgnoredCollisions();
-            if (TrailRenderer)
-            {
-                TrailRenderer.emitting = false;
-                TrailRenderer.Clear();
-            }
+            StopTrailForPooling();
 
             transform.localScale = _originalScale * bulletSize;
         }
@@ -63,6 +61,10 @@ namespace SoulKnight3D
         {
             _originalScale = transform.localScale;
             _impactBehavior = GetComponent<IBulletImpactBehavior>();
+            if (SelfRigidbody != null)
+            {
+                _originalInterpolation = SelfRigidbody.interpolation;
+            }
             ConfigureTrailForPooling();
             SelfCapsuleCollider.OnCollisionEnterEvent((other) =>
             {
@@ -79,8 +81,7 @@ namespace SoulKnight3D
             // Auto Destruct removes the trail object after its first use, which
             // leaves later pool checkouts without a renderer.
             TrailRenderer.autodestruct = false;
-            TrailRenderer.emitting = false;
-            TrailRenderer.Clear();
+            StopTrailForPooling();
         }
 
         private bool PassThroughFriendlyCollision(Collision other)
@@ -279,22 +280,62 @@ namespace SoulKnight3D
                 SelfRigidbody.angularVelocity = Vector3.zero;
             }
             transform.localScale = _originalScale;
-            if (TrailRenderer)
-            {
-                TrailRenderer.emitting = false;
-                TrailRenderer.Clear();
-            }
+            StopTrailForPooling();
             gameObject.Hide();
         }
 
         public void ShowFromPool()
         {
+            Vector3 spawnPosition = transform.position;
+            Quaternion spawnRotation = transform.rotation;
+            if (SelfRigidbody != null)
+            {
+                SelfRigidbody.interpolation = RigidbodyInterpolation.None;
+                SelfRigidbody.position = spawnPosition;
+                SelfRigidbody.rotation = spawnRotation;
+            }
+
             gameObject.Show();
+
+            if (SelfRigidbody != null)
+            {
+                SelfRigidbody.interpolation = _originalInterpolation;
+            }
+
             if (!TrailRenderer) { return; }
+
+            StopTrailForPooling();
+            _trailStartCoroutine = StartCoroutine(StartTrailAfterSpawn());
+        }
+
+        private void StopTrailForPooling()
+        {
+            if (_trailStartCoroutine != null)
+            {
+                StopCoroutine(_trailStartCoroutine);
+                _trailStartCoroutine = null;
+            }
+            if (!TrailRenderer) { return; }
+
+            TrailRenderer.emitting = false;
+            TrailRenderer.enabled = false;
+            TrailRenderer.Clear();
+        }
+
+        private IEnumerator StartTrailAfterSpawn()
+        {
+            yield return null;
+            _trailStartCoroutine = null;
+
+            if (!gameObject.activeInHierarchy || !TrailRenderer)
+            {
+                yield break;
+            }
 
             TrailRenderer.autodestruct = false;
             TrailRenderer.enabled = true;
             TrailRenderer.Clear();
+            TrailRenderer.AddPosition(transform.position);
             TrailRenderer.emitting = true;
         }
     }

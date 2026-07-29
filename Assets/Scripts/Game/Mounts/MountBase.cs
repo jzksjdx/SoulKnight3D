@@ -232,12 +232,37 @@ namespace SoulKnight3D
         {
             if (!IsMounted) { return; }
 
+            Quaternion spawnRotation = transform.rotation;
+            transform.SetPositionAndRotation(
+                spawnPosition, spawnRotation);
+            RigidbodyInterpolation interpolation =
+                RigidbodyInterpolation.None;
+            if (_body != null)
+            {
+                interpolation = _body.interpolation;
+                _body.interpolation = RigidbodyInterpolation.None;
+                if (!_body.isKinematic)
+                {
+                    _body.velocity = Vector3.zero;
+                    _body.angularVelocity = Vector3.zero;
+                }
+                _body.isKinematic = true;
+                _body.useGravity = false;
+                _body.position = spawnPosition;
+                _body.rotation = spawnRotation;
+            }
+
             gameObject.SetActive(true);
-            transform.position = spawnPosition;
             Health.Value = Mathf.Min(
                 MaxHealth,
                 Health.Value + Mathf.FloorToInt(MaxHealth * 0.5f));
             SetOccupiedPhysics(true);
+            if (_body != null)
+            {
+                _body.position = spawnPosition;
+                _body.rotation = spawnRotation;
+                _body.interpolation = interpolation;
+            }
             SetAnimatorActive(true);
             SetAnimationState(MountAnimationState.Idle);
         }

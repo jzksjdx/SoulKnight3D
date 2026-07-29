@@ -138,12 +138,19 @@ namespace SoulKnight3D
                 yield break;
             }
 
-            PlayerController.Instance.transform.position = _playerSpawnPoint;
-            PlayerController.Instance.MountRider?.RestoreAfterLevelTransition(
+            PlayerController player = PlayerController.Instance;
+            if (MapGenerator != null &&
+                MapGenerator.HasHomeRoomSpawnPosition)
+            {
+                _playerSpawnPoint = MapGenerator.HomeRoomSpawnPosition;
+            }
+
+            player.PlaceAtLevelSpawn(_playerSpawnPoint);
+            player.MountRider?.RestoreAfterLevelTransition(
                 _playerSpawnPoint);
-            SpawnLevelOneStarterChest(PlayerController.Instance.transform);
-            PlayerController.Instance.gameObject.Show();
-            PlayerController.Instance.PlayerAttack.RestoreWeaponState();
+            SpawnLevelOneStarterChest(player.transform);
+            player.gameObject.Show();
+            player.PlayerAttack.RestoreWeaponState();
             UIMinimapUpdater.Instance?.UpdateMap();
         }
 
@@ -280,8 +287,11 @@ namespace SoulKnight3D
             player.PlayerAttack.Skill?.CancelForLevelTransition();
             player.PlayerAttack.CancelCurrentWeaponCharge();
             player.MountRider?.PrepareForLevelTransition();
-            player.SelfRigidbody.velocity = Vector3.zero;
-            player.SelfRigidbody.angularVelocity = Vector3.zero;
+            if (!player.SelfRigidbody.isKinematic)
+            {
+                player.SelfRigidbody.velocity = Vector3.zero;
+                player.SelfRigidbody.angularVelocity = Vector3.zero;
+            }
         }
 
         private IEnumerator LoadCurrentSceneAsync()

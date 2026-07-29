@@ -303,6 +303,24 @@ namespace SoulKnight3D
             transform.SetPositionAndRotation(
                 mountTransform.position,
                 mountTransform.rotation);
+            SelfRigidbody.position = mountTransform.position;
+            SelfRigidbody.rotation = mountTransform.rotation;
+        }
+
+        internal void PlaceAtLevelSpawn(Vector3 worldPosition)
+        {
+            RigidbodyInterpolation interpolation =
+                SelfRigidbody.interpolation;
+            SelfRigidbody.interpolation = RigidbodyInterpolation.None;
+            transform.position = worldPosition;
+            SelfRigidbody.position = worldPosition;
+            if (!SelfRigidbody.isKinematic)
+            {
+                SelfRigidbody.velocity = Vector3.zero;
+                SelfRigidbody.angularVelocity = Vector3.zero;
+            }
+            SelfRigidbody.interpolation = interpolation;
+            SetGroundedState(false);
         }
 
         private void HidePlayerPresentation()
