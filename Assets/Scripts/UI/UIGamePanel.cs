@@ -155,6 +155,22 @@ namespace SoulKnight3D
 
                 SetWeaponDisplay(weaponData);
             }).UnRegisterWhenGameObjectDestroyed(this);
+
+            PlayerController.Instance.PlayerAttack.OnWeaponDisplayOverrideChanged
+                .Register((sprite, energyCostText) =>
+                {
+                    if (sprite != null)
+                    {
+                        WeaponSprite.sprite = sprite;
+                        EnergyCostText.text = energyCostText ?? string.Empty;
+                        return;
+                    }
+
+                    Weapon currentWeapon =
+                        PlayerController.Instance.PlayerAttack.GetCurrentWeapon();
+                    SetWeaponDisplay(
+                        currentWeapon != null ? currentWeapon.InGameData : null);
+                }).UnRegisterWhenGameObjectDestroyed(this);
             
         }
 
@@ -319,6 +335,15 @@ namespace SoulKnight3D
 
         private void SetWeaponDisplay(WeaponData weaponData)
         {
+            if (PlayerController.Instance.PlayerAttack
+                .TryGetWeaponDisplayOverride(out Sprite overrideSprite,
+                    out string overrideCost))
+            {
+                WeaponSprite.sprite = overrideSprite;
+                EnergyCostText.text = overrideCost ?? string.Empty;
+                return;
+            }
+
             if (weaponData == null) { return; }
 
             WeaponSprite.sprite = weaponData.Sprite;

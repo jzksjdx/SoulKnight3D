@@ -45,7 +45,8 @@ public static class EnemySpawnProfileBuilder
             Entry("Elite Goblin Guard Blowpipe.prefab", null, 2, 2, 1, 2),
             Entry("Elite Goblin Guard Sickle.prefab", null, 2, 2, 1, 2),
             Entry("DireBoar.prefab", null, 1, 2, 2, 2),
-            Entry("GoblinGiant.prefab", null, 4, 4, 1, 4, 1)
+            Entry("GoblinGiant.prefab", null, 4, 4, 1, 4, 1),
+            Entry("Void Summoner.prefab", null, 5, 5, 1, 4, 1, 5)
         };
 
         EditorUtility.SetDirty(profile);
@@ -81,7 +82,8 @@ public static class EnemySpawnProfileBuilder
     }
 
     private static EnemySpawnEntry Entry(string prefabName, string elitePrefabName,
-        int pointCost, int waveSize, int weight, int minLevel, int maxCountPerWave = 0)
+        int pointCost, int waveSize, int weight, int minLevel,
+        int maxCountPerWave = 0, int maxLevel = 0)
     {
         return new EnemySpawnEntry
         {
@@ -93,7 +95,7 @@ public static class EnemySpawnProfileBuilder
             WaveSize = waveSize,
             Weight = weight,
             MinLevel = minLevel,
-            MaxLevel = 0,
+            MaxLevel = maxLevel,
             MaxCountPerWave = maxCountPerWave,
             EliteChanceMultiplier = 1f
         };

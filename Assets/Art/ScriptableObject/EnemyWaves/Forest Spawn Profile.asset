@@ -130,3 +130,13 @@ MonoBehaviour:
     MaxLevel: 0
     MaxCountPerWave: 1
     EliteChanceMultiplier: 1
+  - EnemyPrefab: {fileID: 1974972283321210167, guid: 1751b11dd39d0d04dac1af1a4cdb9e9b,
+      type: 3}
+    ElitePrefab: {fileID: 0}
+    PointCost: 5
+    WaveSize: 5
+    Weight: 1
+    MinLevel: 4
+    MaxLevel: 5
+    MaxCountPerWave: 1
+    EliteChanceMultiplier: 1

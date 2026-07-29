@@ -19,6 +19,12 @@ namespace SoulKnight3D {
         private Weapon _currentWeapon;
 
         private bool _isAttacking = false;
+        private bool _suppressAttackUntilReleased;
+        private readonly HashSet<UnityEngine.Object> _actionBlockers =
+            new HashSet<UnityEngine.Object>();
+        private UnityEngine.Object _weaponDisplayOverrideOwner;
+        private Sprite _weaponDisplayOverrideSprite;
+        private string _weaponDisplayOverrideCost;
 
         private float _interactDistance = 2f;
         private InteractiveItem _interactiveItem;
@@ -33,6 +39,8 @@ namespace SoulKnight3D {
 
         public EasyEvent<InteractiveItem> OnInteractiveItemChanged = new EasyEvent<InteractiveItem>();
         public EasyEvent<WeaponData, GameObject> OnWeaponSwitched = new EasyEvent<WeaponData, GameObject>();
+        public EasyEvent<Sprite, string> OnWeaponDisplayOverrideChanged =
+            new EasyEvent<Sprite, string>();
         public EasyEvent OnPlayerAttaked = new EasyEvent();
 
         public List<IUnRegister> UnregisterList { get; } = new List<IUnRegister>();
@@ -46,6 +54,10 @@ namespace SoulKnight3D {
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
             {
                 _isAttacking = isAttacking;
+                if (!isAttacking)
+                {
+                    _suppressAttackUntilReleased = false;
+                }
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             PlayerInputs.Instance.OnSwitchPerformed.Register(() =>
@@ -79,7 +91,8 @@ namespace SoulKnight3D {
 
         private void Attack()
         {
-            if (DisableAttack) { return; }
+            if (DisableAttack || AreActionsBlocked ||
+                _suppressAttackUntilReleased) { return; }
 
             MountBase mount = PlayerController.Instance != null &&
                 PlayerController.Instance.MountRider != null
@@ -140,7 +153,7 @@ namespace SoulKnight3D {
 
         public void SwitchWeapon()
         {
-            if (IsMountAttackSuppressed) { return; }
+            if (IsMountAttackSuppressed || AreActionsBlocked) { return; }
             if (Weapons.Count == 0) { return; }
 
             if (Weapons.Count == 1)
@@ -193,6 +206,76 @@ namespace SoulKnight3D {
         public Weapon GetCurrentWeapon()
         {
             return _currentWeapon;
+        }
+
+        public bool AreActionsBlocked
+        {
+            get
+            {
+                _actionBlockers.RemoveWhere(blocker => blocker == null);
+                return _actionBlockers.Count > 0;
+            }
+        }
+
+        public bool IsAttackInputSuppressed =>
+            _suppressAttackUntilReleased;
+
+        public void SetActionBlocker(UnityEngine.Object owner, bool isBlocked)
+        {
+            if (owner == null) { return; }
+            if (isBlocked)
+            {
+                _actionBlockers.Add(owner);
+            }
+            else
+            {
+                _actionBlockers.Remove(owner);
+            }
+        }
+
+        public void SuppressAttackUntilReleased()
+        {
+            _suppressAttackUntilReleased = true;
+        }
+
+        public void SetWeaponDisplayOverride(UnityEngine.Object owner,
+            Sprite sprite, string energyCostText)
+        {
+            if (owner == null || sprite == null) { return; }
+
+            _weaponDisplayOverrideOwner = owner;
+            _weaponDisplayOverrideSprite = sprite;
+            _weaponDisplayOverrideCost = energyCostText;
+            OnWeaponDisplayOverrideChanged.Trigger(sprite, energyCostText);
+        }
+
+        public void ClearWeaponDisplayOverride(UnityEngine.Object owner)
+        {
+            if (owner == null || _weaponDisplayOverrideOwner != owner) { return; }
+
+            _weaponDisplayOverrideOwner = null;
+            _weaponDisplayOverrideSprite = null;
+            _weaponDisplayOverrideCost = null;
+            OnWeaponDisplayOverrideChanged.Trigger(null, null);
+        }
+
+        public bool TryGetWeaponDisplayOverride(out Sprite sprite,
+            out string energyCostText)
+        {
+            if (_weaponDisplayOverrideOwner != null &&
+                _weaponDisplayOverrideSprite != null)
+            {
+                sprite = _weaponDisplayOverrideSprite;
+                energyCostText = _weaponDisplayOverrideCost;
+                return true;
+            }
+
+            _weaponDisplayOverrideOwner = null;
+            _weaponDisplayOverrideSprite = null;
+            _weaponDisplayOverrideCost = null;
+            sprite = null;
+            energyCostText = null;
+            return false;
         }
 
         public void AllowChargeWeaponToShoot()

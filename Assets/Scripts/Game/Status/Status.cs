@@ -8,24 +8,30 @@ namespace SoulKnight3D
     {
         public enum StatusType
         {
-            SpeedUp, SpeedDown, Poison
+            SpeedUp, SpeedDown, Poison, Restrained
         }
 
         public StatusType Type;
         [SerializeField] protected float _duration;
         protected TargetableObject _target;
+        [HideInInspector] public GameObject PrefabRef;
 
         private bool _isActive;
         private float _durationTimer;
+
+        protected virtual bool Expires => true;
 
         private void Update()
         {
             if (!_isActive) { return; }
 
-            _durationTimer -= Time.deltaTime;
+            if (Expires)
+            {
+                _durationTimer -= Time.deltaTime;
+            }
             OnStatusTick(Time.deltaTime);
 
-            if (_durationTimer <= 0f)
+            if (Expires && _durationTimer <= 0f)
             {
                 HandleDespawn();
             }
@@ -55,7 +61,20 @@ namespace SoulKnight3D
         protected virtual void HandleDespawn()
         {
             DeactivateStatus();
-            GameObjectsManager.Instance.DespawnStatus(this);
+            if (GameObjectsManager.Instance != null)
+            {
+                GameObjectsManager.Instance.DespawnStatus(this);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        public void RemoveStatus()
+        {
+            if (!_isActive) { return; }
+            HandleDespawn();
         }
 
         public void Reset()

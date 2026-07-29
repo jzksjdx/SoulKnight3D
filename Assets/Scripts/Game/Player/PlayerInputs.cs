@@ -99,6 +99,12 @@ namespace SoulKnight3D
 
         public void TriggerSkillAction()
         {
+            if (PlayerController.Instance != null &&
+                PlayerController.Instance.PlayerAttack.AreActionsBlocked)
+            {
+                return;
+            }
+
             MountRider rider = PlayerController.Instance != null
                 ? PlayerController.Instance.MountRider
                 : null;
@@ -119,6 +125,12 @@ namespace SoulKnight3D
 
         public bool TriggerSpecialAttackAction()
         {
+            if (PlayerController.Instance != null &&
+                PlayerController.Instance.PlayerAttack.AreActionsBlocked)
+            {
+                return false;
+            }
+
             MountRider rider = PlayerController.Instance != null
                 ? PlayerController.Instance.MountRider
                 : null;

@@ -23,7 +23,8 @@ namespace SoulKnight3D {
 
         private readonly Dictionary<GameObject, SimpleObjectPool<StatusZone>> _statusZonePools = new Dictionary<GameObject, SimpleObjectPool<StatusZone>>();
 
-        private readonly Dictionary<Status.StatusType, SimpleObjectPool<Status>> _statusPools = new Dictionary<Status.StatusType, SimpleObjectPool<Status>>();
+        private readonly Dictionary<GameObject, SimpleObjectPool<Status>>
+            _statusPools = new Dictionary<GameObject, SimpleObjectPool<Status>>();
         private readonly Dictionary<GameObject, Status.StatusType> _statusTypeCache = new Dictionary<GameObject, Status.StatusType>();
 
         private void Awake()
@@ -222,7 +223,7 @@ namespace SoulKnight3D {
         // status
         public GameObject SpawnStatus(GameObject statusPrefab, TargetableObject target)
         {
-            if (target == null) { return null; }
+            if (statusPrefab == null || target == null) { return null; }
 
             Status.StatusType statusType = GetStatusType(statusPrefab);
             if (target.Statuses.Contains(statusType))
@@ -230,22 +231,26 @@ namespace SoulKnight3D {
                 return null;
             }
 
-            if (!_statusPools.TryGetValue(statusType, out SimpleObjectPool<Status> statusPool))
+            if (!_statusPools.TryGetValue(statusPrefab,
+                out SimpleObjectPool<Status> statusPool))
             {
                 statusPool = new SimpleObjectPool<Status>(factoryMethod: () =>
                 {
                     GameObject statusObject = Instantiate(statusPrefab, transform).Hide();
-                    return statusObject.GetComponent<Status>();
+                    Status status = statusObject.GetComponent<Status>();
+                    status.PrefabRef = statusPrefab;
+                    return status;
                 }, initCount: 5,
                 resetMethod: (status) =>
                 {
                     status.Reset();
                 });
 
-                _statusPools.Add(statusType, statusPool);
+                _statusPools.Add(statusPrefab, statusPool);
             }
 
             Status newStatus = statusPool.Allocate();
+            newStatus.PrefabRef = statusPrefab;
             if (!newStatus.ActivateStatus(target))
             {
                 statusPool.Recycle(newStatus);
@@ -256,11 +261,13 @@ namespace SoulKnight3D {
 
         public void DespawnStatus(Status status)
         {
-            if (_statusPools.TryGetValue(status.Type, out SimpleObjectPool<Status> statusPool))
+            if (status != null && status.PrefabRef != null &&
+                _statusPools.TryGetValue(status.PrefabRef,
+                    out SimpleObjectPool<Status> statusPool))
             {
                 statusPool.Recycle(status);
             }
-            else
+            else if (status != null)
             {
                 Destroy(status.gameObject);
             }

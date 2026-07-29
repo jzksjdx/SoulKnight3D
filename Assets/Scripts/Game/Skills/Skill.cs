@@ -66,6 +66,11 @@ namespace SoulKnight3D
 
         public virtual bool UseSkill()
         {
+            if (PlayerController.Instance != null &&
+                PlayerController.Instance.PlayerAttack.AreActionsBlocked)
+            {
+                return false;
+            }
             if (_skillCooldownDelta > 0f || IsUsingSkill) { return false; }
             _skillDurationDelta = _skillDuration;
             IsUsingSkill = true;

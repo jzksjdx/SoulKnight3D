@@ -16,9 +16,13 @@ namespace SoulKnight3D
 
         private readonly HashSet<TargetableObject> _enemiesInRange =
             new HashSet<TargetableObject>();
+        private readonly HashSet<TargetableObject> _scannedEnemies =
+            new HashSet<TargetableObject>();
         private readonly HashSet<TargetableObject> _attackTargets =
             new HashSet<TargetableObject>();
+        private readonly Collider[] _rangeHits = new Collider[32];
         private bool _canUseBareHand = false;
+        private bool _isBareHandActive;
         [SerializeField] private int _movesLeft = 0;
 
         private float _cooldownTimeout = 0.1f;
@@ -42,14 +46,19 @@ namespace SoulKnight3D
 
             BareHandRange.OnTriggerExitEvent((other) =>
             {
-                if (!TryGetEnemyTarget(other, out TargetableObject enemy)) { return; }
-                RemoveEnemy(enemy);
+                RefreshTargetsInRange();
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
             PlayerInputs.Instance.OnAttackPerformed.Register((isAttacking) =>
             {
                 if (!isAttacking) { return; }
 
+                if (_playerAttack.AreActionsBlocked ||
+                    _playerAttack.IsAttackInputSuppressed)
+                {
+                    CancelBareHandAttack();
+                    return;
+                }
 
                 if (!_canUseBareHand) { return; }
 
@@ -69,17 +78,21 @@ namespace SoulKnight3D
             {
                 _movesLeft = 0;
                 _cooldownTimeoutDelta = _cooldownTimeout;
+                _isBareHandActive = false;
                 _playerAttack.DisableAttack = false;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         private void Update()
         {
-            if (_canUseBareHand)
+            if (_playerAttack != null &&
+                _playerAttack.AreActionsBlocked &&
+                _isBareHandActive)
             {
-                _enemiesInRange.RemoveWhere(IsUnavailableEnemy);
-                _canUseBareHand = _enemiesInRange.Count > 0;
+                CancelBareHandAttack();
             }
+
+            RefreshTargetsInRange();
 
             if (_cooldownTimeoutDelta >= 0f)
             {
@@ -89,6 +102,7 @@ namespace SoulKnight3D
 
         public void ToggleBareHand(bool isBareHand)
         {
+            _isBareHandActive = isBareHand;
             _playerAttack.DisableAttack = isBareHand;
             _playerAnimation.ToggleBareHandAnimation(isBareHand);
             _playerAttack.ToggleBareHandAttack(isBareHand);
@@ -96,6 +110,11 @@ namespace SoulKnight3D
 
         public void AttackFromAniamtion(bool isRightHand)
         {
+            if (_playerAttack.AreActionsBlocked)
+            {
+                CancelBareHandAttack();
+                return;
+            }
             if (_cooldownTimeoutDelta >= 0f) { return; }
             _cooldownTimeoutDelta = _cooldownTimeout;
             
@@ -160,6 +179,15 @@ namespace SoulKnight3D
             }
         }
 
+        public void CancelBareHandAttack()
+        {
+            _movesLeft = 0;
+            _cooldownTimeoutDelta = _cooldownTimeout;
+            if (!_isBareHandActive) { return; }
+
+            ToggleBareHand(false);
+        }
+
         private static bool TryGetEnemyTarget(
             Collider collider, out TargetableObject enemy)
         {
@@ -175,13 +203,68 @@ namespace SoulKnight3D
                 !enemy.gameObject.activeInHierarchy;
         }
 
-        private void RemoveEnemy(TargetableObject enemy)
+        private void RefreshTargetsInRange()
         {
-            if (enemy != null)
+            _scannedEnemies.Clear();
+            if (BareHandRange == null || !BareHandRange.enabled ||
+                !BareHandRange.gameObject.activeInHierarchy)
             {
-                _enemiesInRange.Remove(enemy);
+                ApplyScannedTargets();
+                return;
             }
+
+            Bounds bounds = BareHandRange.bounds;
+            Vector3 center = bounds.center;
+            Vector3 halfExtents = bounds.extents;
+            Quaternion rotation = Quaternion.identity;
+            if (BareHandRange is BoxCollider box)
+            {
+                center = box.transform.TransformPoint(box.center);
+                Vector3 scale = box.transform.lossyScale;
+                halfExtents = Vector3.Scale(
+                    box.size * 0.5f,
+                    new Vector3(
+                        Mathf.Abs(scale.x),
+                        Mathf.Abs(scale.y),
+                        Mathf.Abs(scale.z)));
+                rotation = box.transform.rotation;
+            }
+
+            int hitCount = Physics.OverlapBoxNonAlloc(
+                center,
+                halfExtents,
+                _rangeHits,
+                rotation,
+                ~0,
+                QueryTriggerInteraction.Collide);
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (TryGetEnemyTarget(
+                    _rangeHits[i], out TargetableObject enemy))
+                {
+                    _scannedEnemies.Add(enemy);
+                }
+                _rangeHits[i] = null;
+            }
+
+            ApplyScannedTargets();
+        }
+
+        private void ApplyScannedTargets()
+        {
+            _scannedEnemies.RemoveWhere(IsUnavailableEnemy);
+            bool changed = !_enemiesInRange.SetEquals(_scannedEnemies);
+            if (changed)
+            {
+                _enemiesInRange.Clear();
+                _enemiesInRange.UnionWith(_scannedEnemies);
+            }
+
             _canUseBareHand = _enemiesInRange.Count > 0;
+            if (!_canUseBareHand && _isBareHandActive)
+            {
+                CancelBareHandAttack();
+            }
         }
 
         //private void OnDrawGizmosSelected()
