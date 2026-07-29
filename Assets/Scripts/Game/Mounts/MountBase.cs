@@ -532,6 +532,8 @@ namespace SoulKnight3D
             for (int i = 0; i < transforms.Length; i++)
             {
                 Transform poseTransform = transforms[i];
+                if (poseTransform == transform) { continue; }
+
                 _defaultPose.Add(new TransformPose
                 {
                     Transform = poseTransform,
@@ -565,7 +567,10 @@ namespace SoulKnight3D
             for (int i = 0; i < _defaultPose.Count; i++)
             {
                 TransformPose pose = _defaultPose[i];
-                if (pose.Transform == null) { continue; }
+                if (pose.Transform == null || pose.Transform == transform)
+                {
+                    continue;
+                }
 
                 pose.Transform.localPosition = pose.LocalPosition;
                 pose.Transform.localRotation = pose.LocalRotation;

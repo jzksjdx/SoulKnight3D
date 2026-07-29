@@ -3,7 +3,6 @@ using QFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Random = UnityEngine.Random;
 using RoomGen;
 
 namespace SoulKnight3D
@@ -172,11 +171,12 @@ namespace SoulKnight3D
             {
                 RoomManager.RoomType.Reward
             };
-            if (Random.value < _specialRoomChance)
+            if (GameRandom.Chance(GameRandomStream.MapTopology, _specialRoomChance))
             {
                 roomTypes.Add(RoomManager.RoomType.Special);
             }
-            if (isBossFloor && Random.value < _bossExtraBattleRoomChance)
+            if (isBossFloor && GameRandom.Chance(
+                    GameRandomStream.MapTopology, _bossExtraBattleRoomChance))
             {
                 roomTypes.Add(RoomManager.RoomType.Battle);
             }
@@ -188,7 +188,8 @@ namespace SoulKnight3D
 
             for (int i = roomTypes.Count - 1; i > 0; i--)
             {
-                int swapIndex = Random.Range(0, i + 1);
+                int swapIndex = GameRandom.Range(
+                    GameRandomStream.MapTopology, 0, i + 1);
                 (roomTypes[i], roomTypes[swapIndex]) =
                     (roomTypes[swapIndex], roomTypes[i]);
             }
@@ -274,11 +275,13 @@ namespace SoulKnight3D
                 return false;
             }
 
-            nextRoomKey = pathCandidates[Random.Range(0, pathCandidates.Count)];
+            nextRoomKey = pathCandidates[GameRandom.Range(
+                GameRandomStream.MapTopology, 0, pathCandidates.Count)];
             range.Remove(nextRoomKey);
             while (range.Count > newRoomCount - 1)
             {
-                range.RemoveAt(Random.Range(0, range.Count));
+                range.RemoveAt(GameRandom.Range(
+                    GameRandomStream.MapTopology, 0, range.Count));
             }
             range.Insert(0, nextRoomKey);
             return true;
@@ -376,7 +379,8 @@ namespace SoulKnight3D
             EventSystem.instance.SetGridSize(1000 + _generatedHallways.Count,
                 isHorizontal ? 3 : 11,
                 isHorizontal ? 11 : 3);
-            EventSystem.instance.SetRoomSeed(1000 + _generatedHallways.Count, 0, Random.Range(0, 100000));
+            EventSystem.instance.SetRoomSeed(1000 + _generatedHallways.Count, 0,
+                GameRandom.Range(GameRandomStream.MapTopology, 0, 100000));
             hallwayGen.GenerateRoom(hallwayGen.id);
             hallwayGen.parent.transform.SetParent(hallwayGenObj.transform);
             _generatedHallways.Add(hallwayGenObj);
@@ -401,7 +405,17 @@ namespace SoulKnight3D
             int level = GameController.Instance != null
                 ? GameController.Instance.Level
                 : EnemySpawnLevel;
-            return level >= _merchantMinimumLevel && Random.value < _merchantRoomChance;
+            if (level < _merchantMinimumLevel)
+            {
+                return false;
+            }
+
+            bool shouldGenerate = GameRandom.Chance(
+                GameRandomStream.RoomContent, _merchantRoomChance);
+            Debug.Log($"Reward room selected: " +
+                $"{(shouldGenerate ? "Merchant" : "Chest")} " +
+                $"(level {level}, seed {GameRandom.LevelSeed}).");
+            return shouldGenerate;
         }
 
         private GameObject GenerateRoom(int roomKey, Vector3 roomWorldPosition)
@@ -409,7 +423,8 @@ namespace SoulKnight3D
             GameObject roomGenObj = Instantiate(roomGenPrefab, roomWorldPosition, Quaternion.identity);
             RoomGenerator roomGen = roomGenObj.GetComponent<RoomGenerator>();
             roomGen.id = _roomDataDict.Count;
-            EventSystem.instance.SetRoomSeed(_roomDataDict.Count, 0, Random.Range(0, 100000));
+            EventSystem.instance.SetRoomSeed(_roomDataDict.Count, 0,
+                GameRandom.Range(GameRandomStream.MapTopology, 0, 100000));
             roomGen.GenerateRoom(roomGen.id);
             roomGen.parent.transform.SetParent(roomGenObj.transform);
             // adjust room collider
@@ -466,7 +481,8 @@ namespace SoulKnight3D
 
             if (EnemyWaveSOs.Count > 0)
             {
-                room.SetEnemyWaves(EnemyWaveSOs[Random.Range(0, EnemyWaveSOs.Count)]);
+                room.SetEnemyWaves(EnemyWaveSOs[GameRandom.Range(
+                    GameRandomStream.Enemies, 0, EnemyWaveSOs.Count)]);
                 return;
             }
 

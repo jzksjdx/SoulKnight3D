@@ -225,7 +225,10 @@ namespace SoulKnight3D {
             if (owner == null) { return; }
             if (isBlocked)
             {
-                _actionBlockers.Add(owner);
+                if (_actionBlockers.Add(owner))
+                {
+                    Skill?.CancelForActionBlock();
+                }
             }
             else
             {

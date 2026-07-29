@@ -29763,6 +29763,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Void Summoner
       objectReference: {fileID: 0}
+    - target: {fileID: 1974972283321210167, guid: 1751b11dd39d0d04dac1af1a4cdb9e9b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -31195,16 +31200,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Barrage
-      objectReference: {fileID: 0}
-    - target: {fileID: 1963934486083877673, guid: 9fedbef25e2d3a743b8af112e3f08fff,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038620122238131205, guid: 9fedbef25e2d3a743b8af112e3f08fff,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace SoulKnight3D
 {
@@ -21,8 +19,6 @@ namespace SoulKnight3D
         [SerializeField, Min(0f)] private float _playerProximityDistance = 2.5f;
         [SerializeField] private Vector2 _talkIntervalRange = new Vector2(4f, 9f);
 
-        private static readonly System.Random StockRandom = new System.Random(
-            unchecked(Environment.TickCount ^ (int)DateTime.UtcNow.Ticks));
         private static readonly int IdleState = Animator.StringToHash("Idle");
         private static readonly int TalkingState = Animator.StringToHash("Talking");
         private static readonly int ThankfulState = Animator.StringToHash("Thankful");
@@ -139,6 +135,8 @@ namespace SoulKnight3D
                 MerchantStockItem stockItem = MerchantStockItem.Create(
                     _stockPoints[i], itemPrefab, price, _priceLabelPrefab, _potionStockYOffset);
                 stockItem.Purchased += PlayPurchaseReaction;
+                Debug.Log($"Merchant stock {i + 1}: '{itemPrefab.name}' " +
+                    $"for {price} coins (seed {GameRandom.LevelSeed}).");
             }
         }
 
@@ -189,7 +187,8 @@ namespace SoulKnight3D
 
         private void PlayPurchaseReaction()
         {
-            bool isThankful = Random.value < 0.5f;
+            bool isThankful = GameRandom.Chance(
+                GameRandomStream.Presentation, 0.5f);
             RequestOneShot(
                 isThankful ? ThankfulTrigger : HandGestureTrigger,
                 isThankful ? ThankfulState : HandGestureState);
@@ -237,7 +236,8 @@ namespace SoulKnight3D
         {
             float minimum = Mathf.Max(0f, _talkIntervalRange.x);
             float maximum = Mathf.Max(minimum, _talkIntervalRange.y);
-            _nextTalkTime = Time.time + Random.Range(minimum, maximum);
+            _nextTalkTime = Time.time + GameRandom.Range(
+                GameRandomStream.Presentation, minimum, maximum);
         }
 
         private HashSet<int> SelectPotionSlots()
@@ -248,7 +248,8 @@ namespace SoulKnight3D
                 return potionSlots;
             }
 
-            int potionCount = _stockPoints.Count >= 3 && Random.value < _twoPotionStockChance
+            int potionCount = _stockPoints.Count >= 3 &&
+                GameRandom.Chance(GameRandomStream.Merchant, _twoPotionStockChance)
                 ? 2
                 : 1;
             potionCount = Mathf.Min(potionCount, _stockPoints.Count - 1);
@@ -256,7 +257,8 @@ namespace SoulKnight3D
 
             while (potionSlots.Count < potionCount)
             {
-                potionSlots.Add(Random.Range(0, _stockPoints.Count));
+                potionSlots.Add(GameRandom.Range(
+                    GameRandomStream.Merchant, 0, _stockPoints.Count));
             }
             return potionSlots;
         }
@@ -281,15 +283,15 @@ namespace SoulKnight3D
             if (_weaponPool == null) { return null; }
 
             GameObject selected = null;
-            lock (StockRandom)
+            System.Random stockRandom = GameRandom.GetStream(
+                GameRandomStream.Merchant);
+            for (int attempt = 0; attempt < 8; attempt++)
             {
-                for (int attempt = 0; attempt < 8; attempt++)
+                selected = _weaponPool.GetRandomPickupPrefabAtOrBelow(
+                    _level, stockRandom);
+                if (selected == null || selected != excludedPrefab)
                 {
-                    selected = _weaponPool.GetRandomPickupPrefabAtOrBelow(_level, StockRandom);
-                    if (selected == null || selected != excludedPrefab)
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
             return selected;
@@ -310,7 +312,8 @@ namespace SoulKnight3D
 
             if (candidates.Count == 0) { return null; }
 
-            GameObject selectedPotion = candidates[Random.Range(0, candidates.Count)];
+            GameObject selectedPotion = candidates[GameRandom.Range(
+                GameRandomStream.Merchant, 0, candidates.Count)];
             selectedPotions.Add(selectedPotion);
             return selectedPotion;
         }

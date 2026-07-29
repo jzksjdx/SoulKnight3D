@@ -1,17 +1,12 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
-using Random = UnityEngine.Random;
 
 namespace SoulKnight3D
 {
     public class Chest : InteractiveItem
     {
-        private static readonly System.Random RewardRandom = new System.Random(
-            unchecked(Environment.TickCount ^ (int)DateTime.UtcNow.Ticks));
-
         private Animator _animator;
         private int _animIdOpen;
 
@@ -158,11 +153,7 @@ namespace SoulKnight3D
                     potionUpperBound, 100);
             }
 
-            int roll;
-            lock (RewardRandom)
-            {
-                roll = RewardRandom.Next(0, 100);
-            }
+            int roll = GameRandom.Range(GameRandomStream.Rewards, 0, 100);
 
             if (roll < potionUpperBound)
             {
@@ -224,10 +215,7 @@ namespace SoulKnight3D
 
         private static float NextRewardRate(float totalRate)
         {
-            lock (RewardRandom)
-            {
-                return (float)(RewardRandom.NextDouble() * totalRate);
-            }
+            return GameRandom.Value(GameRandomStream.Rewards) * totalRate;
         }
 
         private GameObject GetSelectedRewardItem()
@@ -248,7 +236,8 @@ namespace SoulKnight3D
             if (category.UseWeaponPool && category.WeaponPool != null)
             {
                 int poolLevel = GetWeaponPoolLevel(category);
-                GameObject poolReward = category.WeaponPool.GetRandomPickupPrefab(poolLevel, RewardRandom);
+                GameObject poolReward = category.WeaponPool.GetRandomPickupPrefab(
+                    poolLevel, GameRandom.GetStream(GameRandomStream.Rewards));
                 if (poolReward != null)
                 {
                     return poolReward;
@@ -280,8 +269,9 @@ namespace SoulKnight3D
 
             const float randomScale = 0.3f;
             Vector3 randomDirection = Vector3.up + new Vector3(
-                Random.Range(-randomScale, randomScale), 0f,
-                Random.Range(-randomScale, randomScale));
+                GameRandom.Range(GameRandomStream.Gameplay, -randomScale, randomScale),
+                0f,
+                GameRandom.Range(GameRandomStream.Gameplay, -randomScale, randomScale));
             rewardRigidbody.AddForce(randomDirection * 5f, ForceMode.Impulse);
         }
 

@@ -61,13 +61,16 @@ namespace SoulKnight3D
                 RunsStarted++;
                 saveSystem.SaveInt(RunsStartedSaveKey, RunsStarted);
             }
+            GameRandom.BeginLevel(RunsStarted, Level);
             IsFinalLevel = Level == GameFloor.GameLevels.Count;
             GameLevel currentLevel = GameFloor.GameLevels[Level - 1];
             MapGenerator.EnemySpawnProfile = currentLevel.EnemySpawnProfile;
             MapGenerator.EnemySpawnLevel = Level;
-            MapGenerator.EnemySpawnSeed = Random.Range(1, int.MaxValue);
+            MapGenerator.EnemySpawnSeed = GameRandom.Range(
+                GameRandomStream.Enemies, 1, int.MaxValue);
             MapGenerator.EnemyWaveSOs = currentLevel.LevelWaves;
-            MapGenerator.BossEncounter = GameFloor.SelectBoss(Random.value);
+            MapGenerator.BossEncounter = GameFloor.SelectBoss(
+                GameRandom.Value(GameRandomStream.RoomContent));
             if (MapGenerator.BossEncounter == null)
             {
                 Debug.LogError($"Game floor '{GameFloor.name}' has no valid weighted boss encounter.");

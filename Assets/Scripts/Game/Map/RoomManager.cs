@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace SoulKnight3D
 {
@@ -261,7 +260,7 @@ namespace SoulKnight3D
                 return;
             }
 
-            float roll = Random.value * totalWeight;
+            float roll = GameRandom.Value(GameRandomStream.RoomContent) * totalWeight;
             SpecialRoomContentGroup selectedGroup =
                 eligibleGroups[eligibleGroups.Count - 1];
             for (int i = 0; i < eligibleGroups.Count; i++)
@@ -275,7 +274,10 @@ namespace SoulKnight3D
             }
 
             GameObject contentPrefab = selectedGroup.Prefabs[
-                Random.Range(0, selectedGroup.Prefabs.Count)];
+                GameRandom.Range(GameRandomStream.RoomContent, 0,
+                    selectedGroup.Prefabs.Count)];
+            Debug.Log($"Special room selected '{contentPrefab.name}' " +
+                $"(seed {GameRandom.LevelSeed}).");
             Vector3 spawnPosition = transform.position + Vector3.up * _specialRoomYOffset;
             Instantiate(contentPrefab, spawnPosition, GetEntranceFacingRotation(), transform);
 
@@ -347,7 +349,8 @@ namespace SoulKnight3D
             if (Type == RoomType.Battle)
             {
                 // setup map items
-                GameObject roomItems = Instantiate(_roomItemPresets[Random.Range(0, _roomItemPresets.Count)], transform)
+                GameObject roomItems = Instantiate(_roomItemPresets[GameRandom.Range(
+                    GameRandomStream.RoomContent, 0, _roomItemPresets.Count)], transform)
                 .Position(transform.position);
                 if (roomItems.GetComponentInChildren<SpikeTilesController>())
                 {
@@ -621,7 +624,10 @@ namespace SoulKnight3D
         {
             for (int attempt = 0; attempt < SpawnPositionMaxAttempts; attempt++)
             {
-                Vector3 randomOffset = new Vector3(Random.Range(-radius, radius), yOffset, Random.Range(-radius, radius));
+                Vector3 randomOffset = new Vector3(
+                    GameRandom.Range(GameRandomStream.Gameplay, -radius, radius),
+                    yOffset,
+                    GameRandom.Range(GameRandomStream.Gameplay, -radius, radius));
                 Vector3 candidate = transform.position + randomOffset;
                 if (!Physics.CheckSphere(candidate, checkRadius, _itemLayerMask))
                 {

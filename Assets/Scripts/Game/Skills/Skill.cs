@@ -31,6 +31,13 @@ namespace SoulKnight3D
 
         protected virtual void Update()
         {
+            if (IsUsingSkill && PlayerController.Instance != null &&
+                PlayerController.Instance.PlayerAttack.AreActionsBlocked)
+            {
+                CancelForActionBlock();
+                return;
+            }
+
             if (!IsUsingSkill && _skillCooldownDelta >= 0) // cooling down
             {
                 _skillCooldownDelta -= Time.deltaTime;
@@ -75,6 +82,14 @@ namespace SoulKnight3D
             _skillDurationDelta = _skillDuration;
             IsUsingSkill = true;
             return true;
+        }
+
+        public virtual void CancelForActionBlock()
+        {
+            if (IsUsingSkill)
+            {
+                HandleSkillEnd();
+            }
         }
 
         public virtual void CancelForLevelTransition()

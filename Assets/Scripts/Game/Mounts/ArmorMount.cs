@@ -34,7 +34,7 @@ namespace SoulKnight3D
             }
             IsolateBuiltInWeaponShakeChannel();
             CacheBuiltInWeaponBehaviours();
-            SetBuiltInWeaponEnabled(false);
+            SetBuiltInWeaponEnabled(false, false);
             _aimRig?.SetAimingEnabled(false);
         }
 
@@ -62,11 +62,12 @@ namespace SoulKnight3D
             return _builtInWeapon.AttackAlongShootPoint(Vector3.left);
         }
 
-        private void SetBuiltInWeaponEnabled(bool isEnabled)
+        private void SetBuiltInWeaponEnabled(bool isEnabled,
+            bool stopFeedbacks = true)
         {
             if (_builtInWeapon == null) { return; }
 
-            if (!isEnabled)
+            if (!isEnabled && stopFeedbacks)
             {
                 MMF_Player[] feedbackPlayers =
                     _builtInWeapon.GetComponentsInChildren<MMF_Player>(true);
