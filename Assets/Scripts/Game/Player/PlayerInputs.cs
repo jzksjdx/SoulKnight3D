@@ -11,6 +11,7 @@ namespace SoulKnight3D
         private InputActions inputActions;
 
         public EasyEvent OnJumpPerformed = new EasyEvent();
+        public EasyEvent<bool> OnJumpStateChanged = new EasyEvent<bool>();
         public EasyEvent<bool> OnAttackPerformed = new EasyEvent<bool>();
         public EasyEvent OnSkillPerformed = new EasyEvent();
         public EasyEvent OnSwitchPerformed = new EasyEvent();
@@ -18,6 +19,9 @@ namespace SoulKnight3D
         public EasyEvent OnPausePerformed = new EasyEvent();
 
         private bool _isMobile = false;
+        private bool _isJumpPressed;
+
+        public bool IsJumpPressed => _isJumpPressed;
 
         private void Awake()
         {
@@ -25,6 +29,7 @@ namespace SoulKnight3D
             inputActions.Player.Enable();
 
             inputActions.Player.Jump.performed += Jump_performed;
+            inputActions.Player.Jump.canceled += Jump_canceled;
             inputActions.Player.Attack.performed += Attack_performed;
             inputActions.Player.Attack.canceled += Attack_canceled;
             inputActions.Player.Skill.performed += Skill_performed;
@@ -49,6 +54,7 @@ namespace SoulKnight3D
             if (inputActions == null) { return; }
 
             inputActions.Player.Jump.performed -= Jump_performed;
+            inputActions.Player.Jump.canceled -= Jump_canceled;
             inputActions.Player.Attack.performed -= Attack_performed;
             inputActions.Player.Attack.canceled -= Attack_canceled;
             inputActions.Player.Skill.performed -= Skill_performed;
@@ -64,6 +70,7 @@ namespace SoulKnight3D
         public void DisableMoveAndAtk()
         {
             inputActions.Player.Jump.performed -= Jump_performed;
+            inputActions.Player.Jump.canceled -= Jump_canceled;
             inputActions.Player.Attack.performed -= Attack_performed;
             inputActions.Player.Attack.canceled -= Attack_canceled;
             inputActions.Player.Skill.performed -= Skill_performed;
@@ -76,7 +83,26 @@ namespace SoulKnight3D
         private void Jump_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
             if (Time.timeScale == 0) { return; }
-            OnJumpPerformed.Trigger();
+            TriggerJumpInput(true);
+        }
+
+        private void Jump_canceled(
+            UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            TriggerJumpInput(false);
+        }
+
+        public void TriggerJumpInput(bool isPressed)
+        {
+            if (_isJumpPressed == isPressed) { return; }
+            if (isPressed && Time.timeScale == 0) { return; }
+
+            _isJumpPressed = isPressed;
+            OnJumpStateChanged.Trigger(isPressed);
+            if (isPressed)
+            {
+                OnJumpPerformed.Trigger();
+            }
         }
 
         private void Attack_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)

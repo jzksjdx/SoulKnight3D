@@ -14,15 +14,34 @@ namespace SoulKnight3D
 		private bool _canInteract = false;
 		private bool _isJoystickRightPressed = false;
 		private IUnRegister _specialAttackChargeRegistration;
+		private IUnRegister _hoverButtonRegistration;
+		private RectTransform _jumpButtonImageTransform;
+		private Quaternion _defaultJumpButtonRotation;
 
 		protected override void OnInit(IUIData uiData = null)
 		{
 			mData = uiData as UIMobileControlPanelData ?? new UIMobileControlPanelData();
 			// please add init code here
-			JoystickJump.onClick.AddListener(() =>
+			UIPressStateRelay jumpPressRelay =
+				JoystickJump.GetComponent<UIPressStateRelay>();
+			if (jumpPressRelay == null)
 			{
-				PlayerInputs.Instance.OnJumpPerformed.Trigger();
-			});
+				jumpPressRelay =
+					JoystickJump.gameObject.AddComponent<UIPressStateRelay>();
+			}
+			jumpPressRelay.OnPressedChanged.Register(isPressed =>
+			{
+				PlayerInputs.Instance.TriggerJumpInput(isPressed);
+			}).UnRegisterWhenGameObjectDestroyed(gameObject);
+
+			_jumpButtonImageTransform = JoystickJump.image != null
+				? JoystickJump.image.rectTransform
+				: JoystickJump.transform as RectTransform;
+			if (_jumpButtonImageTransform != null)
+			{
+				_defaultJumpButtonRotation =
+					_jumpButtonImageTransform.localRotation;
+			}
 
 			// joystick attack
 			_joystickAtkAnimator = JoystickAttack.GetComponent<Animator>();
@@ -52,9 +71,9 @@ namespace SoulKnight3D
 			});
 
 			MountRider mountRider = PlayerController.Instance.MountRider;
-			mountRider.OnMountChanged.Register(BindSpecialAttack)
+			mountRider.OnMountChanged.Register(HandleMountChanged)
 				.UnRegisterWhenGameObjectDestroyed(gameObject);
-			BindSpecialAttack(mountRider.CurrentMount);
+			HandleMountChanged(mountRider.CurrentMount);
         }
 		
 		protected override void OnOpen(IUIData uiData = null)
@@ -89,6 +108,15 @@ namespace SoulKnight3D
 		{
 			_specialAttackChargeRegistration?.UnRegister();
 			_specialAttackChargeRegistration = null;
+			_hoverButtonRegistration?.UnRegister();
+			_hoverButtonRegistration = null;
+			SetLandingButtonState(false);
+		}
+
+		private void HandleMountChanged(MountBase mount)
+		{
+			BindSpecialAttack(mount);
+			BindHoverAbility(mount);
 		}
 
 		private void BindSpecialAttack(MountBase mount)
@@ -119,6 +147,36 @@ namespace SoulKnight3D
 				BtnSpecialAttack.image.fillAmount = normalizedCharge;
 			}
 			BtnSpecialAttack.interactable = normalizedCharge >= 0.999f;
+		}
+
+		private void BindHoverAbility(MountBase mount)
+		{
+			_hoverButtonRegistration?.UnRegister();
+			_hoverButtonRegistration = null;
+
+			MountHoverAbility hoverAbility =
+				mount != null ? mount.HoverAbility : null;
+			if (hoverAbility == null)
+			{
+				SetLandingButtonState(false);
+				return;
+			}
+
+			SetLandingButtonState(
+				hoverAbility.IsLandingButtonActive);
+			_hoverButtonRegistration =
+				hoverAbility.OnLandingButtonStateChanged.Register(
+					SetLandingButtonState);
+		}
+
+		private void SetLandingButtonState(bool isLanding)
+		{
+			if (_jumpButtonImageTransform == null) { return; }
+
+			_jumpButtonImageTransform.localRotation = isLanding
+				? _defaultJumpButtonRotation *
+					Quaternion.Euler(0f, 0f, 180f)
+				: _defaultJumpButtonRotation;
 		}
 	}
 }

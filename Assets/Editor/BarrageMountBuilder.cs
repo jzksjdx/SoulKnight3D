@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using MoreMountains.Feedbacks;
 using QFramework;
@@ -410,6 +411,187 @@ internal static class BarrageMountBuilder
             "Barrage shot sounds are not configured.");
 
         Debug.Log("Barrage special attack validation passed.");
+    }
+
+    [MenuItem("Tools/Soul Knight/Configure Barrage Hover")]
+    private static void ConfigureHover()
+    {
+        GameObject root =
+            PrefabUtility.LoadPrefabContents(BarragePrefabPath);
+        try
+        {
+            ArmorMount mount = root.GetComponent<ArmorMount>();
+            Rigidbody body = root.GetComponent<Rigidbody>();
+            Require(mount != null,
+                "Barrage is missing ArmorMount.");
+            Require(body != null,
+                "Barrage is missing Rigidbody.");
+
+            Transform thrustEffect =
+                FindUniqueDescendant(
+                    root.transform, "FX_PowerBeam_Flash_01");
+            thrustEffect.gameObject.SetActive(false);
+
+            MountHoverAbility hover =
+                GetOrAddComponent<MountHoverAbility>(root);
+            SerializedObject serializedHover =
+                new SerializedObject(hover);
+            serializedHover.FindProperty("_mount")
+                .objectReferenceValue = mount;
+            serializedHover.FindProperty("_body")
+                .objectReferenceValue = body;
+            serializedHover.FindProperty("_hoverDuration")
+                .floatValue = 3f;
+            serializedHover.FindProperty("_apexVelocityThreshold")
+                .floatValue = 0.05f;
+            SerializedProperty effects =
+                serializedHover.FindProperty("_thrustEffects");
+            effects.arraySize = 1;
+            effects.GetArrayElementAtIndex(0).objectReferenceValue =
+                thrustEffect.gameObject;
+            serializedHover.FindProperty("_hoverLoopSound")
+                .stringValue = "fx_laser";
+            serializedHover.ApplyModifiedPropertiesWithoutUndo();
+
+            PrefabUtility.SaveAsPrefabAsset(root, BarragePrefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        ValidateHover();
+        Debug.Log("Configured Barrage apex hover.");
+    }
+
+    [MenuItem("Tools/Soul Knight/Validate Barrage Hover")]
+    private static void ValidateHover()
+    {
+        GameObject barrage =
+            AssetDatabase.LoadAssetAtPath<GameObject>(BarragePrefabPath);
+        Require(barrage != null, "Barrage prefab is missing.");
+
+        MountHoverAbility hover =
+            barrage.GetComponent<MountHoverAbility>();
+        Require(hover != null,
+            "Barrage is missing MountHoverAbility.");
+
+        SerializedObject serializedHover =
+            new SerializedObject(hover);
+        SerializedProperty effects =
+            serializedHover.FindProperty("_thrustEffects");
+        Require(effects.arraySize >= 1,
+            "Barrage hover has no thrust effects.");
+        GameObject thrustEffect =
+            effects.GetArrayElementAtIndex(0).objectReferenceValue
+                as GameObject;
+        Require(thrustEffect != null &&
+                thrustEffect.name == "FX_PowerBeam_Flash_01",
+            "Barrage thrust effect is not wired.");
+        Require(!thrustEffect.activeSelf,
+            "Barrage thrust effect should be inactive outside hover.");
+        Require(Mathf.Approximately(
+                serializedHover.FindProperty("_hoverDuration").floatValue,
+                3f),
+            "Barrage hover duration is not three seconds.");
+        Require(
+            serializedHover.FindProperty("_hoverLoopSound").stringValue ==
+                "fx_laser",
+            "Barrage hover loop sound is not configured.");
+
+        Debug.Log("Barrage hover validation passed.");
+    }
+
+    [MenuItem("Tools/Soul Knight/Validate Barrage Hover in Play Mode")]
+    private static void ValidateHoverInPlayMode()
+    {
+        if (!Application.isPlaying)
+        {
+            throw new InvalidOperationException(
+                "Enter Play Mode before validating Barrage hover.");
+        }
+
+        ArmorMount mount = UnityEngine.Object.FindObjectsOfType<ArmorMount>()
+            .FirstOrDefault();
+        PlayerController player = PlayerController.Instance;
+        Require(mount != null, "No active Barrage ArmorMount was found.");
+        Require(player != null, "PlayerController is missing.");
+        mount.StartCoroutine(
+            ValidateHoverRoutine(mount, player));
+    }
+
+    private static IEnumerator ValidateHoverRoutine(
+        ArmorMount mount, PlayerController player)
+    {
+        MountInteraction interaction =
+            mount.GetComponent<MountInteraction>();
+        MountHoverAbility hover =
+            mount.GetComponent<MountHoverAbility>();
+        Rigidbody body = mount.GetComponent<Rigidbody>();
+        Require(interaction != null,
+            "Barrage MountInteraction is missing.");
+        Require(hover != null,
+            "Barrage MountHoverAbility is missing.");
+        Require(body != null,
+            "Barrage Rigidbody is missing.");
+
+        if (!mount.IsMounted)
+        {
+            interaction.Interact();
+        }
+        Require(player.MountRider.CurrentMount == mount,
+            "Could not mount Barrage for hover validation.");
+
+        yield return new WaitForFixedUpdate();
+        yield return new WaitForFixedUpdate();
+
+        PlayerInputs.Instance.TriggerJumpInput(true);
+        PlayerInputs.Instance.TriggerJumpInput(false);
+        body.velocity =
+            new Vector3(body.velocity.x, 1f, body.velocity.z);
+        yield return new WaitForFixedUpdate();
+        body.velocity =
+            new Vector3(body.velocity.x, 0f, body.velocity.z);
+        yield return new WaitForFixedUpdate();
+
+        Require(hover.IsHovering,
+            "Barrage did not start hovering at the jump apex.");
+        Require(!body.useGravity &&
+                (body.constraints &
+                    RigidbodyConstraints.FreezePositionY) != 0,
+            "Barrage hover did not suspend vertical physics.");
+        Require(hover.IsLandingButtonActive,
+            "Barrage landing-button state did not activate.");
+
+        PlayerInputs.Instance.TriggerJumpInput(true);
+        PlayerInputs.Instance.TriggerJumpInput(false);
+        yield return null;
+        Require(!hover.IsHovering && body.useGravity,
+            "Second jump press did not cancel Barrage hover.");
+
+        PlayerInputs.Instance.TriggerJumpInput(true);
+        hover.ArmForJump();
+        body.velocity =
+            new Vector3(body.velocity.x, 1f, body.velocity.z);
+        yield return new WaitForFixedUpdate();
+        body.velocity =
+            new Vector3(body.velocity.x, 0f, body.velocity.z);
+        yield return new WaitForFixedUpdate();
+        Require(hover.IsHovering,
+            "Held jump input did not start Barrage hover.");
+
+        PlayerInputs.Instance.TriggerJumpInput(false);
+        yield return null;
+        Require(!hover.IsHovering && body.useGravity,
+            "Releasing held jump did not end Barrage hover.");
+
+        player.MountRider.Dismount();
+        Require(!hover.IsLandingButtonActive,
+            "Barrage landing-button state survived dismount.");
+
+        Debug.Log("Barrage hover Play Mode validation passed.");
     }
 
     private static void ConfigureEnhancedRocket(

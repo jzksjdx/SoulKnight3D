@@ -47,6 +47,7 @@ namespace SoulKnight3D
         private MountRider _rider;
         private MountInteraction _interaction;
         private MountSpecialAttack _specialAttack;
+        private MountHoverAbility _hoverAbility;
         private MountAnimationState _animationState = MountAnimationState.None;
         private float _jumpLockoutRemaining;
         private float _damageInvulnerabilityRemaining;
@@ -64,6 +65,9 @@ namespace SoulKnight3D
         public virtual bool ReplacesRider => false;
         public MountSpecialAttack SpecialAttack => _specialAttack;
         public bool HasSpecialAttack => _specialAttack != null;
+        public MountHoverAbility HoverAbility => _hoverAbility;
+        public Rigidbody Body => _body;
+        public bool IsGrounded => _isGrounded;
 
         private enum MountAnimationState
         {
@@ -96,6 +100,7 @@ namespace SoulKnight3D
             if (_walkFeedback == null) { _walkFeedback = FindFeedback("FeedbacksWalk"); }
             _interaction = GetComponent<MountInteraction>();
             _specialAttack = GetComponent<MountSpecialAttack>();
+            _hoverAbility = GetComponent<MountHoverAbility>();
             CacheAnimatorParameters();
             CaptureDefaultPose();
             SetOccupiedPhysics(false);
@@ -189,6 +194,7 @@ namespace SoulKnight3D
                 transform.position + transform.right * _dismountDistance;
             _rider = null;
             _specialAttack?.HandleRideEnded();
+            _hoverAbility?.CancelHoverCycle();
             OnRideEnded(wasDestroyed);
             _jumpWasStarted = false;
             _wasWalking = false;
@@ -298,6 +304,7 @@ namespace SoulKnight3D
             _jumpLockoutRemaining = _jumpLockout;
             _jumpFeedback?.PlayFeedbacks();
             SetAnimationState(MountAnimationState.JumpUp);
+            _hoverAbility?.ArmForJump();
         }
 
         private bool UpdateGroundedState()
@@ -324,6 +331,7 @@ namespace SoulKnight3D
             if (landedThisFrame)
             {
                 _jumpWasStarted = false;
+                _hoverAbility?.HandleLanded();
                 _landFeedback?.PlayFeedbacks();
             }
 
@@ -600,6 +608,11 @@ namespace SoulKnight3D
                 _animator.ResetTrigger(availableTrigger);
             }
             _animator.SetTrigger(trigger);
+        }
+
+        public void KeepJumpMidAirAnimation()
+        {
+            SetAnimationState(MountAnimationState.JumpMidAir);
         }
 
         private static int GetAnimationTrigger(MountAnimationState state)
