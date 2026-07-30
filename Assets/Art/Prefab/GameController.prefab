@@ -1563,7 +1563,7 @@ MonoBehaviour:
   MapGenerator: {fileID: 6218586280659333557}
   Level: 1
   IsFinalLevel: 0
-  _levelOneStarterChestPrefab: {fileID: 5028523851695631656, guid: fc6061cdd18273541ba4760221e57cd6,
+  _levelOneStarterChestPrefab: {fileID: 5444915812375469549, guid: 676a752306ce90844a6c4c12e93ce6e7,
     type: 3}
   _levelOneStarterChestDistance: 2.25
   MMSoundManager: {fileID: 6025450636858251264}

@@ -253,11 +253,22 @@ namespace SoulKnight3D
         {
             int baseLevel = category.FixedWeaponPoolLevel >= 0
                 ? category.FixedWeaponPoolLevel
-                : (GameController.Instance != null ? GameController.Instance.Level : 1);
+                : GetCurrentDungeonWeaponPoolLevel();
 
             return Mathf.Clamp(baseLevel + category.WeaponPoolLevelOffset,
                 category.MinWeaponPoolLevel,
                 category.MaxWeaponPoolLevel);
+        }
+
+        private static int GetCurrentDungeonWeaponPoolLevel()
+        {
+            GameController gameController = GameController.Instance;
+            if (gameController == null || gameController.GameFloor == null)
+            {
+                return 1;
+            }
+
+            return gameController.GameFloor.GetWeaponPoolLevel(gameController.Level);
         }
 
         private static void LaunchReward(GameObject reward)

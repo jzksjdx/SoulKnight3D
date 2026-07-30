@@ -13,6 +13,8 @@ namespace SoulKnight3D {
         private SimpleObjectPool<EnergyOrb> _energyOrbPool;
         private readonly Dictionary<CoinPickup.CoinType, SimpleObjectPool<CoinPickup>> _coinPools =
             new Dictionary<CoinPickup.CoinType, SimpleObjectPool<CoinPickup>>();
+        private readonly Dictionary<CoinPickup.CoinType, int> _coinValues =
+            new Dictionary<CoinPickup.CoinType, int>();
         private readonly HashSet<CoinPickup.CoinType> _missingCoinPoolWarnings =
             new HashSet<CoinPickup.CoinType>();
 
@@ -66,6 +68,7 @@ namespace SoulKnight3D {
                 }
 
                 CoinPickup.CoinType coinType = coinTemplate.Type;
+                _coinValues[coinType] = coinTemplate.Value;
                 if (_coinPools.ContainsKey(coinType))
                 {
                     Debug.LogWarning($"Multiple coin prefabs are configured for {coinType}. Using the first one.");
@@ -84,6 +87,30 @@ namespace SoulKnight3D {
 
                 _coinPools.Add(coinType, pool);
             }
+        }
+
+        public bool TryGetCoinValue(CoinPickup.CoinType coinType, out int value)
+        {
+            if (_coinValues.TryGetValue(coinType, out value))
+            {
+                return true;
+            }
+
+            for (int i = 0; i < CoinPrefabs.Count; i++)
+            {
+                GameObject coinPrefab = CoinPrefabs[i];
+                if (coinPrefab != null &&
+                    coinPrefab.TryGetComponent(out CoinPickup coinPickup) &&
+                    coinPickup.Type == coinType)
+                {
+                    value = coinPickup.Value;
+                    _coinValues[coinType] = value;
+                    return true;
+                }
+            }
+
+            value = 0;
+            return false;
         }
 
         public GameObject SpawnEnergyOrb(Vector3 position)

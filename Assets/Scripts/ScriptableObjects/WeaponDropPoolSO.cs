@@ -36,6 +36,57 @@ namespace SoulKnight3D
             return FindLevelPool(level) != null;
         }
 
+        public GameObject GetRandomDistinctPickupPrefab(System.Random random)
+        {
+            if (random == null)
+            {
+                throw new ArgumentNullException(nameof(random));
+            }
+
+            List<GameObject> pickupPrefabs = GetDistinctPickupPrefabs();
+            return pickupPrefabs.Count > 0
+                ? pickupPrefabs[random.Next(pickupPrefabs.Count)]
+                : null;
+        }
+
+        public List<GameObject> GetDistinctPickupPrefabs()
+        {
+            List<GameObject> pickupPrefabs = new List<GameObject>();
+            HashSet<WeaponData> seenWeapons = new HashSet<WeaponData>();
+            HashSet<GameObject> seenPrefabs = new HashSet<GameObject>();
+
+            for (int levelIndex = 0; levelIndex < Levels.Count; levelIndex++)
+            {
+                WeaponDropPoolLevel level = Levels[levelIndex];
+                if (level == null)
+                {
+                    continue;
+                }
+
+                for (int entryIndex = 0; entryIndex < level.Entries.Count; entryIndex++)
+                {
+                    WeaponDropPoolEntry entry = level.Entries[entryIndex];
+                    if (entry == null || !entry.IsAvailable)
+                    {
+                        continue;
+                    }
+
+                    GameObject pickupPrefab = entry.GetPickupPrefab();
+                    if (entry.Weapon != null && !seenWeapons.Add(entry.Weapon))
+                    {
+                        continue;
+                    }
+
+                    if (pickupPrefab != null && seenPrefabs.Add(pickupPrefab))
+                    {
+                        pickupPrefabs.Add(pickupPrefab);
+                    }
+                }
+            }
+
+            return pickupPrefabs;
+        }
+
         private WeaponDropPoolLevel FindLevelPool(int level)
         {
             for (int i = 0; i < Levels.Count; i++)

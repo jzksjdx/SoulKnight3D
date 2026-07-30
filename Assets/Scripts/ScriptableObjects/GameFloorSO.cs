@@ -10,6 +10,17 @@ namespace SoulKnight3D
         public List<GameLevel> GameLevels = new List<GameLevel>();
         public List<WeightedBossEncounter> BossPool = new List<WeightedBossEncounter>();
 
+        public int GetWeaponPoolLevel(int gameLevel)
+        {
+            if (GameLevels.Count == 0)
+            {
+                return 1;
+            }
+
+            int index = Mathf.Clamp(gameLevel - 1, 0, GameLevels.Count - 1);
+            return Mathf.Max(0, GameLevels[index].WeaponPoolLevel);
+        }
+
         public BossEncounterDataSO SelectBoss(float normalizedRoll)
         {
             float totalWeight = 0f;
@@ -56,6 +67,7 @@ namespace SoulKnight3D
     [Serializable]
     public class GameLevel
     {
+        [Min(0)] public int WeaponPoolLevel = 1;
         public EnemySpawnProfileSO EnemySpawnProfile;
         public List<EnemyWaveSO> LevelWaves = new List<EnemyWaveSO>();
     }

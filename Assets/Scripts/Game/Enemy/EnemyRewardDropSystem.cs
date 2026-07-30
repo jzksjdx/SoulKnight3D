@@ -4,6 +4,13 @@ namespace SoulKnight3D
 {
     public static class EnemyRewardDropSystem
     {
+        private static readonly CoinPickup.CoinType[] CoinTypes =
+        {
+            CoinPickup.CoinType.Copper,
+            CoinPickup.CoinType.Silver,
+            CoinPickup.CoinType.Gold
+        };
+
         public const int GoldIndex = 0;
         public const int SilverIndex = 1;
         public const int CopperIndex = 2;
@@ -56,6 +63,62 @@ namespace SoulKnight3D
             if (GameObjectsManager.Instance == null) { return; }
 
             SpawnCoins(position, type, Mathf.Max(0, count));
+        }
+
+        public static void DropRandomCoinValue(Vector3 position, int totalValue)
+        {
+            GameObjectsManager manager = GameObjectsManager.Instance;
+            int remainingValue = Mathf.Max(0, totalValue);
+            if (manager == null || remainingValue == 0)
+            {
+                return;
+            }
+
+            while (remainingValue > 0)
+            {
+                int affordableCount = 0;
+                for (int i = 0; i < CoinTypes.Length; i++)
+                {
+                    if (manager.TryGetCoinValue(CoinTypes[i], out int coinValue) &&
+                        coinValue > 0 && coinValue <= remainingValue)
+                    {
+                        affordableCount++;
+                    }
+                }
+
+                if (affordableCount == 0)
+                {
+                    Debug.LogWarning(
+                        $"Unable to compose the remaining coin reward value {remainingValue}.");
+                    return;
+                }
+
+                int selectedAffordableIndex = GameRandom.Range(
+                    GameRandomStream.Rewards, 0, affordableCount);
+                CoinPickup.CoinType selectedType = CoinPickup.CoinType.Copper;
+                for (int i = 0; i < CoinTypes.Length; i++)
+                {
+                    if (!manager.TryGetCoinValue(CoinTypes[i], out int coinValue) ||
+                        coinValue <= 0 || coinValue > remainingValue)
+                    {
+                        continue;
+                    }
+
+                    if (selectedAffordableIndex-- == 0)
+                    {
+                        selectedType = CoinTypes[i];
+                        break;
+                    }
+                }
+
+                if (!manager.TryGetCoinValue(selectedType, out int selectedValue))
+                {
+                    return;
+                }
+
+                Launch(manager.SpawnCoin(position, selectedType));
+                remainingValue -= selectedValue;
+            }
         }
 
         private static void SpawnEnergy(Vector3 position, int count)

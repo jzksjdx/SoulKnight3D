@@ -40,6 +40,8 @@ namespace SoulKnight3D
         [Header("Chest Prefabs")]
         public GameObject WhiteChest;
         public GameObject DungeonChest;
+        [SerializeField] private GameObject _blueDungeonChest;
+        [SerializeField, Range(0f, 1f)] private float _blueDungeonChestChance = 0.35f;
 
         [Header("Merchant Room")]
         [SerializeField] private GameObject _merchantRoomPrefab;
@@ -170,9 +172,7 @@ namespace SoulKnight3D
             Type = type;
             if (type == RoomType.Reward)
             {
-                GameObject newReward = Instantiate(DungeonChest, transform.position, Quaternion.identity);
-                newReward.transform.SetParent(transform);
-                newReward.transform.Translate(new Vector3(0, 0.043f, 0));
+                SpawnDungeonChest();
                 _roomIcon.sprite = IconChest;
             }
             else if (type == RoomType.Merchant)
@@ -205,9 +205,7 @@ namespace SoulKnight3D
             if (_merchantRoomPrefab == null)
             {
                 Debug.LogWarning("Merchant room prefab is not configured. Falling back to a reward chest.");
-                GameObject fallbackReward = Instantiate(DungeonChest, transform.position,
-                    Quaternion.identity, transform);
-                fallbackReward.transform.Translate(new Vector3(0f, 0.043f, 0f));
+                SpawnDungeonChest();
                 return;
             }
 
@@ -223,6 +221,26 @@ namespace SoulKnight3D
             merchantRoom.Configure(_merchantWeaponPool, _merchantPotionPrefabs, level,
                 _merchantPriceIncreasePerLevel, _merchantPriceLabelPrefab,
                 _merchantPotionStockYOffset);
+        }
+
+        private void SpawnDungeonChest()
+        {
+            GameObject chestPrefab = DungeonChest;
+            if (_blueDungeonChest != null &&
+                GameRandom.Chance(GameRandomStream.Rewards, _blueDungeonChestChance))
+            {
+                chestPrefab = _blueDungeonChest;
+            }
+
+            if (chestPrefab == null)
+            {
+                Debug.LogError($"Room '{name}' has no dungeon chest prefab configured.");
+                return;
+            }
+
+            GameObject chest = Instantiate(chestPrefab, transform.position,
+                Quaternion.identity, transform);
+            chest.transform.Translate(new Vector3(0f, 0.043f, 0f));
         }
 
         private void SpawnSpecialRoom()

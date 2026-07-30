@@ -47,7 +47,7 @@ namespace SoulKnight3D
             [Header("Weapon Pool")]
             public bool UseWeaponPool;
             public WeaponDropPoolSO WeaponPool;
-            [Tooltip("-1 uses GameController.Level. Non-negative values use this fixed pool level.")]
+            [Tooltip("-1 uses the current GameLevel weapon pool tier. Non-negative values use this fixed pool level.")]
             public int FixedWeaponPoolLevel = -1;
             public int WeaponPoolLevelOffset;
             public int MinWeaponPoolLevel = 0;

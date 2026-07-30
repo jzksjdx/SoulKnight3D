@@ -282,19 +282,31 @@ namespace SoulKnight3D
         {
             if (_weaponPool == null) { return null; }
 
+            int poolLevel = GetCurrentWeaponPoolLevel();
             GameObject selected = null;
             System.Random stockRandom = GameRandom.GetStream(
                 GameRandomStream.Merchant);
             for (int attempt = 0; attempt < 8; attempt++)
             {
                 selected = _weaponPool.GetRandomPickupPrefabAtOrBelow(
-                    _level, stockRandom);
+                    poolLevel, stockRandom);
                 if (selected == null || selected != excludedPrefab)
                 {
                     break;
                 }
             }
             return selected;
+        }
+
+        private int GetCurrentWeaponPoolLevel()
+        {
+            GameController gameController = GameController.Instance;
+            if (gameController == null || gameController.GameFloor == null)
+            {
+                return _level;
+            }
+
+            return gameController.GameFloor.GetWeaponPoolLevel(_level);
         }
 
         private GameObject GetRandomPotion(HashSet<GameObject> selectedPotions)

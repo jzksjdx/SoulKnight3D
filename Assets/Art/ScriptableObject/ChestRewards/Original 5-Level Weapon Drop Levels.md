@@ -9,6 +9,22 @@ The old three-level demo profile remains available as the explicitly named
 
 Enemy-only and mount-only weapons remain at `-1` and never enter chest pools.
 
+## Current Forest Progression
+
+Weapon drop levels remain the authentic, exclusive tiers listed below. The
+current five-stage Forest demo maps game levels to base pool tiers as follows:
+
+| Game level | Brown chest / merchant | Blue chest |
+| --- | --- | --- |
+| 1-1 | 1 | 2 |
+| 1-2 | 2 | 3 |
+| 1-3 | 2 | 3 |
+| 1-4 | 3 | 4 |
+| 1-5 | 4 | 4 |
+
+Blue chest keeps its `+1` tier advantage and is capped at tier 4 until the
+project contains tier-5 weapons.
+
 | Weapon | Original pool level(s) |
 | --- | --- |
 | AK-47 | 0, 1 |
