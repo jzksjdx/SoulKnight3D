@@ -134,7 +134,7 @@ MonoBehaviour:
   _minimumCoinValue: 5
   _maximumCoinValue: 25
   _rewardSpawnPoint: {fileID: 151677634551903365}
-  _remainChance: 1
+  _remainChance: 0.5
   _interactionCooldown: 1
   _openFeedbacks: {fileID: 967318960321683480}
   _despawnDelay: 0.5

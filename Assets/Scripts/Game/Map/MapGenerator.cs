@@ -38,6 +38,10 @@ namespace SoulKnight3D
         [Header("Minimap")]
         [SerializeField] private GameObject MinimapTile;
 
+        [Header("Runtime Room Culling")]
+        [SerializeField] private bool _enableRuntimeRoomCulling = true;
+        [SerializeField, Range(0, 2)] private int _visibleConnectedRoomDepth = 1;
+
         private int[,] map;
         private int gridWidth = 5;
         private int gridHeight = 5;
@@ -49,6 +53,14 @@ namespace SoulKnight3D
         private Dictionary<int, RoomData> _roomDataDict = new Dictionary<int, RoomData>();
         private Dictionary<int, RoomManager> _generatedRooms = new Dictionary<int, RoomManager>(); // saves room managers
         private List<GameObject> _generatedHallways = new List<GameObject>();
+        private readonly Dictionary<RoomManager, RuntimeRenderVisibility>
+            _roomVisibility = new Dictionary<RoomManager, RuntimeRenderVisibility>();
+        private readonly List<HallwayVisibility> _hallwayVisibility =
+            new List<HallwayVisibility>();
+        private readonly HashSet<RoomManager> _visibleRooms =
+            new HashSet<RoomManager>();
+        private readonly Queue<RoomTraversal> _roomTraversal =
+            new Queue<RoomTraversal>();
         private GameObject _generatedPortal;
         public bool IsMapReady { get; private set; }
         public Vector3 HomeRoomSpawnPosition { get; private set; }
@@ -169,6 +181,33 @@ namespace SoulKnight3D
             }
 
             _generatedRooms[startRoomKey].PlayerEntersRoom();
+        }
+
+        private readonly struct RoomTraversal
+        {
+            public readonly RoomManager Room;
+            public readonly int Depth;
+
+            public RoomTraversal(RoomManager room, int depth)
+            {
+                Room = room;
+                Depth = depth;
+            }
+        }
+
+        private sealed class HallwayVisibility
+        {
+            public readonly RoomManager FirstRoom;
+            public readonly RoomManager SecondRoom;
+            public readonly RuntimeRenderVisibility RenderVisibility;
+
+            public HallwayVisibility(Transform root, RoomManager firstRoom,
+                RoomManager secondRoom)
+            {
+                FirstRoom = firstRoom;
+                SecondRoom = secondRoom;
+                RenderVisibility = new RuntimeRenderVisibility(root);
+            }
         }
 
         private List<RoomManager.RoomType?> BuildBranchRoomTypes(
@@ -357,7 +396,7 @@ namespace SoulKnight3D
             GameObject newRoomGate = Instantiate(roomGatePrefab, newRoomGatePos, rotation2);
             RoomGate oldRoomGateComponent = oldRoomGate.GetComponent<RoomGate>();
             RoomGate newRoomGateComponent = newRoomGate.GetComponent<RoomGate>();
-            _roomDataDict[oldRoomKey].gates.Add(oldRoomGateComponent);
+            _generatedRooms[oldRoomKey].AddGate(oldRoomGateComponent);
 
             RoomManager.RoomType roomType = newRoomKey == pathRoomKey
                 ? pathRoomType
@@ -402,6 +441,13 @@ namespace SoulKnight3D
             _generatedRooms[newRoomKey].InitializeForMinimap();
             _generatedRooms[newRoomKey].AddConnectedRoom(_generatedRooms[oldRoomKey]);
             _generatedRooms[oldRoomKey].AddConnectedRoom(_generatedRooms[newRoomKey]);
+            if (_enableRuntimeRoomCulling)
+            {
+                _hallwayVisibility.Add(new HallwayVisibility(
+                    hallwayGenObj.transform,
+                    _generatedRooms[oldRoomKey],
+                    _generatedRooms[newRoomKey]));
+            }
 
             newRoom.transform.SetParent(_generatedRooms[newRoomKey].transform);
             oldRoomGate.transform.SetParent(_generatedRooms[oldRoomKey].transform);
@@ -465,7 +511,13 @@ namespace SoulKnight3D
                 .SetBossEncounter(BossEncounter)
                 .SetKey(roomKey)
                 .SetRoomType(_roomDataDict[roomKey].type)
-                .SetRoomStatus(_roomDataDict[roomKey].status);
+                .SetRoomStatus(_roomDataDict[roomKey].status)
+                .SetPlayerEnteredCallback(HandlePlayerEnteredRoom);
+
+            if (generatedPortal)
+            {
+                generatedPortal.transform.SetParent(newRoom.transform);
+            }
 
             if (_roomDataDict[roomKey].type == RoomManager.RoomType.Battle)
             {
@@ -474,6 +526,58 @@ namespace SoulKnight3D
 
             newRoom.CompleteSetup();
             _generatedRooms.Add(roomKey, newRoom);
+        }
+
+        private void HandlePlayerEnteredRoom(RoomManager currentRoom)
+        {
+            if (!_enableRuntimeRoomCulling || currentRoom == null) { return; }
+
+            _visibleRooms.Clear();
+            _roomTraversal.Clear();
+            _visibleRooms.Add(currentRoom);
+            _roomTraversal.Enqueue(new RoomTraversal(currentRoom, 0));
+
+            while (_roomTraversal.Count > 0)
+            {
+                RoomTraversal current = _roomTraversal.Dequeue();
+                if (current.Depth >= _visibleConnectedRoomDepth) { continue; }
+
+                IReadOnlyList<RoomManager> connectedRooms =
+                    current.Room.ConnectedRooms;
+                for (int i = 0; i < connectedRooms.Count; i++)
+                {
+                    RoomManager connectedRoom = connectedRooms[i];
+                    if (connectedRoom != null && _visibleRooms.Add(connectedRoom))
+                    {
+                        _roomTraversal.Enqueue(new RoomTraversal(
+                            connectedRoom, current.Depth + 1));
+                    }
+                }
+            }
+
+            foreach (RoomManager room in _generatedRooms.Values)
+            {
+                if (!_roomVisibility.TryGetValue(
+                    room, out RuntimeRenderVisibility visibility))
+                {
+                    visibility = new RuntimeRenderVisibility(room.transform);
+                    _roomVisibility.Add(room, visibility);
+                }
+                else
+                {
+                    visibility.Refresh();
+                }
+
+                visibility.SetVisible(_visibleRooms.Contains(room));
+            }
+
+            for (int i = 0; i < _hallwayVisibility.Count; i++)
+            {
+                HallwayVisibility hallway = _hallwayVisibility[i];
+                bool isVisible = _visibleRooms.Contains(hallway.FirstRoom) ||
+                                 _visibleRooms.Contains(hallway.SecondRoom);
+                hallway.RenderVisibility.SetVisible(isVisible);
+            }
         }
 
         private void ConfigureBattleWaves(RoomManager room, int roomKey)

@@ -10,10 +10,14 @@ namespace SoulKnight3D
     {
         [SerializeField] private List<GameObject> _roomItemPresets;
         [SerializeField] private LayerMask _itemLayerMask;
-        private List<RoomGate> _gates;
+        private List<RoomGate> _gates = new List<RoomGate>();
+        private readonly HashSet<RoomGate> _registeredGates =
+            new HashSet<RoomGate>();
         private IReadOnlyList<EnemyWaveGroup> _enemyWaveGroups = Array.Empty<EnemyWaveGroup>();
         private BossEncounterDataSO _bossEncounter;
         private GameObject _generatedPortal;
+        private Action<RoomManager> _onPlayerEntered;
+        private bool _setupComplete;
 
         [Header("Minimap")]
         [SerializeField] private SpriteRenderer _roomIcon;
@@ -131,8 +135,29 @@ namespace SoulKnight3D
 
         public RoomManager SetGates(List<RoomGate> gates)
         {
-            _gates = gates;
+            _gates = gates ?? new List<RoomGate>();
             return this;
+        }
+
+        public RoomManager SetPlayerEnteredCallback(Action<RoomManager> callback)
+        {
+            _onPlayerEntered = callback;
+            return this;
+        }
+
+        public void AddGate(RoomGate gate)
+        {
+            if (gate == null) { return; }
+
+            if (!_gates.Contains(gate))
+            {
+                _gates.Add(gate);
+            }
+
+            if (_setupComplete)
+            {
+                RegisterGate(gate);
+            }
         }
 
         public RoomManager SetEnemyWaves(EnemyWaveSO waves)
@@ -362,9 +387,9 @@ namespace SoulKnight3D
 
         public void CompleteSetup()
         {
-            if (Status != RoomStatus.Unexplored) { return; }
-            
-            if (Type == RoomType.Battle)
+            if (_setupComplete) { return; }
+
+            if (Status == RoomStatus.Unexplored && Type == RoomType.Battle)
             {
                 // setup map items
                 GameObject roomItems = Instantiate(_roomItemPresets[GameRandom.Range(
@@ -375,52 +400,64 @@ namespace SoulKnight3D
                     _spikeTilesController = roomItems.GetComponentInChildren<SpikeTilesController>();
                 }
             }
-            else if (Type == RoomType.Boss)
+            else if (Status == RoomStatus.Unexplored && Type == RoomType.Boss)
             {
                 _generatedPortal.Hide();
             }
-            
 
             // setup gates
             foreach (RoomGate gate in _gates)
             {
-                gate.OnPlayerEnter.Register(() =>
-                {
-                    // determine if player in room
-                    if (_player == null)
-                    {
-                        _player = PlayerController.Instance;
-                    }
-                    if (_player == null) { return; }
+                RegisterGate(gate);
+            }
 
-                    if ((_player.transform.position - transform.position).sqrMagnitude > _radius * _radius) {
-                        PlayerExitsRoom();
-                        return;
-                    }
-                    PlayerEntersRoom();
+            _setupComplete = true;
+        }
 
-                    if (Type != RoomType.Battle && Type != RoomType.Boss) { return; }
-                    if (Status != RoomStatus.Unexplored) { return; }
-                    foreach (RoomGate mGate in _gates)
-                    {
-                        mGate.ToggleGate();
-                    }
-                    Status = RoomStatus.InBattle;
-                    GameController.Instance?.SetRoomBattleState(true);
-                    AudioKit.PlaySound("fx_door");
-                    _roomIcon.Hide();
-                    //Debug.Log("Closing Door");
+        private void RegisterGate(RoomGate gate)
+        {
+            if (gate == null || !_registeredGates.Add(gate)) { return; }
 
-                    if (Type == RoomType.Boss)
-                    {
-                        StartCoroutine(BossFightWorkFlow());
-                    }
-                    else if (Type == RoomType.Battle)
-                    {
-                        StartCoroutine(WaveWorkFlow());
-                    }
-                    
-                }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            gate.OnPlayerEnter.Register(HandleGateCrossed)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private void HandleGateCrossed()
+        {
+            if (_player == null)
+            {
+                _player = PlayerController.Instance;
+            }
+            if (_player == null) { return; }
+
+            if ((_player.transform.position - transform.position).sqrMagnitude >
+                _radius * _radius)
+            {
+                PlayerExitsRoom();
+                return;
+            }
+
+            PlayerEntersRoom();
+
+            if (Type != RoomType.Battle && Type != RoomType.Boss) { return; }
+            if (Status != RoomStatus.Unexplored) { return; }
+
+            foreach (RoomGate gate in _gates)
+            {
+                gate.ToggleGate();
+            }
+            Status = RoomStatus.InBattle;
+            GameController.Instance?.SetRoomBattleState(true);
+            AudioKit.PlaySound("fx_door");
+            _roomIcon.Hide();
+
+            if (Type == RoomType.Boss)
+            {
+                StartCoroutine(BossFightWorkFlow());
+            }
+            else
+            {
+                StartCoroutine(WaveWorkFlow());
             }
         }
 
@@ -585,6 +622,8 @@ namespace SoulKnight3D
 
         public void PlayerEntersRoom()
         {
+            _onPlayerEntered?.Invoke(this);
+
             if (Type == RoomType.Portal || Type == RoomType.Reward ||
                 Type == RoomType.Merchant || Type == RoomType.Special)
             {
